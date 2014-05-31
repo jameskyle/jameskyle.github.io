@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/osx-administration.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-03-19T13:33:14-07:00</updated><entry><title>OSXFuse 2.6.2 Kext Fails to Load in Mavericks</title><link href="http://blog.jameskyle.org/2014/03/osxfuse-kext-fails-on-mavericks" rel="alternate"></link><updated>2014-03-19T13:33:14-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-03-19:2014/03/osxfuse-kext-fails-on-mavericks</id><summary type="html">&lt;div class="section" id="the-problem"&gt;
+&lt;h2&gt;The Problem&lt;/h2&gt;
+&lt;p&gt;Installing the most recent &lt;a class="reference external" href="http://osxfuse.github.io"&gt;OSXFuse&lt;/a&gt; from &lt;a class="reference external" href="http://brew.sh"&gt;Homebrew&lt;/a&gt; (or from the main site),
+fails to load the new kext. If you attempt to load the kext, you get errors
+in your logs like:&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+Mar 19 11:34:30 metaverse.local com.apple.kextd&lt;span class="o"&gt;[&lt;/span&gt;29&lt;span class="o"&gt;]&lt;/span&gt;: WARNING - &lt;span class="se"&gt;\
+&lt;/span&gt;Invalid signature -67062 0xFFFFFFFFFFFEFA0A &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;kext &lt;span class="s2"&gt;&amp;quot;/Library/Filesystems/osxfusefs.fs/Support/osxfusefs.kext&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-fix"&gt;
+&lt;h2&gt;The Fix&lt;/h2&gt;
+&lt;p&gt;The workaround is to sign the code yourself. To do so, you'll first need a
+signing certificate. The &lt;a class="reference external" href="https://developer.apple.com/library/mac/documentation/security/conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW1"&gt;Apple Code Signing Guide&lt;/a&gt; covers how to do so. If
+you don't have an applie account and have no interest in creating an
+developer certificate, jump to the section called
+&amp;quot;To use the Certificate Assistant to create a self-signed signing identity&amp;quot;.&lt;/p&gt;
+&lt;p&gt;Once you have a certificate, you can sign the kext.&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+sudo codesign -s &lt;span class="s2"&gt;&amp;quot;James Kyle&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;    -f /Library/Filesystems/osxfusefs.fs/Support/osxfusefs.kex
+&lt;/pre&gt;
+&lt;p&gt;You should replace &amp;quot;James Kyle&amp;quot; with the name you gave the certificate.&lt;/p&gt;
+&lt;p&gt;After that, all should be well with the world again.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="external-links"&gt;
+&lt;h2&gt;External Links&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://osxfuse.github.io"&gt;OSXFuse&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://brew.sh"&gt;Homebrew&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://developer.apple.com/library/mac/documentation/security/conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW1"&gt;Apple Code Signing Guide&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="osx administration"></category></entry></feed>

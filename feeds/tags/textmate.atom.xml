@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/textmate.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2009-06-15T19:32:00-07:00</updated><entry><title>30 Days with TextMate</title><link href="http://blog.jameskyle.org/2009/06/30-days-with-textmate" rel="alternate"></link><updated>2009-06-15T19:32:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-06-15:2009/06/30-days-with-textmate</id><summary type="html">&lt;p&gt;I've been a vim user for years, but since moving to OSX I've been
+hearing a lot about TextMate. Since I always encourage others to keep an
+open mind and learn new things, I decided to give this editor a solid
+shot.
+For the next 30 days, I'll TextMate for all my editing, coding, and
+general editing needs. I'll keep a tally of pros and cons that I
+encounter along the way.&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="15%" /&gt;
+&lt;col width="35%" /&gt;
+&lt;col width="51%" /&gt;
+&lt;/colgroup&gt;
+&lt;thead valign="bottom"&gt;
+&lt;tr&gt;&lt;th class="head"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th class="head"&gt;Vim&lt;/th&gt;
+&lt;th class="head"&gt;Textmate&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Snippets&lt;/td&gt;
+&lt;td&gt;I'm told there's a plugin
+called SnipMate, haven't
+tried it yet though&lt;/td&gt;
+&lt;td&gt;Killer feature, highly customizable
+and flexible (any scripting language
+you want.)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Stability&lt;/td&gt;
+&lt;td&gt;rock solid&lt;/td&gt;
+&lt;td&gt;Crashes frequently. Not every 5m or
+anything, but about once or twice a
+day. *Seems to be related to a bug
+in the help search menu. You can
+avoid crashing by not launching
+commands through the help search.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+</summary><category term="osx"></category><category term="programming"></category><category term="textmate"></category></entry></feed>

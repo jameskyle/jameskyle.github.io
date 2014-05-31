@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/categories/utilities.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2011-02-25T11:58:00-08:00</updated><entry><title>Fix for MacVim Syntax Error, Throws "Only one file name allowed"</title><link href="http://blog.jameskyle.org/2011/02/vim-only-one-filename-allowed-fix" rel="alternate"></link><updated>2011-02-25T11:58:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2011-02-25:2011/02/vim-only-one-filename-allowed-fix</id><summary type="html">&lt;p&gt;I keep a lot of my user installed applications in /Applications/User
+Utilities. Keeps some modicum of organization and reduces a bit of
+clutter in my /Applications directory. After moving &lt;a class="reference external" href="http://code.google.com/p/macvim/"&gt;MacVim&lt;/a&gt; to this
+directory, I began getting several errors when opening files. They were
+all of the same type.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+E172: Only one file name allowed
+&lt;/pre&gt;
+&lt;p&gt;With occurrances on several lines in the runtime/syntax/vim.vim file.
+Opening the file, I found syntax like the following&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:perlpath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You may notice the perpath variable is where the problem lies. the space
+gives the appearance of two arguments instead of a single path. We can
+prevent this by using fnameescape For me, these errors occurred on lines
+585, 607, and 628.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Line 585&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:perlpath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:perlpath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Line 607&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:rubypath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:rubypath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Line 628&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:pythonpath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:pythonpath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;All done.&lt;/p&gt;
+</summary><category term="programming"></category><category term="vim"></category></entry></feed>

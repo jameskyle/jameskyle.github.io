@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/debian-sysadmin-apt.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2013-08-17T13:44:11-07:00</updated><entry><title>HowTo Create Debian Packages from Source</title><link href="http://blog.jameskyle.org/2013/08/howto-create-debian-packages-from-source" rel="alternate"></link><updated>2013-08-17T13:44:11-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2013-08-17:2013/08/howto-create-debian-packages-from-source</id><summary type="html">&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;We'll walk through the process of building an apt package from source using
+charybdis irc and atheme services as examples. Both using an earlier version
+as a &amp;quot;template&amp;quot; and creating one from scratch. Finally, the package is uploaded
+to a PPA repository.&lt;/p&gt;
+&lt;p&gt;I worked through the tutorial on Ubuntu 12.04. Modifications may be needed for
+other versions or deb platforms.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="building"&gt;
+&lt;h2&gt;Building&lt;/h2&gt;
+&lt;div class="section" id="installing-dependencies"&gt;
+&lt;h3&gt;Installing dependencies&lt;/h3&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="nv"&gt;$ &lt;/span&gt;sudo apt-get build-dep charybdis
+&lt;span class="nv"&gt;$ &lt;/span&gt;sudo apt-get install  ubuntu-dev-tools git dput devscripts -y
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="getting-the-source"&gt;
+&lt;h3&gt;Getting the source&lt;/h3&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="nv"&gt;$ &lt;/span&gt;pull-lp-source charybdis
+&lt;span class="nv"&gt;$ &lt;/span&gt;&lt;span class="nb"&gt;cd &lt;/span&gt;charybdis-3.4.2
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="configuring-the-project-for-debian"&gt;
+&lt;h3&gt;Configuring the project for debian&lt;/h3&gt;
+&lt;p&gt;After performing any fixes, patches, etc., you'll then want to update the
+debian/control files by setting your gpg key to&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="building-the-deb"&gt;
+&lt;h3&gt;Building the .deb&lt;/h3&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="nv"&gt;$ &lt;/span&gt;dpkg-buildpackage -rfakeroot -uc -b
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="external-links"&gt;
+&lt;h2&gt;External Links&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://developer.ubuntu.com/packaging/html/traditional-packaging.html"&gt;Ubuntu Packaging&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="debian sysadmin apt"></category></entry></feed>

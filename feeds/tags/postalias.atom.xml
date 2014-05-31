@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/postalias.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2008-09-04T17:49:00-07:00</updated><entry><title>Creating postfix aliases</title><link href="http://blog.jameskyle.org/2008/09/creating-postfix-aliases" rel="alternate"></link><updated>2008-09-04T17:49:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-09-04:2008/09/creating-postfix-aliases</id><summary type="html">&lt;p&gt;Just&amp;nbsp;a&amp;nbsp;reminder&amp;nbsp;of&amp;nbsp;the&amp;nbsp;postfix&amp;nbsp;alias&amp;nbsp;flow.&amp;nbsp;I&amp;nbsp;don't&amp;nbsp;do&amp;nbsp;it&amp;nbsp;enough&amp;nbsp;to&amp;nbsp;remember
+off&amp;nbsp;the&amp;nbsp;top&amp;nbsp;of&amp;nbsp;my&amp;nbsp;head&amp;nbsp;and&amp;nbsp;this&amp;nbsp;saves&amp;nbsp;me&amp;nbsp;the&amp;nbsp;google&amp;nbsp;time.&lt;/p&gt;
+&lt;p&gt;1. edit /etc/aliases or /etc/postfix/aliases (one is a symlink to the
+other):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# postalias /etc/aliases&lt;/span&gt;
+&lt;span class="c"&gt;# newaliases&lt;/span&gt;
+&lt;span class="c"&gt;# postfix reload&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="mail"></category><category term="mtu"></category><category term="postalias"></category><category term="postfix"></category></entry></feed>

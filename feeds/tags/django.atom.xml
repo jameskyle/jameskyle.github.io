@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/django.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2011-02-25T11:10:00-08:00</updated><entry><title>Automatically create django User Profiles as needed.</title><link href="http://blog.jameskyle.org/2011/02/autocreate-django-user-profiles" rel="alternate"></link><updated>2011-02-25T11:10:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2011-02-25:2011/02/autocreate-django-user-profiles</id><summary type="html">&lt;p&gt;Ran across a very nice, brief run down of creating user profiles for
+django on &lt;a class="reference external" href="http://www.turnkeylinux.org/blog/django-profile"&gt;Turnkey Linux&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I was particularly pleased of this &amp;quot;ism&amp;quot; that creates user profiles on
+the fly on an as needed basis. As a bonus, it provides access to the
+profiles through a user.profile property. All you have to do is place
+the following property declaration at the bottom of your profile's
+models.py.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;User&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;profile&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;property&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;UserProfile&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;objects&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_or_create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And that's it. Now, when someuser.profile is called, it'll create a
+default profile if needed or return that user's profile if it exists.
+See the original article for a full User Profile quickstart.&lt;/p&gt;
+</summary><category term="django"></category><category term="programming"></category><category term="python"></category></entry></feed>

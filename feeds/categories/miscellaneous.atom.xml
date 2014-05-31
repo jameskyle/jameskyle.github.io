@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/categories/miscellaneous.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2013-05-25T09:03:50-07:00</updated><entry><title>Zsh Script to Create VMware Fusion 5 Vagrant Box</title><link href="http://blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" rel="alternate"></link><updated>2013-05-25T09:03:50-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2013-05-25:2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box</id><summary type="html">&lt;p&gt;I'm sure &lt;a class="reference external" href="http://www.vagrantup.com/"&gt;vagrant&lt;/a&gt; package will soon support &lt;a class="reference external" href="http://www.vmware.com/products/fusion/overview.html"&gt;vmware fusion&lt;/a&gt; too, but as of this article
+it does not. So I wrote a little script that'll clean up, shrink, and package a
+vmware virtualmachine directory into a vagrant box.&lt;/p&gt;
+&lt;p&gt;It's should be run from the directory of the virtual machine. I put some checks
+in there to try and verify that the current directory is a vmware vm. However,
+if you do run it outside of a vmware vm directory Bad Things May Happen (TM).&lt;/p&gt;
+&lt;p&gt;Use with caution, I'm not responsible for any unintended consequences, yada
+yada yada.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/usr/bin/env zsh&lt;/span&gt;
+&lt;span class="c"&gt;# set: ft=sh&lt;/span&gt;
+&lt;span class="nb"&gt;set&lt;/span&gt; -e
+setopt extendedglob
+
+vmrun stop *.vmx
+
+&lt;span class="c"&gt;# verify we&amp;#39;re in a vmware vm directory&lt;/span&gt;
+&lt;span class="nb"&gt;pwd&lt;/span&gt; | grep vmwarevm &amp;gt; /dev/null 2&amp;gt;&amp;amp;1
+
+&lt;span class="c"&gt;# just another check, make sure the files in this directory look like vmware&lt;/span&gt;
+&lt;span class="c"&gt;# virtual machine files&lt;/span&gt;
+ls -d *.&lt;span class="o"&gt;(&lt;/span&gt;vmxf|nvram|vmsd|vmx|vmdk&lt;span class="o"&gt;)&lt;/span&gt; &amp;gt; /dev/null 2&amp;gt;&amp;amp;1
+
+&lt;span class="c"&gt;# remove all files that are not essential for a vagrant box&lt;/span&gt;
+rm -f &lt;span class="k"&gt;$(&lt;/span&gt;ls -d *~*.&lt;span class="o"&gt;(&lt;/span&gt;vmxf|nvram|vmsd|vmx|vmdk&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+
+&lt;span class="c"&gt;# defragment and shrink the main vmware disk&lt;/span&gt;
+vmware-vdiskmanager -d &lt;span class="s2"&gt;&amp;quot;Virtual Disk.vmdk&amp;quot;&lt;/span&gt;
+vmware-vdiskmanager -k &lt;span class="s2"&gt;&amp;quot;Virtual Disk.vmdk&amp;quot;&lt;/span&gt;
+
+&lt;span class="c"&gt;# create the metadata.json for vmware fusion&lt;/span&gt;
+cat &lt;span class="s"&gt;&amp;lt;&amp;lt;EOF &amp;gt; metadata.json&lt;/span&gt;
+&lt;span class="s"&gt;{&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;provider&amp;quot;:&amp;quot;vmware_fusion&amp;quot;&lt;/span&gt;
+&lt;span class="s"&gt;}&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+&lt;span class="c"&gt;# box it up using the virtual machine name as the box name.&lt;/span&gt;
+&lt;span class="nv"&gt;box_name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;basename &lt;span class="s2"&gt;&amp;quot;${PWD}&amp;quot;&lt;/span&gt; .vmwarevm&lt;span class="k"&gt;)&lt;/span&gt;
+tar cvzf &lt;span class="s2"&gt;&amp;quot;${box_name}.box&amp;quot;&lt;/span&gt; ./*
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="vmware"></category><category term="vagrant"></category><category term="scripts"></category></entry><entry><title>Disable DHCP Daemon on Default Virtual Nets in VMware Fusion 5</title><link href="http://blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" rel="alternate"></link><updated>2013-05-16T21:21:18-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2013-05-16:2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5</id><summary type="html">&lt;p&gt;Fusion 5 is a bit different than previous versions. It adds a lot of network
+configuration missing in previous versions. There are two interfaces that
+aren't modifiable in the gui; vmnet1 and vmnet8.&lt;/p&gt;
+&lt;p&gt;These are default networks created by VMware. vmnet1 is VMware's default
+hostonly net and vmnet8 is the default nat network. Both have dhcp enabled.&lt;/p&gt;
+&lt;p&gt;Network configuration options are managed using the vmnet-cfgcli. vmnet-cfgcli
+and all VMWare utilities are found in the
+/Applications/VMware Fusion.app/Contents/Library/ directory. To disable dhcp,
+we'd&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo vmnet-cfgcli vnetcfgadd VNET_1_DHCP no
+sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;They basically update configuration values in the
+/Library/Preferences/VMware Fusion/networking file.&lt;/p&gt;
+&lt;p&gt;Then restart vmware. You can verify the dhcpd service is no longer running by&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;ps aux | grep -i dhcpd | grep vmnet
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Zero results means no dhcpd running on VMware's virtual nets.&lt;/p&gt;
+</summary><category term="vmware"></category><category term="virtualization"></category><category term="dhcp"></category></entry><entry><title>Configuring OpenSwan IPSec Server</title><link href="http://blog.jameskyle.org/2012/07/configuring-openswan-ipsec-server" rel="alternate"></link><updated>2012-07-18T15:06:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-07-18:2012/07/configuring-openswan-ipsec-server</id><summary type="html">&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;The intent of this article is to walk through the installation,
+configuration, and general debugging of OpenSwan based IPSec tunnels.
+Though primarily focused on Ubuntu &amp;amp; Debian systems, non-package
+management portions should apply generally.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="installation-initial-configuration"&gt;
+&lt;h2&gt;Installation &amp;amp; Initial Configuration&lt;/h2&gt;
+&lt;p&gt;We install using apt-get or aptitude.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% apt-get install openswan
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;For a basic PSK (Private Shared Key) configuration, there are two main
+files we need to modify. The first is the configuration file,
+/etc/ipsec.conf. The second is the ipsec secrets file where the PSK is
+stored in /etc/ipsec.secrets.&lt;/p&gt;
+&lt;div class="section" id="the-ipsec-conf-file"&gt;
+&lt;h3&gt;The ipsec.conf file&lt;/h3&gt;
+&lt;p&gt;There are two main sections to the ipsec configuration file. The
+configuration setup section &amp;amp; the connection section.&lt;/p&gt;
+&lt;div class="section" id="the-configuration-setup-section"&gt;
+&lt;h4&gt;The configuration setup section&lt;/h4&gt;
+&lt;p&gt;The configuration setup section begins by declaring&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;config setup
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;. The 'virtual_private 'option declares which subnets should be allowed
+through the tunnel and which should be excluded. Typically, you'll wish
+to exclude any networks that overlap with your private LAN.&lt;/p&gt;
+&lt;p&gt;Networks are allowed by specifying the internet protocol version and the
+CIDR of the allowed network. Networks are excluded by prepending the
+bang symbol, '!', to the CIDR.&lt;/p&gt;
+&lt;p&gt;Assuming a private network of 10.1.1.1 on a /24 network, the setup
+configuration would look something like...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;config setup
+    plutoopts=&amp;quot;--perpeerlog&amp;quot;
+    virtual_private=%v4:172.16.0.0/12,%v4:192.168.0.0/16,%v4:10.0.0.0/8,%v4:!10.1.1.0/24
+    protostack=auto
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If either end of the tunnel is being nat'd, it may be necessary to add
+the nat_traversal work around to the config setup section.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;nat_traversal=yes
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The plutoopts specified create a log for each peer that connects. The
+protostack specifies which kernel protocol to use. 'auto' is generally
+fine. However, if you wish to apply firewall rules to traffic coming
+over the tunnel, you may wan to look into the KLIPS protocol as it
+creates a unique interface for tunnel traffic, greatly reducing the
+complexity of your firewall scripts.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-connection-configuration-section"&gt;
+&lt;h4&gt;The connection configuration section&lt;/h4&gt;
+&lt;p&gt;The connection configuration section begins with the declaration of the
+'conn' keyword followed by an arbitrary connection label. An example
+configuration might look like...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;conn State-Secrets
+    type=tunnel
+    authby=secret
+    auto=start
+    pfs=no
+    ike=aes256-sha1;modp1024!
+    phase2alg=aes256-sha1;modp1024
+    aggrmode=no    left=10.1.1.1
+    right=5.5.5.5    leftsubnet=10.1.1.0/24
+    rightsubnet=172.16.0.0/12
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We'll walk through each of the above connection options. It is important
+to note that though the protocol allows for client negotiation of most
+of these parameters with the server, in practice I've found explicitly
+setting them to conform to the remote servers specifications produces
+the most reliable results. If you are acting as the client, without
+control of the server, obtaining a thorough specification document that
+lists phase1 and phase2 algorithms can be quite the time saver. Such a
+document for the above configuration might look like&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;caption&gt;Configuration Table&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col width="61%" /&gt;
+&lt;col width="39%" /&gt;
+&lt;/colgroup&gt;
+&lt;thead valign="bottom"&gt;
+&lt;tr&gt;&lt;th class="head"&gt;Configuration Option&lt;/th&gt;
+&lt;th class="head"&gt;Configuration Value&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Athentication Method&lt;/td&gt;
+&lt;td&gt;Pre Shared Key&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 1 Encryption Scheme&lt;/td&gt;
+&lt;td&gt;IKE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 1 DH Group&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Encryption Algorithm&lt;/td&gt;
+&lt;td&gt;AES/256&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Hashing Algorithm&lt;/td&gt;
+&lt;td&gt;SHA-1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Main or Aggressive Mode&lt;/td&gt;
+&lt;td&gt;Main Mode&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 1 Lifetime&lt;/td&gt;
+&lt;td&gt;1440&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 2 Encapsulation&lt;/td&gt;
+&lt;td&gt;ESP&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 2 Encryption Algorithm&lt;/td&gt;
+&lt;td&gt;AES/256&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 2 Authentication Algorithm&lt;/td&gt;
+&lt;td&gt;SHA&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 2 Perfect Forward Secrecy&lt;/td&gt;
+&lt;td&gt;No&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Phase 2 Lifetime&lt;/td&gt;
+&lt;td&gt;3600&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Key Exchange for Subnets&lt;/td&gt;
+&lt;td&gt;Yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Let's walk through each of the options, look at their corresponding
+value from our document, and clarify its use.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;type=tunnel
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This declares the type of connection to be formed. Since we're
+configuring an ipsec tunnel, we specify 'tunnel' (I know, very
+original).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;authby=secret
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This option declares the type of authentication scheme to use. IPSec
+supports several different authentication schemes. 'secret' is used due
+to our specification document specifying a type of &amp;quot;Pre Shared Key&amp;quot;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;auto=start
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;There's no corresponding document value for this setting. It specifies
+that the ipsec tunnel should be started and routes created when the
+ipsec daemon itself starts.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;pfs=no
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This value comes from our documents PFS setting.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;ike=aes256-sha1;modp1024!
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is a combination of several values in our document. It specifies
+the phase 1 encryption scheme, the hashing algorithm, and the
+diffie-hellman group. The modp1024 is for Diffie-Hellman 2. Why 'modp'
+instead of dh? DH2 is a 1028 bit encryption algorithm that modulo's a
+prime number, e.g. modp1028. See RFC 5114 for details or the wiki page
+on diffie hellmann, if interested.&lt;/p&gt;
+&lt;p&gt;The bang symbol, !, specifies the connection shoudl be formed in strict
+mode. Technically, this is the default. However, at some point (version
+wise) it was not being properly applied and it doesn't hurt.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;phase2alg=aes256-sha1;modp1024
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is a combination of several values in our document. It specifies
+the phase 2 encryption scheme, the hashing algorithm, and the
+diffie-hellman group just like the ike parameter.&lt;/p&gt;
+&lt;p&gt;For further information on valid parameters for the ike and phase2alg
+variables, please see the ipsec.conf man page.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;aggrmode=no
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Enables or disables Aggressive Mode. Agressive Mode is almost &lt;em&gt;never&lt;/em&gt;
+needed and 'no' is the default. However, I've included it for clarity.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;left=10.1.1.1
+right=5.5.5.5
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The 'left' and &amp;amp;39;right' arguments specify details about the two end
+points of the tunnel. Which is used for which endpoint is arbitrary, but
+many used left to denote the 'local' endpoint and the right to denote
+the 'remote' endpoing for mnemonic reasons. This &lt;em&gt;should&lt;/em&gt; be the ip of
+the peer we're attempting to connect to.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;leftsubnet=10.1.1.0/24
+rightsubnet=172.16.0.0/12
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;These are the subnets that are exposed by the tunnel. Again, left and
+right is arbitrary. However, consistency is obviously required. Make
+sure the subnet declaration matches its corresponding left/right
+endpoing declaration.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="troubleshooting"&gt;
+&lt;h2&gt;Troubleshooting&lt;/h2&gt;
+&lt;p&gt;Configuration is normally the easy portion of setting up an ipsec
+tunnel, it's normally the debugging that takes up the majority of time.
+Particularly if dealing with heterogenous peers.&lt;/p&gt;
+&lt;div class="section" id="pertinent-log-files"&gt;
+&lt;h3&gt;Pertinent log files&lt;/h3&gt;
+&lt;p&gt;These are the log files most likely to contain important information
+about why a particular tunnel is not succeeding.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/var/log/auth.log
+/var/log/syslog
+/var/log/pluto/peer/a/b/c/d/a.b.c.d.log
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;The /var/log/auth.log is where logs on the authentication
+transactions are, stored.&lt;/li&gt;
+&lt;li&gt;The /var/log/syslog is the system log, it's always good to check here
+for any startup or general errors.&lt;/li&gt;
+&lt;li&gt;/var/log/pluto/peer/a/b/c/d/a.b.c.d.log file is the per peer pluto
+log. You can find some of the startup and shutdown information in
+here.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="utilities"&gt;
+&lt;h3&gt;Utilities&lt;/h3&gt;
+&lt;p&gt;The main utilities to use are&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;tcpdump&lt;/li&gt;
+&lt;li&gt;ip&lt;/li&gt;
+&lt;li&gt;ipsec&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="section" id="tcpdump"&gt;
+&lt;h4&gt;tcpdump&lt;/h4&gt;
+&lt;p&gt;Since the traffic is encrypted, you can only track the &amp;quot;flow&amp;quot; of the
+ipsec transaction to ensure all packets are reaching their destination
+and routing is working as expected. However, seeing the packet flow can
+be very informative.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ip"&gt;
+&lt;h4&gt;ip&lt;/h4&gt;
+&lt;p&gt;The ip tool is used to ensure that the needed routes have been crated.
+Alternatively, you could use something like netstat.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ipsec"&gt;
+&lt;h4&gt;ipsec&lt;/h4&gt;
+&lt;p&gt;Read the man page for complete information, but the most used switch is
+the status command. We configured our example connection for 'auto'. To
+retrieve the status of all auto configured connections, you execute&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% ipsec auto --status
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;When debugging, I find it very useful to poll the output of this command
+in one second intervales. For example,&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;((&lt;/span&gt; ;; &lt;span class="o"&gt;))&lt;/span&gt;;&lt;span class="k"&gt;do &lt;/span&gt;ipsec auto --status; sleep 1; &lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The astute may notice the 'watch' command was made for this. I
+experienced glitches on some systems with ipsec status and the watch
+command. YMMV.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-ipsec-secrets-file"&gt;
+&lt;h4&gt;The ipsec.secrets file&lt;/h4&gt;
+&lt;p&gt;The ipsec.secrets file takes the following format&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;leftid1 rightid1 : PSK &amp;quot;preshared key1&amp;quot;
+leftid2 rightid2 : PSK &amp;quot;preshared key2&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The secrets file can have multiple entries. Of note, the combination of
+the leftid1 + rightid1 must be unique for each tunnel in order for the
+PSK lookup to succeed.&lt;/p&gt;
+&lt;p&gt;If you're only managing a single ipsec tunnel, using the the special
+catch all %any can work well. Such a config would look like this&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;%any %any : PSK &amp;quot;preshared key&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="gotchas-to-keep-an-eye-out-for"&gt;
+&lt;h3&gt;'Gotchas' to keep an eye out for&lt;/h3&gt;
+&lt;p&gt;There are a few problems that seem to come up over and over and over
+again. I cover those here in brief along with ways to eliminate them as
+suspects. . . or at least ways to &lt;em&gt;confirm&lt;/em&gt; if not completely eliminate.&lt;/p&gt;
+&lt;div class="section" id="mismatched-peer-identities"&gt;
+&lt;h4&gt;Mismatched Peer Identities&lt;/h4&gt;
+&lt;p&gt;This comes up quite a bit. Keep an eye out for messages from the peer
+like 'no proposal found for peer' or connections that make it through
+phase 1, but fail to complete phase 2. Another way to verify is by
+inspecting the status output. You'll find a line like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;10.1.1.0/24===10.1.1.1&amp;lt;10.1.1.1&amp;gt;[+S=C]...5.5.5.5&amp;lt;5.5.5.5&amp;gt;[+S=C]===172.16.0.0/12; erouted; eroute owner: #6
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That line indicates that the ips of the endpoints are being used as the
+peer id. It also declares the subnet being exposed. The standard default
+for peer id&amp;amp;39;s is the ip of the peer. However, this is not required.
+Nor is it uncommon for it to be overridden by a remote admin. If you
+suspect a peer id mismatch, the remote peer admin should be able to
+provide you with her routers configuration.&lt;/p&gt;
+&lt;p&gt;Peer id's &lt;em&gt;must&lt;/em&gt; match.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="mismatched-configurations"&gt;
+&lt;h4&gt;Mismatched configurations&lt;/h4&gt;
+&lt;p&gt;This is pretty vague. In the end, virtually &lt;em&gt;all&lt;/em&gt; connection problems
+boil down to mismatched configurations. However, it still bears
+mentioning as it is eminently worth it to go over configurations
+repeatedly to ensure they match up.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="administration"></category><category term="debian"></category><category term="howtos"></category><category term="openswan"></category></entry><entry><title>A Boilerplate Comparison: Puppet</title><link href="http://blog.jameskyle.org/2012/07/puppet-boilerplate" rel="alternate"></link><updated>2012-07-15T15:20:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-07-15:2012/07/puppet-boilerplate</id><summary type="html">&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Here we cover the steps for deploying a package to a puppet agent/node.
+Like with chef, we assume a working installation.&lt;/p&gt;
+&lt;p&gt;Though I must take the opportunity to comment that the installation
+process for puppet was ridiculously easy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-ridiculously-easy-way"&gt;
+&lt;h2&gt;The ridiculously easy way&lt;/h2&gt;
+&lt;p&gt;Package installation can be performed completely through the console,
+e.g. web ui, for puppet. To do so, you go to &lt;a class="reference external" href="https://puppetmaster.me.com"&gt;https://puppetmaster.me.com&lt;/a&gt;
+and click 'Live Management' -&amp;gt; Advanced Tasks -&amp;gt; package tasks -&amp;gt;
+Install. Type in the package name you wish to install and click 'Run'.&lt;/p&gt;
+&lt;p&gt;That's it. Done.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-not-quite-ridiculously-easy-way"&gt;
+&lt;h2&gt;The not quite ridiculously easy way&lt;/h2&gt;
+&lt;p&gt;That seems almost too trivial. It's nice that the trivial tasks are
+trivial to perform, but let's take a closer look at what it takes to
+roll your own task and deploy it. It's more representative of how a
+sysadmin will interact with the framework and seems more fair to chef.&lt;/p&gt;
+&lt;div class="section" id="creating-a-module-from-scratch"&gt;
+&lt;h3&gt;Creating a module from scratch&lt;/h3&gt;
+&lt;p&gt;Puppet, like chef, can generate a module template. Puppet is very
+community centric and sharing of modules is the default. As such, the
+module template asks you to prepend your Puppet Forge username as it is
+the best practice naming convention for shared modules. Like in our
+previous walk through with chef, we're going to write a package for
+installing tmux.&lt;/p&gt;
+&lt;div class="section" id="create-the-package"&gt;
+&lt;h4&gt;Create the package&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% puppet module generate username-tmux
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You're rewarded with a directory like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Modulefile README     manifests  spec       tests
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="edit-modulefile"&gt;
+&lt;h4&gt;Edit Modulefile&lt;/h4&gt;
+&lt;p&gt;You should always edit the modulefile and enter pertinent information
+such as version, license, description, etc.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-tmux-class"&gt;
+&lt;h4&gt;Create tmux class&lt;/h4&gt;
+&lt;p&gt;The business is in the init.pp file, we edit that and add our package
+requirement.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="n"&gt;tmux&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;package&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;tmux&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="add-class-to-a-node"&gt;
+&lt;h4&gt;Add class to a node&lt;/h4&gt;
+&lt;p&gt;Finally, to apply the role to a node you add it to the nodes definition
+in the site.pp file. This isn't a hard, fast rule. Puppet can pull node
+configuration from external sources. Puppet Enterprise console provides
+this and so you could use the web frontend to add the class to your list
+in console and then apply it to a group. You could also provide your own
+backend.&lt;/p&gt;
+&lt;p&gt;However, the &amp;quot;basic&amp;quot; basic, out the box puppet involves editing the
+site.pp, so we&amp;amp;squot;ll add it to the default node here&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;tmux&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We also commit the package to our repository.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% git add modules/username-tmux manifests/site.pp
+% git commit modules/username-tmux manifests/site.pp -m &lt;span class="s2"&gt;&amp;quot;added tmux module&amp;quot;&lt;/span&gt;
+% git push origin master
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="comments"&gt;
+&lt;h3&gt;Comments&lt;/h3&gt;
+&lt;p&gt;If you noticed, we didn't cover how you upload your module and manifest
+like we did in the &lt;a class="reference external" href="/2012/07/infrastructure-automation-a-boilerplate-comparison/"&gt;Chef&lt;/a&gt; article. That's because puppet doesn't have a
+management tool for interacting with the puppet master like the knife
+tool. Deployment is left up to the administrator. Some common methods
+are using cap deploy, commit hooks, or pulling files down in a cron from
+the repo.&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="/2012/07/infrastructure-automation-a-boilerplate-comparison/"&gt;Previous Article&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="administration"></category><category term="chef"></category><category term="devops"></category><category term="infrastructure"></category><category term="linux"></category><category term="puppet"></category></entry><entry><title>Infrastructure Automation: A Boilerplate Comparison</title><link href="http://blog.jameskyle.org/2012/07/infrastructure-automation-a-boilerplate-comparison" rel="alternate"></link><updated>2012-07-08T11:33:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-07-08:2012/07/infrastructure-automation-a-boilerplate-comparison</id><summary type="html">&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;We've been using &lt;a class="reference external" href="http://opscode.com"&gt;Chef&lt;/a&gt; to deploy our infrastructure for a while now.
+One of the main sticking points we've run into is the barrier to entry
+for develoepers as a result of the boiler plate required to perform a
+simple deployment task. Our ideal framework would be equally accessible
+to the ops, who use the system every day, and development teams, who
+know their application environments best.&lt;/p&gt;
+&lt;p&gt;In that spirit, this article compares the boilerplate necessary to
+perform a simple configuraiton task. Since one of the most common, and
+straight forward, needs is installing a system package we'll use that as
+an example. This is not intended to demonstrate that one framework is
+overall &amp;quot;better&amp;quot; than another. Rather it's merely a comparison of
+workflows.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="contenders"&gt;
+&lt;h2&gt;Contenders&lt;/h2&gt;
+&lt;p&gt;The following frameworks are covered:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://opscode.com"&gt;Chef&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://puppetlabs.com/"&gt;Puppet&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="article-series-format"&gt;
+&lt;h2&gt;Article Series Format&lt;/h2&gt;
+&lt;p&gt;I already have a chef environment ready to go. So first, we'll cover
+that workflow. In subsequent posts, I'll cover the other frameworks.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-objective"&gt;
+&lt;h2&gt;The Objective&lt;/h2&gt;
+&lt;p&gt;To install the tmux package.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-chef-workflow"&gt;
+&lt;h2&gt;The Chef Workflow&lt;/h2&gt;
+&lt;p&gt;For the purposes of our example, we assume &lt;a class="reference external" href="http://wiki.opscode.com/display/chef/Chef+Server"&gt;Chef Server&lt;/a&gt; is already
+configured and working. We also assume a working repository is already
+created and the users credentials/environment is set up.&lt;/p&gt;
+&lt;div class="section" id="step-one-create-a-cookbook"&gt;
+&lt;h3&gt;Step One: Create a Cookbook&lt;/h3&gt;
+&lt;p&gt;First, we create the chef cookbook.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% knife cookbook create tmux
+** Creating cookbook tmux
+** Creating README for cookbook: tmux
+** Creating metadata for cookbook: tmux
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-two-edit-the-default-recipe"&gt;
+&lt;h3&gt;Step Two: Edit the Default Recipe&lt;/h3&gt;
+&lt;p&gt;Next, we edit the package to perform the task we need. To do so, we open
+the default recipe.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% vim cookbooks/tmux/recipes/default.rb
+&lt;/pre&gt;
+&lt;p&gt;And add the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# add multiple case statements for other target platforms&lt;/span&gt;
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:platform&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+  &lt;span class="k"&gt;when&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;ubuntu&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;debian&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;package&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tmux&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;action&lt;/span&gt; &lt;span class="ss"&gt;:install&lt;/span&gt;
+    &lt;span class="k"&gt;end&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Though technically not required, updating the metadata is certainly best
+practice.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% vim cookbooks/tmux/metadata.rb
+&lt;/pre&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;maintainer&lt;/span&gt;       &lt;span class="s2"&gt;&amp;quot;AT&amp;amp;T Foundry&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;maintainer_email&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;email@domain.com&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;license&lt;/span&gt;          &lt;span class="s2"&gt;&amp;quot;All rights reserved&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;description&lt;/span&gt;      &lt;span class="s2"&gt;&amp;quot;Installs/Configures tmux&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;long_description&lt;/span&gt; &lt;span class="no"&gt;IO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;File&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;File&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dirname&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;__FILE__&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;README.md&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="n"&gt;version&lt;/span&gt;          &lt;span class="s2"&gt;&amp;quot;0.0.1&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-three-add-the-cookbook-to-your-repository"&gt;
+&lt;h3&gt;Step Three: Add the Cookbook to Your Repository&lt;/h3&gt;
+&lt;pre class="literal-block"&gt;
+% git add cookbooks/tmux
+% git commit cookbooks/tmux -m &amp;quot;Tmux package cookbook added&amp;quot;
+% git pull origin master
+% git push origin master
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-four-upload-cookbook-to-chef-server"&gt;
+&lt;h3&gt;Step Four: Upload Cookbook to Chef Server&lt;/h3&gt;
+&lt;pre class="literal-block"&gt;
+% knife cookbook upload tmux
+Uploading tmux
+[0.0.1] upload complete
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-five-add-recipe-to-role"&gt;
+&lt;h3&gt;Step Five: Add Recipe to Role&lt;/h3&gt;
+&lt;p&gt;Next we need to add the recipe to a role. This may require the creation
+of a new role. In that case, an additional creation, commit, upload is
+required for the role.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% vim roles/tmux.json
+&lt;/pre&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tmux&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;default_attributes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;json_class&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Chef::Role&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;env_run_lists&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;run_list&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;recipe[tmux]&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;],&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;description&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Install Tmux&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;chef_type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;role&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;override_attributes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Commit &amp;amp; Upload the role:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% knife role from file roles/tmux.json
+% git commit roles/tmux.json -m &amp;quot;added tmux role&amp;quot;
+% git push origin master
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-six-apply-role-to-server"&gt;
+&lt;h3&gt;Step Six: Apply Role to Server&lt;/h3&gt;
+&lt;p&gt;The final step is applying the role to a server.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+knife bootstrap 10.4.54.9 -i ~/.ssh/keys/jk328n_rsa -d ubuntu12.04-gems-att \
+  -x ubuntu --sudo -N jkyle-test -E foundry-services_pao1 -r 'role[tmux]'
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="followup-articles"&gt;
+&lt;h2&gt;Followup Articles&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="/2012/07/puppet-boilerplate/"&gt;Puppet Boiler Plate&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="administration"></category><category term="devops"></category><category term="infrastructure"></category><category term="linux"></category></entry><entry><title>Adding Syntactic Sugar to Python dicts</title><link href="http://blog.jameskyle.org/2012/01/adding-syntactic-sugar-to-python-dicts" rel="alternate"></link><updated>2012-01-28T16:44:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-01-28:2012/01/adding-syntactic-sugar-to-python-dicts</id><summary type="html">&lt;div class="section" id="snippet"&gt;
+&lt;h2&gt;Snippet&lt;/h2&gt;
+&lt;p&gt;This little snippet allows dict keys to be accessed like attributes. For
+example&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CustomDict&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;foo&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;bar&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;bah&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;baz&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;bot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}})&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Can be accessed like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;foo&lt;/span&gt; &lt;span class="c"&gt;# returns &amp;quot;bar&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;foo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bah&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;baz&lt;/span&gt; &lt;span class="c"&gt;# returns &amp;quot;bot&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In addition to the hash key lookups.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;CustomDict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__dict__&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;iteritems&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CustomDict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="nb"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__setitem__&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;values&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="programming"></category><category term="python"></category><category term="recipes"></category></entry><entry><title>The role of religion and science</title><link href="http://blog.jameskyle.org/2010/12/the-role-of-religion-and-science" rel="alternate"></link><updated>2010-12-02T10:52:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-12-02:2010/12/the-role-of-religion-and-science</id><summary type="html">&lt;p&gt;Greg Fish has a pretty interesting &lt;a class="reference external" href="http://worldofweirdthings.com/2010/12/01/your-morning-dose-of-would-be-martyrdom/"&gt;article&lt;/a&gt; on the religious victim
+complex. The comments sparked a good discussion on the roles of religion
+and science.&lt;/p&gt;
+&lt;p&gt;In particular, the proposition was made that &amp;quot;S*cience answers ‘How?’;
+religion answers ‘Why?’&amp;quot;.*I took contention with this statement,
+proposing that science is perfectly adequate at answering 'why'
+questions. Below is a response to that assertion by &lt;a class="reference external" href="http://worldofweirdthings.com/2010/12/01/your-morning-dose-of-would-be-martyrdom/#comment-32422"&gt;Bruce Coulson&lt;/a&gt;, my
+reply got quite verbose so I thought it deserved its own blog
+entry.&amp;nbsp;I'll walk through the main points one by one.&lt;/p&gt;
+&lt;blockquote&gt;
+&amp;quot;Religion provides meaning. Science doesn’t.&amp;quot;&lt;/blockquote&gt;
+&lt;p&gt;I take umbrage at this. The natural conclusion would be that those who
+do not have religion have no meaning in their lives. This is
+demonstrably false. All the atheists I know, including myself, have very
+clearly defined concepts of the &amp;quot;meaning&amp;quot; of their lives. I also know
+many a religious person who is extremely conflicted over what the
+meaning of their lives are. Now, that's purely anecdotal (most of the
+atheists I know are academic or business professionals and very goal
+oriented) and not meant to reflect the normal population as a whole. But
+if I just produce a single atheist that has meaning, that negates the
+assertion that it can _only_ be found through religion or
+spirituality.&lt;/p&gt;
+&lt;blockquote&gt;
+It does not answer, and cannot answer, ‘Why?’ If you counter with,
+‘well, evolution is the function of natural laws’ then the counter
+is ‘Why do the natural laws work this way?’ Ultimately, your answer
+(from a scientific point of view) boils down to “Because they do!”
+Which is perfectly valid and correct, scientifically. But
+unsatisfying from a faith point of view, because it’s not an answer.&lt;/blockquote&gt;
+&lt;p&gt;I'm not sure what's being implied here. When a child asks &amp;quot;Why do
+oranges fall to the ground?&amp;quot; replying &amp;quot;Gravity&amp;quot; is a perfectly valid
+response.&lt;/p&gt;
+&lt;p&gt;Pointing out that science is not infinite in its ability to answer the
+&amp;quot;Why&amp;quot; questions is not a nail in its coffin. Also, &amp;quot;Because they do.&amp;quot; is
+never, ever a valid answer from the perspective of science. However, &amp;quot;We
+don't know.&amp;quot; is. This is a key difference between Religion and science.
+Religion insists that when traversing the ladder of Why's there must be
+turtles all the way down. Science does not require that every observed
+phenomena have a definitive answer. Though lack of an answer is
+certainly an indication that there is still interesting work to do.&lt;/p&gt;
+&lt;p&gt;Science views unanswered questions as areas to be investigated, not
+areas resolved arbitrarily by a god which need no further investigation.
+Not only is it ok to say &amp;quot;I don't know.&amp;quot; in science, it's a requirement
+before you can even begin to embark on a scientific inquiry. It is
+religion that is perfectly fine with show stopping answers to why such
+as &amp;quot;Because god made it that way.&amp;quot;&lt;/p&gt;
+&lt;p&gt;To delve a little deeper into this issue and get at what I think the
+core contention is in this &amp;quot;Why&amp;quot; analogy, there are some questions which
+are &lt;em&gt;unanswerable&lt;/em&gt;. They are posited in such a way that they are
+untestable. For example, if you define &amp;quot;spirit&amp;quot; as an entity that does
+not exist on this plane of reality and is therefore undetectable by
+anything in this reality. Or the framing of morality in a way that does
+not entail any sort of claimed effect on our lives. The problem with
+these sorts of questions is that &lt;a class="reference external" href="http://godlessgeeks.com/LINKS/Dragon.htm"&gt;the moment you remove a proposed
+&amp;quot;thing&amp;quot; from our reality&lt;/a&gt;, it no longer impacts this reality (by
+definition). The &amp;quot;answer&amp;quot; to an untestable question can be any one of an
+infinite set of arbitrary &amp;quot;solutions&amp;quot;. Since they are all equally
+untestable, they are all equally valid (or invalid) with maybe a loose
+requirement of logical consistency. I say &amp;quot;loose&amp;quot; because except in the
+works of the most academic of religious philosophers such as
+&lt;a class="reference external" href="http://en.wikipedia.org/wiki/Alvin_Plantinga"&gt;Plantinga&lt;/a&gt;, &lt;a class="reference external" href="http://en.wikipedia.org/wiki/Alvin_Plantinga"&gt;Alston&lt;/a&gt;, and others this requirement is never followed.
+In fact, the biggest issue that rigorous modern philosophers of religion
+have is trying to shoe horn religion into some sort of logically
+consistent, rational framework with varying degrees of success depending
+on whether you're speaking to a religiously affiliated philosopher or
+not.&lt;/p&gt;
+&lt;p&gt;To drive this home, claiming that X is moral means nothing if there is
+no proposed positive or negative effect of doing X. It simply doesn't
+impact our lives at all. As soon as you make some claim, such as &amp;quot;If
+people X, then it improves Y&amp;quot; or even something as vague as &amp;quot;If people
+X, they will feel better.&amp;quot; you've thrown yourself into the realm of
+science as we can certainly devise a means of testing that hypothesis.&lt;/p&gt;
+&lt;p&gt;To claim that religion is only concerned with those questions that are
+unanswerable not by some limitation of our instruments, but by the
+inherent nature of the question, is to assert that religion is only
+concerned with those questions which do not impact our lives. I think
+this is a proposition that even the most academic of religious
+philosophers would reject.&lt;/p&gt;
+</summary><category term="personal beliefs"></category><category term="philosophy"></category><category term="religion"></category><category term="science"></category></entry><entry><title>Migrated old Posts</title><link href="http://blog.jameskyle.org/2010/06/migrated-old-posts" rel="alternate"></link><updated>2010-06-12T11:57:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-06-12:2010/06/migrated-old-posts</id><summary type="html">&lt;p&gt;I migrated my old blog posts from &lt;a class="reference external" href="http://ccn.ucla.edu/users/jkyle"&gt;CCN&lt;/a&gt; into this one via rss. It looks
+like it mostly worked, formatting is a little off so my apologies for
+that. I'll try to touch them up &amp;quot;as needed&amp;quot;.&lt;/p&gt;
+</summary></entry></feed>

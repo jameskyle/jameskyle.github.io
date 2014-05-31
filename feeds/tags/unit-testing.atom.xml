@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/unit-testing.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2010-10-02T15:00:00-07:00</updated><entry><title>Nose Unit Testing Quick Start</title><link href="http://blog.jameskyle.org/2010/10/nose-unit-testing-quick-start" rel="alternate"></link><updated>2010-10-02T15:00:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-10-02:2010/10/nose-unit-testing-quick-start</id><summary type="html">&lt;p&gt;This is just a quick &amp;quot;get up and running fast&amp;quot; walk through on using the
+&lt;a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.2/"&gt;Nose&lt;/a&gt; Unit Testing framework. The reference documentation for Nose is
+great, but their site seems a little light on the quick start side. I
+assume you have python installed. If you're unsure how to install
+python, see your OS documentation.&lt;/p&gt;
+&lt;div class="section" id="install-nose"&gt;
+&lt;h2&gt;Install Nose&lt;/h2&gt;
+&lt;p&gt;Install Nose using your OS's package manager or with easy_install. For
+example:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% easy_install nose
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-some-code-for-testing"&gt;
+&lt;h2&gt;Create Some Code for Testing&lt;/h2&gt;
+&lt;p&gt;As an example, I've created the class below I'll use in the unit test
+examples.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;A&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Some Value&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;return_true&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Truedef&lt;/span&gt; &lt;span class="n"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;KeyError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-unit-test-classes"&gt;
+&lt;h2&gt;Create Unit Test Classes&lt;/h2&gt;
+&lt;p&gt;There are many approaches to writing Nose unit tests. I normally write a
+test class for each class or module I wish to test.&amp;nbsp;Nose will load and
+run any class whose name is preceded by Test such as TestClassA or
+TestA. When it discovers a class, it uses its default testMatch regex to
+find any methods that match. Again, we'll use the test_method()
+convention for our tests.&amp;nbsp;For more information see the&amp;nbsp; &lt;a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.1/writing_tests.html"&gt;Writing Tests&lt;/a&gt;
+reference.&lt;/p&gt;
+&lt;p&gt;A few notes on the testing example.&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;Nose supports fixtures, though we won't use them here. I have
+included the fixture methods in the below example, but only provide a
+comment explaining their use in the source.&lt;/li&gt;
+&lt;li&gt;The nose.tools packages comes with many helper methods that make
+testing syntactically clearer for common test cases. In this example,
+we use assert_equal, assert_not_equal, the raises decorator, and
+assert_raises. For a full list see the&amp;nbsp;&lt;a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/doc/module_nose.tools.html"&gt;nose.tools
+documentation&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;For organizational purposes, I create a subdirectory in my project
+called &amp;quot;tests&amp;quot;. This is not required.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;a&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;assert_equal&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;assert_not_equal&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;assert_raises&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;raises&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;TestA&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setup_class&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;klass&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once for each class before any tests are run&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;teardown_class&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;klass&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once for each class _after_ all tests are run&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setUp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once before _each_ test method is executed&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;teardown&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once after _each_ test method is executed&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_init&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;assert_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Some Value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;assert_not_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Incorrect Value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_return_true&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;assert_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_true&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;assert_not_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_true&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="bp"&gt;False&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;        &lt;span class="n"&gt;assert_raises&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ne"&gt;KeyError&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;A value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@raises&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ne"&gt;KeyError&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_raise_exc_with_decorator&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;A message&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="run-tests"&gt;
+&lt;h2&gt;Run Tests&lt;/h2&gt;
+&lt;p&gt;All that's left is to run our tests. Nose comes with a command line
+utility called 'nosetests'. The simplest usage is to call nosetests from
+within your project directory and pass the 'tests' directory as an
+argument. For example,&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests tests
+&lt;/pre&gt;
+&lt;p&gt;For our examples, this outputs the following test summary:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ % nosetests tests
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s  OK
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="adding-code-coverage"&gt;
+&lt;h2&gt;Adding Code Coverage&lt;/h2&gt;
+&lt;p&gt;One useful metric for the completeness of your unit tests is the concept
+of code coverage. Nose comes out of the box with support for the
+&lt;a class="reference external" href="http://pypi.python.org/pypi/coverage"&gt;coverage module&lt;/a&gt;. First, install coverage using your package manager
+or by:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% easy_install coverage
+&lt;/pre&gt;
+&lt;p&gt;To generate a coverage report using the nosetests utility, simply add
+the --with-coverage. By default, coverage generates data for all modules
+found in the current directory.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage
+&lt;/pre&gt;
+&lt;p&gt;If you've included a few 3rd party modules, then you could be looking at
+a lot of information you don't care much about. If this is the case, you
+can also specify the specific modules you wish to run reports on. In our
+example, you would do so by running&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage --cover-package a
+&lt;/pre&gt;
+&lt;p&gt;The --cover-package switch can be used multiple times. If you had a
+b.py, you could&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage --cover-package a --cover-package b
+&lt;/pre&gt;
+&lt;p&gt;If we run coverage on our example tests, we get:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage
+....
+Name    Stmts   Miss  Cover   Missing
+-------------------------------------
+a           8      0   100%
+----------------------------------------------------------------------
+Ran 4 tests in 0.006sOK
+&lt;/pre&gt;
+&lt;/div&gt;
+</summary><category term="programming"></category><category term="python"></category><category term="unit testing"></category><category term="utilities"></category></entry></feed>

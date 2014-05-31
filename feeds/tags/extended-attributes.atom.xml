@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/extended-attributes.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2008-10-09T11:06:00-07:00</updated><entry><title>Disable Extended Attributes for Tar Backup</title><link href="http://blog.jameskyle.org/2008/10/disable-extended-attributes-for-tar-backup" rel="alternate"></link><updated>2008-10-09T11:06:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-10-09:2008/10/disable-extended-attributes-for-tar-backup</id><summary type="html">&lt;p&gt;To disable the tar'ing of extended attributes (those pesky ._foo
+files), export the following variable:&lt;/p&gt;
+&lt;p&gt;For Tiger:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;COPY_EXTENDED_ATTRIBUTES_DISABLE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;For Leopard &amp;amp; Snow Leopard:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;COPYFILE_DISABLE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="administration"></category><category term="extended attributes"></category><category term="osx"></category><category term="tar"></category></entry></feed>

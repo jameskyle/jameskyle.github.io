@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>Configuring OpenSwan IPSec Server - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>Configuring OpenSwan IPSec Server</h1>
+        
+        <div class="section" id="introduction">
+<h2>Introduction</h2>
+<p>The intent of this article is to walk through the installation,
+configuration, and general debugging of OpenSwan based IPSec tunnels.
+Though primarily focused on Ubuntu &amp; Debian systems, non-package
+management portions should apply generally.</p>
+</div>
+<div class="section" id="installation-initial-configuration">
+<h2>Installation &amp; Initial Configuration</h2>
+<p>We install using apt-get or aptitude.</p>
+<div class="highlight"><pre>% apt-get install openswan
+</pre></div>
+<p>For a basic PSK (Private Shared Key) configuration, there are two main
+files we need to modify. The first is the configuration file,
+/etc/ipsec.conf. The second is the ipsec secrets file where the PSK is
+stored in /etc/ipsec.secrets.</p>
+<div class="section" id="the-ipsec-conf-file">
+<h3>The ipsec.conf file</h3>
+<p>There are two main sections to the ipsec configuration file. The
+configuration setup section &amp; the connection section.</p>
+<div class="section" id="the-configuration-setup-section">
+<h4>The configuration setup section</h4>
+<p>The configuration setup section begins by declaring</p>
+<div class="highlight"><pre>config setup
+</pre></div>
+<p>. The 'virtual_private 'option declares which subnets should be allowed
+through the tunnel and which should be excluded. Typically, you'll wish
+to exclude any networks that overlap with your private LAN.</p>
+<p>Networks are allowed by specifying the internet protocol version and the
+CIDR of the allowed network. Networks are excluded by prepending the
+bang symbol, '!', to the CIDR.</p>
+<p>Assuming a private network of 10.1.1.1 on a /24 network, the setup
+configuration would look something like...</p>
+<div class="highlight"><pre>config setup
+    plutoopts=&quot;--perpeerlog&quot;
+    virtual_private=%v4:172.16.0.0/12,%v4:192.168.0.0/16,%v4:10.0.0.0/8,%v4:!10.1.1.0/24
+    protostack=auto
+</pre></div>
+<p>If either end of the tunnel is being nat'd, it may be necessary to add
+the nat_traversal work around to the config setup section.</p>
+<div class="highlight"><pre>nat_traversal=yes
+</pre></div>
+<p>The plutoopts specified create a log for each peer that connects. The
+protostack specifies which kernel protocol to use. 'auto' is generally
+fine. However, if you wish to apply firewall rules to traffic coming
+over the tunnel, you may wan to look into the KLIPS protocol as it
+creates a unique interface for tunnel traffic, greatly reducing the
+complexity of your firewall scripts.</p>
+</div>
+<div class="section" id="the-connection-configuration-section">
+<h4>The connection configuration section</h4>
+<p>The connection configuration section begins with the declaration of the
+'conn' keyword followed by an arbitrary connection label. An example
+configuration might look like...</p>
+<div class="highlight"><pre>conn State-Secrets
+    type=tunnel
+    authby=secret
+    auto=start
+    pfs=no
+    ike=aes256-sha1;modp1024!
+    phase2alg=aes256-sha1;modp1024
+    aggrmode=no    left=10.1.1.1
+    right=5.5.5.5    leftsubnet=10.1.1.0/24
+    rightsubnet=172.16.0.0/12
+</pre></div>
+<p>We'll walk through each of the above connection options. It is important
+to note that though the protocol allows for client negotiation of most
+of these parameters with the server, in practice I've found explicitly
+setting them to conform to the remote servers specifications produces
+the most reliable results. If you are acting as the client, without
+control of the server, obtaining a thorough specification document that
+lists phase1 and phase2 algorithms can be quite the time saver. Such a
+document for the above configuration might look like</p>
+<table border="1" class="docutils">
+<caption>Configuration Table</caption>
+<colgroup>
+<col width="61%" />
+<col width="39%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Configuration Option</th>
+<th class="head">Configuration Value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Athentication Method</td>
+<td>Pre Shared Key</td>
+</tr>
+<tr><td>Phase 1 Encryption Scheme</td>
+<td>IKE</td>
+</tr>
+<tr><td>Phase 1 DH Group</td>
+<td>2</td>
+</tr>
+<tr><td>Encryption Algorithm</td>
+<td>AES/256</td>
+</tr>
+<tr><td>Hashing Algorithm</td>
+<td>SHA-1</td>
+</tr>
+<tr><td>Main or Aggressive Mode</td>
+<td>Main Mode</td>
+</tr>
+<tr><td>Phase 1 Lifetime</td>
+<td>1440</td>
+</tr>
+<tr><td>Phase 2 Encapsulation</td>
+<td>ESP</td>
+</tr>
+<tr><td>Phase 2 Encryption Algorithm</td>
+<td>AES/256</td>
+</tr>
+<tr><td>Phase 2 Authentication Algorithm</td>
+<td>SHA</td>
+</tr>
+<tr><td>Phase 2 Perfect Forward Secrecy</td>
+<td>No</td>
+</tr>
+<tr><td>Phase 2 Lifetime</td>
+<td>3600</td>
+</tr>
+<tr><td>Key Exchange for Subnets</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Let's walk through each of the options, look at their corresponding
+value from our document, and clarify its use.</p>
+<div class="highlight"><pre>type=tunnel
+</pre></div>
+<p>This declares the type of connection to be formed. Since we're
+configuring an ipsec tunnel, we specify 'tunnel' (I know, very
+original).</p>
+<div class="highlight"><pre>authby=secret
+</pre></div>
+<p>This option declares the type of authentication scheme to use. IPSec
+supports several different authentication schemes. 'secret' is used due
+to our specification document specifying a type of &quot;Pre Shared Key&quot;.</p>
+<div class="highlight"><pre>auto=start
+</pre></div>
+<p>There's no corresponding document value for this setting. It specifies
+that the ipsec tunnel should be started and routes created when the
+ipsec daemon itself starts.</p>
+<div class="highlight"><pre>pfs=no
+</pre></div>
+<p>This value comes from our documents PFS setting.</p>
+<div class="highlight"><pre>ike=aes256-sha1;modp1024!
+</pre></div>
+<p>This is a combination of several values in our document. It specifies
+the phase 1 encryption scheme, the hashing algorithm, and the
+diffie-hellman group. The modp1024 is for Diffie-Hellman 2. Why 'modp'
+instead of dh? DH2 is a 1028 bit encryption algorithm that modulo's a
+prime number, e.g. modp1028. See RFC 5114 for details or the wiki page
+on diffie hellmann, if interested.</p>
+<p>The bang symbol, !, specifies the connection shoudl be formed in strict
+mode. Technically, this is the default. However, at some point (version
+wise) it was not being properly applied and it doesn't hurt.</p>
+<div class="highlight"><pre>phase2alg=aes256-sha1;modp1024
+</pre></div>
+<p>This is a combination of several values in our document. It specifies
+the phase 2 encryption scheme, the hashing algorithm, and the
+diffie-hellman group just like the ike parameter.</p>
+<p>For further information on valid parameters for the ike and phase2alg
+variables, please see the ipsec.conf man page.</p>
+<div class="highlight"><pre>aggrmode=no
+</pre></div>
+<p>Enables or disables Aggressive Mode. Agressive Mode is almost <em>never</em>
+needed and 'no' is the default. However, I've included it for clarity.</p>
+<div class="highlight"><pre>left=10.1.1.1
+right=5.5.5.5
+</pre></div>
+<p>The 'left' and &amp;39;right' arguments specify details about the two end
+points of the tunnel. Which is used for which endpoint is arbitrary, but
+many used left to denote the 'local' endpoint and the right to denote
+the 'remote' endpoing for mnemonic reasons. This <em>should</em> be the ip of
+the peer we're attempting to connect to.</p>
+<div class="highlight"><pre>leftsubnet=10.1.1.0/24
+rightsubnet=172.16.0.0/12
+</pre></div>
+<p>These are the subnets that are exposed by the tunnel. Again, left and
+right is arbitrary. However, consistency is obviously required. Make
+sure the subnet declaration matches its corresponding left/right
+endpoing declaration.</p>
+</div>
+</div>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting</h2>
+<p>Configuration is normally the easy portion of setting up an ipsec
+tunnel, it's normally the debugging that takes up the majority of time.
+Particularly if dealing with heterogenous peers.</p>
+<div class="section" id="pertinent-log-files">
+<h3>Pertinent log files</h3>
+<p>These are the log files most likely to contain important information
+about why a particular tunnel is not succeeding.</p>
+<div class="highlight"><pre>/var/log/auth.log
+/var/log/syslog
+/var/log/pluto/peer/a/b/c/d/a.b.c.d.log
+</pre></div>
+<ul class="simple">
+<li>The /var/log/auth.log is where logs on the authentication
+transactions are, stored.</li>
+<li>The /var/log/syslog is the system log, it's always good to check here
+for any startup or general errors.</li>
+<li>/var/log/pluto/peer/a/b/c/d/a.b.c.d.log file is the per peer pluto
+log. You can find some of the startup and shutdown information in
+here.</li>
+</ul>
+</div>
+<div class="section" id="utilities">
+<h3>Utilities</h3>
+<p>The main utilities to use are</p>
+<ul class="simple">
+<li>tcpdump</li>
+<li>ip</li>
+<li>ipsec</li>
+</ul>
+<div class="section" id="tcpdump">
+<h4>tcpdump</h4>
+<p>Since the traffic is encrypted, you can only track the &quot;flow&quot; of the
+ipsec transaction to ensure all packets are reaching their destination
+and routing is working as expected. However, seeing the packet flow can
+be very informative.</p>
+</div>
+<div class="section" id="ip">
+<h4>ip</h4>
+<p>The ip tool is used to ensure that the needed routes have been crated.
+Alternatively, you could use something like netstat.</p>
+</div>
+<div class="section" id="ipsec">
+<h4>ipsec</h4>
+<p>Read the man page for complete information, but the most used switch is
+the status command. We configured our example connection for 'auto'. To
+retrieve the status of all auto configured connections, you execute</p>
+<div class="highlight"><pre>% ipsec auto --status
+</pre></div>
+<p>When debugging, I find it very useful to poll the output of this command
+in one second intervales. For example,</p>
+<div class="highlight"><pre>% <span class="k">for</span> <span class="o">((</span> ;; <span class="o">))</span>;<span class="k">do </span>ipsec auto --status; sleep 1; <span class="k">done</span>
+</pre></div>
+<p>The astute may notice the 'watch' command was made for this. I
+experienced glitches on some systems with ipsec status and the watch
+command. YMMV.</p>
+</div>
+<div class="section" id="the-ipsec-secrets-file">
+<h4>The ipsec.secrets file</h4>
+<p>The ipsec.secrets file takes the following format</p>
+<div class="highlight"><pre>leftid1 rightid1 : PSK &quot;preshared key1&quot;
+leftid2 rightid2 : PSK &quot;preshared key2&quot;
+</pre></div>
+<p>The secrets file can have multiple entries. Of note, the combination of
+the leftid1 + rightid1 must be unique for each tunnel in order for the
+PSK lookup to succeed.</p>
+<p>If you're only managing a single ipsec tunnel, using the the special
+catch all %any can work well. Such a config would look like this</p>
+<div class="highlight"><pre>%any %any : PSK &quot;preshared key&quot;
+</pre></div>
+</div>
+</div>
+<div class="section" id="gotchas-to-keep-an-eye-out-for">
+<h3>'Gotchas' to keep an eye out for</h3>
+<p>There are a few problems that seem to come up over and over and over
+again. I cover those here in brief along with ways to eliminate them as
+suspects. . . or at least ways to <em>confirm</em> if not completely eliminate.</p>
+<div class="section" id="mismatched-peer-identities">
+<h4>Mismatched Peer Identities</h4>
+<p>This comes up quite a bit. Keep an eye out for messages from the peer
+like 'no proposal found for peer' or connections that make it through
+phase 1, but fail to complete phase 2. Another way to verify is by
+inspecting the status output. You'll find a line like this:</p>
+<div class="highlight"><pre>10.1.1.0/24===10.1.1.1&lt;10.1.1.1&gt;[+S=C]...5.5.5.5&lt;5.5.5.5&gt;[+S=C]===172.16.0.0/12; erouted; eroute owner: #6
+</pre></div>
+<p>That line indicates that the ips of the endpoints are being used as the
+peer id. It also declares the subnet being exposed. The standard default
+for peer id&amp;39;s is the ip of the peer. However, this is not required.
+Nor is it uncommon for it to be overridden by a remote admin. If you
+suspect a peer id mismatch, the remote peer admin should be able to
+provide you with her routers configuration.</p>
+<p>Peer id's <em>must</em> match.</p>
+</div>
+<div class="section" id="mismatched-configurations">
+<h4>Mismatched configurations</h4>
+<p>This is pretty vague. In the end, virtually <em>all</em> connection problems
+boil down to mismatched configurations. However, it still bears
+mentioning as it is eminently worth it to go over configurations
+repeatedly to ensure they match up.</p>
+</div>
+</div>
+</div>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=Configuring%20OpenSwan%20IPSec%20Server%20 http%3A//blog.jameskyle.org/2012/07/configuring-openswan-ipsec-server" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2012/07/configuring-openswan-ipsec-server&p[images][0]=&p[title]=Configuring%20OpenSwan%20IPSec%20Server%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22introduction%22%3E%0A%3Ch2%3EIntroduction%3C/h2%3E%0A%3Cp%3EThe%20intent%20of%20this%20article%20is%20to%20walk%20through%20the%20installation%2C%0Aconfiguration%2C%20and%20general%20debugging%20of%20OpenSwan%20based%20IPSec%20tunnels.%0AThough%20primarily%20focused%20on%20Ubuntu%20%26amp%3B%20Debian%20systems%2C%20non-package%0Amanagement%20portions%20should%20apply%20generally.%3C/p%3E%0A%3C/div%3E%0A%3Cdiv%20class%3D%22section%22%20id%3D%22installation-initial-configuration%22%3E%0A%3Ch2%3EInstallation%20%26amp%3B%20Initial%20Configuration%3C/h2%3E%0A%3Cp%3EWe%20install%20using%20apt-get%20or%20aptitude.%3C/p%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%25%20apt-get%20install%20openswan%0A%3C/pre%3E%3C/div%3E%0A%3Cp%3EFor%20a%20basic%20PSK%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2012/07/configuring-openswan-ipsec-server" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=Configuring%20OpenSwan%20IPSec%20Server%20&body=http%3A//blog.jameskyle.org/2012/07/configuring-openswan-ipsec-server" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2012/07/configuring-openswan-ipsec-server";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

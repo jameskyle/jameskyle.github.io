@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>Nose Unit Testing Quick Start - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>Nose Unit Testing Quick Start</h1>
+        
+        <p>This is just a quick &quot;get up and running fast&quot; walk through on using the
+<a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.2/">Nose</a> Unit Testing framework. The reference documentation for Nose is
+great, but their site seems a little light on the quick start side. I
+assume you have python installed. If you're unsure how to install
+python, see your OS documentation.</p>
+<div class="section" id="install-nose">
+<h2>Install Nose</h2>
+<p>Install Nose using your OS's package manager or with easy_install. For
+example:</p>
+<pre class="literal-block">
+% easy_install nose
+</pre>
+</div>
+<div class="section" id="create-some-code-for-testing">
+<h2>Create Some Code for Testing</h2>
+<p>As an example, I've created the class below I'll use in the unit test
+examples.</p>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">A</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&quot;Some Value&quot;</span><span class="k">def</span> <span class="nf">return_true</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Truedef</span> <span class="n">raise_exc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="create-unit-test-classes">
+<h2>Create Unit Test Classes</h2>
+<p>There are many approaches to writing Nose unit tests. I normally write a
+test class for each class or module I wish to test.&nbsp;Nose will load and
+run any class whose name is preceded by Test such as TestClassA or
+TestA. When it discovers a class, it uses its default testMatch regex to
+find any methods that match. Again, we'll use the test_method()
+convention for our tests.&nbsp;For more information see the&nbsp; <a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.1/writing_tests.html">Writing Tests</a>
+reference.</p>
+<p>A few notes on the testing example.</p>
+<ol class="arabic simple">
+<li>Nose supports fixtures, though we won't use them here. I have
+included the fixture methods in the below example, but only provide a
+comment explaining their use in the source.</li>
+<li>The nose.tools packages comes with many helper methods that make
+testing syntactically clearer for common test cases. In this example,
+we use assert_equal, assert_not_equal, the raises decorator, and
+assert_raises. For a full list see the&nbsp;<a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/doc/module_nose.tools.html">nose.tools
+documentation</a>.</li>
+<li>For organizational purposes, I create a subdirectory in my project
+called &quot;tests&quot;. This is not required.</li>
+</ol>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">a</span> <span class="kn">import</span> <span class="n">A</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_not_equal</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_raises</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">raises</span>
+
+
+<span class="k">class</span> <span class="nc">TestA</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">setup_class</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method is run once for each class before any tests are run&quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">teardown_class</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method is run once for each class _after_ all tests are run&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method is run once before _each_ test method is executed&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method is run once after _each_ test method is executed&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">A</span><span class="p">()</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s">&quot;Some Value&quot;</span><span class="p">)</span>
+        <span class="n">assert_not_equal</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s">&quot;Incorrect Value&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_return_true</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">A</span><span class="p">()</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">return_true</span><span class="p">(),</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">assert_not_equal</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">return_true</span><span class="p">(),</span> <span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_raise_exc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">A</span><span class="p">()</span>        <span class="n">assert_raises</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">raise_exc</span><span class="p">,</span> <span class="s">&quot;A value&quot;</span><span class="p">)</span>
+
+    <span class="nd">@raises</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_raise_exc_with_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">A</span><span class="p">()</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">raise_exc</span><span class="p">(</span><span class="s">&quot;A message&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="run-tests">
+<h2>Run Tests</h2>
+<p>All that's left is to run our tests. Nose comes with a command line
+utility called 'nosetests'. The simplest usage is to call nosetests from
+within your project directory and pass the 'tests' directory as an
+argument. For example,</p>
+<pre class="literal-block">
+% nosetests tests
+</pre>
+<p>For our examples, this outputs the following test summary:</p>
+<pre class="literal-block">
+ % nosetests tests
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s  OK
+</pre>
+</div>
+<div class="section" id="adding-code-coverage">
+<h2>Adding Code Coverage</h2>
+<p>One useful metric for the completeness of your unit tests is the concept
+of code coverage. Nose comes out of the box with support for the
+<a class="reference external" href="http://pypi.python.org/pypi/coverage">coverage module</a>. First, install coverage using your package manager
+or by:</p>
+<pre class="literal-block">
+% easy_install coverage
+</pre>
+<p>To generate a coverage report using the nosetests utility, simply add
+the --with-coverage. By default, coverage generates data for all modules
+found in the current directory.</p>
+<pre class="literal-block">
+% nosetests --with-coverage
+</pre>
+<p>If you've included a few 3rd party modules, then you could be looking at
+a lot of information you don't care much about. If this is the case, you
+can also specify the specific modules you wish to run reports on. In our
+example, you would do so by running</p>
+<pre class="literal-block">
+% nosetests --with-coverage --cover-package a
+</pre>
+<p>The --cover-package switch can be used multiple times. If you had a
+b.py, you could</p>
+<pre class="literal-block">
+% nosetests --with-coverage --cover-package a --cover-package b
+</pre>
+<p>If we run coverage on our example tests, we get:</p>
+<pre class="literal-block">
+% nosetests --with-coverage
+....
+Name    Stmts   Miss  Cover   Missing
+-------------------------------------
+a           8      0   100%
+----------------------------------------------------------------------
+Ran 4 tests in 0.006sOK
+</pre>
+</div>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=Nose%20Unit%20Testing%20Quick%20Start%20 http%3A//blog.jameskyle.org/2010/10/nose-unit-testing-quick-start" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2010/10/nose-unit-testing-quick-start&p[images][0]=&p[title]=Nose%20Unit%20Testing%20Quick%20Start%20&p[summary]=%3Cp%3EThis%20is%20just%20a%20quick%20%26quot%3Bget%20up%20and%20running%20fast%26quot%3B%20walk%20through%20on%20using%20the%0A%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//somethingaboutorange.com/mrl/projects/nose/0.11.2/%22%3ENose%3C/a%3E%20Unit%20Testing%20framework.%20The%20reference%20documentation%20for%20Nose%20is%0Agreat%2C%20but%20their%20site%20seems%20a%20little%20light%20on%20the%20quick%20start%20side.%20I%0Aassume%20you%20have%20python%20installed.%20If%20you%27re%20unsure%20how%20to%20...%3C/p%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2010/10/nose-unit-testing-quick-start" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=Nose%20Unit%20Testing%20Quick%20Start%20&body=http%3A//blog.jameskyle.org/2010/10/nose-unit-testing-quick-start" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2010/10/nose-unit-testing-quick-start";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

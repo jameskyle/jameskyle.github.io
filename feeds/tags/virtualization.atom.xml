@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/virtualization.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2013-05-16T21:21:18-07:00</updated><entry><title>Disable DHCP Daemon on Default Virtual Nets in VMware Fusion 5</title><link href="http://blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" rel="alternate"></link><updated>2013-05-16T21:21:18-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2013-05-16:2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5</id><summary type="html">&lt;p&gt;Fusion 5 is a bit different than previous versions. It adds a lot of network
+configuration missing in previous versions. There are two interfaces that
+aren't modifiable in the gui; vmnet1 and vmnet8.&lt;/p&gt;
+&lt;p&gt;These are default networks created by VMware. vmnet1 is VMware's default
+hostonly net and vmnet8 is the default nat network. Both have dhcp enabled.&lt;/p&gt;
+&lt;p&gt;Network configuration options are managed using the vmnet-cfgcli. vmnet-cfgcli
+and all VMWare utilities are found in the
+/Applications/VMware Fusion.app/Contents/Library/ directory. To disable dhcp,
+we'd&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo vmnet-cfgcli vnetcfgadd VNET_1_DHCP no
+sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;They basically update configuration values in the
+/Library/Preferences/VMware Fusion/networking file.&lt;/p&gt;
+&lt;p&gt;Then restart vmware. You can verify the dhcpd service is no longer running by&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;ps aux | grep -i dhcpd | grep vmnet
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Zero results means no dhcpd running on VMware's virtual nets.&lt;/p&gt;
+</summary><category term="vmware"></category><category term="virtualization"></category><category term="dhcp"></category></entry></feed>

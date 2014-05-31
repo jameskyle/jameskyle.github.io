@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/categories/devops.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2013-08-17T12:04:49-07:00</updated><entry><title>Title</title><link href="http://blog.jameskyle.org/2013/08/charybdis-with-puppet" rel="alternate"></link><updated>2013-08-17T12:04:49-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2013-08-17:2013/08/charybdis-with-puppet</id><summary type="html">&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;We're going to use puppet to deploy a charybdis server with atheme services.
+I'm using ppa packages I built. You're free to use them or &lt;a class="reference external" href="http://developer.ubuntu.com/packaging/html/traditional-packaging.html"&gt;build your own&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="retrieving-source"&gt;
+&lt;h2&gt;Retrieving source&lt;/h2&gt;
+&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+when an unknown printer took a galley of type and scrambled it to make a type
+specimen book.&lt;/p&gt;
+&lt;div class="section" id="subsection"&gt;
+&lt;h3&gt;Subsection&lt;/h3&gt;
+&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+when an unknown printer took a galley of type and scrambled it to make a type
+specimen book.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="subsection-ii"&gt;
+&lt;h3&gt;SubSection II&lt;/h3&gt;
+&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+when an unknown printer took a galley of type and scrambled it to make a type
+specimen book.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="external-links"&gt;
+&lt;h2&gt;External Links&lt;/h2&gt;
+&lt;/div&gt;
+</summary><category term="charybdis puppet"></category></entry></feed>

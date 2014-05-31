@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/ubuntu.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2012-02-05T10:32:00-08:00</updated><entry><title>Chef Alternatives for Debian/Ubuntu</title><link href="http://blog.jameskyle.org/2012/02/chef-alternatives-for-debian-ubuntu" rel="alternate"></link><updated>2012-02-05T10:32:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-02-05:2012/02/chef-alternatives-for-debian-ubuntu</id><summary type="html">&lt;p&gt;An update-alternatives script for chef. Currently only sets up a version
+installed in the 1.9.1 gems directory, but extendable to any version
+easily enough.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
+&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0.10.8
+&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
+   --install /usr/bin/chef-client chef &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-client 500 &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/chef-solo chef-solo &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/knife knife &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/shef shef  &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/shef
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="administration"></category><category term="debian"></category><category term="linux"></category><category term="ubuntu"></category></entry><entry><title>Dell Perc 5i on Ubuntu 64</title><link href="http://blog.jameskyle.org/2010/01/dell-perc-5i-on-ubuntu-64" rel="alternate"></link><updated>2010-01-19T08:38:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-01-19:2010/01/dell-perc-5i-on-ubuntu-64</id><summary type="html">&lt;p&gt;I've been setting up an Ubuntu server on a Dell with a 29xx series with
+a Perc 5i SAS/SATA RAID controller. It took a bit of digging around and
+piecing together posts on the ubuntu forums and random blogs, but I'm
+pretty sure I've got it all up and working. Here's the short story:&lt;/p&gt;
+&lt;ol class="arabic"&gt;
+&lt;li&gt;&lt;p class="first"&gt;Add the deb ports for dell's Open Management tools to your
+sources.conf&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;/etc/apt/sources.list: deb &lt;a class="reference external" href="ftp://ftp.sara.nl/pub/sara-omsa"&gt;ftp://ftp.sara.nl/pub/sara-omsa&lt;/a&gt; dell
+sara&lt;/li&gt;
+&lt;li&gt;add the sara key to your gpg list&lt;ol class="arabic"&gt;
+&lt;li&gt;wget &lt;a class="reference external" href="http://ftp.sara.nl/debian_sara.asc"&gt;http://ftp.sara.nl/debian_sara.asc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;sudo apt-key add debian_sara.asc&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;apt-get update&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Install snmp tools&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;apt-get install snmp snmpd&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Install openipmi and ipmitool&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;apt-get install openipmi&lt;/li&gt;
+&lt;li&gt;apt-get install ipmitool&lt;/li&gt;
+&lt;li&gt;there's an open Ubuntu bug &lt;a class="reference external" href="https://bugs.launchpad.net/ubuntu/+source/ipmitool/+bug/110992"&gt;#110992&lt;/a&gt; that requires ipmi_devinf
+and ipmi_si to be appended to /dev/modules by hand to enable
+creation of the /dev/ipm* needed by ipmitool on start-up.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Install lib32 ncurses and ia32-libs&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;ol class="first arabic simple"&gt;
+&lt;li&gt;apt-get install -f lib32ncurses5&lt;/li&gt;
+&lt;li&gt;apt-get install -f ia32-libs&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Install dell's omsa tools&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;apt-get install dellomsa&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Update your libraries&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;ldconfig&lt;/li&gt;
+&lt;li&gt;&lt;ol class="first arabic"&gt;
+&lt;li&gt;this takes care of a few errors I got that looked like this&lt;/li&gt;
+&lt;li&gt;/opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d: error while
+loading shared libraries: libdcsmil32.so.5: cannot open shared
+object file: No such file or directory&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Place the following init script and put it in /etc/init.d/&lt;/p&gt;
+&lt;ol class="arabic"&gt;
+&lt;li&gt;&lt;div class="first"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/sh&lt;/span&gt;
+
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_snmp32d
+
+/opt/dell/srvadmin/dataeng/bin/dataeng status
+
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+
+/etc/init.d/dataeng stop ; modprobe mptctl ; /etc/init.d/dataeng start
+
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_snmp32d
+
+/opt/dell/srvadmin/dataeng/bin/dataeng status
+
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Enable snmp in omsa tools&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;/etc/init.d/dataeng enablesnmp&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Execute the dell_omsa.sh script to get up and running&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;/etc/init.d/dell_omsa.sh&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Register the new driver module with omsa&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;/etc/init.d/instsvcdrv restart&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Edit your /etc/snmp/snmpd.conf so it can be used (I take no
+responsibility if the following settings are not appropriate security
+for your network)&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;change: com2sec paranoid default public to com2sec readonly
+default public&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Change the way taht ubuntu starts snmpd&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;/etc/default/snmpd: change&lt;/li&gt;
+&lt;li&gt;SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -I -smux -p
+/var/run/snmpd.pid 127.0.0.1' to&lt;/li&gt;
+&lt;li&gt;SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -p /var/run/snmpd.pid
+127.0.0.1'&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;/etc/init.d/snmpd restart&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;/etc/init.d/dataeng restart&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Verify snmpd&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;snmpwalk -OS -v 1 -c public localhost .1.3.6.1.4.1.674.10892.1&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Start OMSA web services on reboot&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;update-rc.d dsm_om_connsvc defaults&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Finally, by default you must log into the web admin with the root
+account. So enable root account&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;sudo passwd root&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;One more catch for 64 bit ubuntu users, you must change the lib paths
+in /etc/pam.d/omauth and install 32 bit pam libs&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;change all instances of /lib/security/ to /lib32/security&lt;/li&gt;
+&lt;li&gt;download the i386 versions of the following libs (you can
+determine the package that provides a particular lib by dpkg -S
+/path/to/file, e.g. dpkg -S /lib/security/pam_unix.so)&lt;ol class="arabic"&gt;
+&lt;li&gt;libselinux1_2.0.15-2ubuntu1_i386.deb&lt;/li&gt;
+&lt;li&gt;libpam-modules_0.99.7.1-5ubuntu1_i386.deb&lt;/li&gt;
+&lt;li&gt;libsepol1_2.0.3-1_i386.deb&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Extract them to a tmp directory&lt;ol class="arabic"&gt;
+&lt;li&gt;dpkg-deb -x &amp;lt;libname&amp;gt; /tmp/lib32s&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;then copy the following over to /lib32 and /lib32/security&lt;ol class="arabic"&gt;
+&lt;li&gt;lib/libsepol.so.1&lt;/li&gt;
+&lt;li&gt;lib/libselinux.so.1&lt;/li&gt;
+&lt;li&gt;lib/security/pam_unix.so&lt;/li&gt;
+&lt;li&gt;lib/security/pam_nologin.so&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;run ldconfig&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;You should now be able to log into the OMSA web manager at
+&lt;a class="reference external" href="https://localhost"&gt;https://localhost&lt;/a&gt;:1311 using your root name password&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Having root enabled can be viewed as a security list, so you probably
+want to add a normal admin user to OMSA's manager group and disable
+root&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;adduser dellroot&lt;/li&gt;
+&lt;li&gt;usermod -g root dellroot # user must be added to the root group to
+gain admin privileges in OMSA manager&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;I'd like to thank the &lt;a class="reference external" href="http://sadsoftware.blogspot.com/2008/08/installing-dell-omsa-and-snmp-in-ubuntu.html"&gt;sad software blogger&lt;/a&gt; for a good bit of this
+information, especially pertaining to snmp.&lt;/p&gt;
+</summary><category term="administration"></category><category term="dell"></category><category term="perc5i"></category><category term="ubuntu"></category><category term="ubuntu64"></category></entry></feed>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/virtual-domains.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2010-06-12T12:47:00-07:00</updated><entry><title>Creating a redmine email filter for postfix with virtual domains</title><link href="http://blog.jameskyle.org/2010/06/postfix-virtual-domain-redmine-filter" rel="alternate"></link><updated>2010-06-12T12:47:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-06-12:2010/06/postfix-virtual-domain-redmine-filter</id><summary type="html">&lt;p&gt;This is adapted from the postfix virtual redme for &lt;a class="reference external" href="http://www.postfix.org/VIRTUAL_README.html#autoreplies"&gt;autoreply
+transports&lt;/a&gt;. As such, I basically copy/paste that tutorial and edited
+it accordingly.&lt;/p&gt;
+&lt;p&gt;This assumes that you have set up redmine at its own subdomain as well
+as a postfix virtual domain, e.g. redmine.yourdomain.com and wish to
+create a virtual redmine user for email processing, e.g.
+&lt;a class="reference external" href="mailto:redmine&amp;#64;redmine.yourdomain.com"&gt;redmine&amp;#64;redmine.yourdomain.com&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In order to set up an redmine for virtual recipients as a final stop (no
+more filters applied), set up a rule in a virtual alias table:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/postfix/main.cf:
+    virtual_alias_maps = hash:/etc/postfix/virtual
+/etc/postfix/virtual:
+    redmine@redmine.yourdomain.com redmine@redmine.yourdomain.com@yourdomain.com
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This delivers mail sent to &lt;a class="reference external" href="mailto:redmine&amp;#64;redmine.yourdomain.com"&gt;redmine&amp;#64;redmine.yourdomain.com&lt;/a&gt; to the local
+address that handles the email. We service the address locally into the
+script parses emails for redmine.&lt;/p&gt;
+&lt;p&gt;DO NOT list redmine.yourdomain.com in mydestination!&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/postfix/main.cf:
+    transport_maps = hash:/etc/postfix/transport
+/etc/postfix/transport:
+    redmine.yourdomain.com  redmine
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/postfix/master.cf:
+redmine unix  -       n       n       -       10      pipe
+    user=nobody argv=/path/to/redmine/extra/mail_handler/rdm-mailhandler.rb
+    --url http://redmine.yourdomain.com --key [redmine api key] --project kspecs
+    --allow-override project,priority
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This invokes/path/to/redmine/extra/mail_handler/rdm-mailhandler.rb and
+pipes any email sent to the redmine domain. Redmine handles rejection of
+invalid users, which is why we don’t bother with filtering valid
+addresses within postfix.&lt;/p&gt;
+&lt;p&gt;After this is done, do the standard postmap routine for your maps, then
+postfix reload.&lt;/p&gt;
+</summary><category term="administration"></category><category term="email filter"></category><category term="postfix"></category><category term="redmine"></category><category term="virtual domains"></category></entry></feed>

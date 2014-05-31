@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/pyobjc.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2010-10-07T16:07:00-07:00</updated><entry><title>Toggling NSMenuItems for a NSSearchField Menu Template</title><link href="http://blog.jameskyle.org/2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template" rel="alternate"></link><updated>2010-10-07T16:07:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-10-07:2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template</id><summary type="html">&lt;div class="section" id="the-problem"&gt;
+&lt;h2&gt;The Problem&lt;/h2&gt;
+&lt;p&gt;Creating NSMenus for NSSearchFields involves specifying a particular
+NSMenu as the NSSearchField's 'Menu Template'. The problem with this is
+that the actual NSMenu is not used, a copy is made. The result is that
+its impossible to access the NSMenu or its NSMenuItems through
+IBOutlets. Thus, modification of the NSMenuItem's state, title, etc.
+attributes are not done in the &amp;quot;Standard Way&amp;quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-solution"&gt;
+&lt;h2&gt;The Solution&lt;/h2&gt;
+&lt;p&gt;This wasn't immediately obvious to me from the documentation or API
+references and caused a good bit of confusion, digging, and googling
+before I turned up an answer. I'm sure this is in part due to my newness
+with The Cocoa Way®. Regardless, it deserves a post so I'll remember it.&lt;/p&gt;
+&lt;p&gt;The magic bullet is to set your controller to the delegate for the
+NSSearchField and implement the validateMenuItem:. Each time the NSMenu
+is refreshed, the validateMenuItem is called for each NSMenuItem at
+which time you can modify its state or attributes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-implementation"&gt;
+&lt;h2&gt;The Implementation&lt;/h2&gt;
+&lt;p&gt;Here we do a quick implementation to demonstrate the validateMenuItem in
+action. I'm going to use PyObjc for brevity, but it should suffice to
+demonstrate the approach.&lt;/p&gt;
+&lt;div class="section" id="create-a-pyobjc-cocoa-application-with-a-nssearchfield-using-a-menu-template"&gt;
+&lt;h3&gt;Create a PyObjc Cocoa Application with a NSSearchField using a Menu Template.&lt;/h3&gt;
+&lt;p&gt;I've named my project ModifySearchMenu. The object is to create an
+IBAction that is assigned to the NSMenuItems action. When the item is
+clicked, we set it as the current menu item. We check this value in
+validateMenuItem and assign the appropriate state. validateMenuItem
+returns either YES or NO if the NSMenuItem should be active or not.&lt;/p&gt;
+&lt;div class="section" id="drag-a-nssearchfield-widget-to-the-default-nswindow"&gt;
+&lt;h4&gt;Drag a NSSearchField widget to the default NSWindow.&lt;/h4&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.11.22 PM.png" src="/images/2010/10/Search_Item.png" /&gt;
+&lt;p class="caption"&gt;Screen shot 2010-10-07 at 4.11.22 PM.png&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-a-nsmenu-instance"&gt;
+&lt;h4&gt;Create a NSMenu instance&lt;/h4&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.13.26 PM.png" src="/images/2010/10/NSMenu.png" /&gt;
+&lt;p class="caption"&gt;Screen shot 2010-10-07 at 4.13.26 PM.png&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="set-the-appdelegate-as-the-delegate-for-the-nssearchfield"&gt;
+&lt;h4&gt;Set the AppDelegate as the delegate for the NSSearchField&lt;/h4&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.14.24 PM.png" src="/images/2010/10/ModifySearchFieldDelegate.png" /&gt;
+&lt;p class="caption"&gt;Screen shot 2010-10-07 at 4.14.24 PM.png&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="implement-the-validatemenuitem-method-in-your-appdelegate-and-create-an-ibaction-to-register-the-clicked-menu-item"&gt;
+&lt;h4&gt;Implement the validateMenuItem method in your AppDelegate and create an IBAction to register the clicked menu item.&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;Foundation&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;AppKit&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;Cocoa&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;objc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;IBAction&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;objc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;YES&lt;/span&gt;
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ModifySearchMenuAppDelegate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSObject&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;currentItem&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;u&amp;quot;Item 1&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;applicationDidFinishLaunching_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sender&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;NSLog&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Application did finish launching.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;    &lt;span class="nd"&gt;@IBAction&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setCurrentMenuItem_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sender&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;currentItem&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sender&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;validateMenuItem_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;currentItem&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setState_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSOnState&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setState_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSOffState&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;YES&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="connect-it-up-in-ib-don-t-forget-to-set-your-menu-template"&gt;
+&lt;h4&gt;Connect it up in IB. Don't forget to set your Menu Template.&lt;/h4&gt;
+&lt;p&gt;&lt;img alt="Screen shot 2010-10-07 at 4.28.00 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.28.00-PM.png" /&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.30.02 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.30.02-PM.png" /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="once-this-is-done-clicking-one-menu-item-will-toggle-it-to-the-on-state-and-all-others-to-the-off-state-on-the-next-display"&gt;
+&lt;h4&gt;Once this is done, clicking one menu item will toggle it to the on state and all others to the off state on the next display.&lt;/h4&gt;
+&lt;p&gt;&lt;img alt="Screen shot 2010-10-07 at 4.30.51 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.30.51-PM.png" /&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.31.00 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.31.00-PM.png" /&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.31.09 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.31.09-PM.png" /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="cocoa"></category><category term="objc"></category><category term="osx"></category><category term="programming"></category><category term="pyobjc"></category><category term="python"></category></entry></feed>

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>Zsh Script to Create VMware Fusion 5 Vagrant Box - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>Zsh Script to Create VMware Fusion 5 Vagrant Box</h1>
+        
+        <p>I'm sure <a class="reference external" href="http://www.vagrantup.com/">vagrant</a> package will soon support <a class="reference external" href="http://www.vmware.com/products/fusion/overview.html">vmware fusion</a> too, but as of this article
+it does not. So I wrote a little script that'll clean up, shrink, and package a
+vmware virtualmachine directory into a vagrant box.</p>
+<p>It's should be run from the directory of the virtual machine. I put some checks
+in there to try and verify that the current directory is a vmware vm. However,
+if you do run it outside of a vmware vm directory Bad Things May Happen (TM).</p>
+<p>Use with caution, I'm not responsible for any unintended consequences, yada
+yada yada.</p>
+<div class="highlight"><pre><span class="c">#!/usr/bin/env zsh</span>
+<span class="c"># set: ft=sh</span>
+<span class="nb">set</span> -e
+setopt extendedglob
+
+vmrun stop *.vmx
+
+<span class="c"># verify we&#39;re in a vmware vm directory</span>
+<span class="nb">pwd</span> | grep vmwarevm &gt; /dev/null 2&gt;&amp;1
+
+<span class="c"># just another check, make sure the files in this directory look like vmware</span>
+<span class="c"># virtual machine files</span>
+ls -d *.<span class="o">(</span>vmxf|nvram|vmsd|vmx|vmdk<span class="o">)</span> &gt; /dev/null 2&gt;&amp;1
+
+<span class="c"># remove all files that are not essential for a vagrant box</span>
+rm -f <span class="k">$(</span>ls -d *~*.<span class="o">(</span>vmxf|nvram|vmsd|vmx|vmdk<span class="k">)</span><span class="o">)</span>
+
+<span class="c"># defragment and shrink the main vmware disk</span>
+vmware-vdiskmanager -d <span class="s2">&quot;Virtual Disk.vmdk&quot;</span>
+vmware-vdiskmanager -k <span class="s2">&quot;Virtual Disk.vmdk&quot;</span>
+
+<span class="c"># create the metadata.json for vmware fusion</span>
+cat <span class="s">&lt;&lt;EOF &gt; metadata.json</span>
+<span class="s">{</span>
+<span class="s">  &quot;provider&quot;:&quot;vmware_fusion&quot;</span>
+<span class="s">}</span>
+<span class="s">EOF</span>
+
+<span class="c"># box it up using the virtual machine name as the box name.</span>
+<span class="nv">box_name</span><span class="o">=</span><span class="k">$(</span>basename <span class="s2">&quot;${PWD}&quot;</span> .vmwarevm<span class="k">)</span>
+tar cvzf <span class="s2">&quot;${box_name}.box&quot;</span> ./*
+</pre></div>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box%20 http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box&p[images][0]=&p[title]=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box%20&p[summary]=%3Cp%3EI%27m%20sure%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.vagrantup.com/%22%3Evagrant%3C/a%3E%20package%20will%20soon%20support%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.vmware.com/products/fusion/overview.html%22%3Evmware%20fusion%3C/a%3E%20too%2C%20but%20as%20of%20this%20article%0Ait%20does%20not.%20So%20I%20wrote%20a%20little%20script%20that%27ll%20clean%20up%2C%20shrink%2C%20and%20package%20a%0Avmware%20virtualmachine%20directory%20into%20a%20vagrant%20box.%3C/p%3E%0A%3Cp%3EIt%27s%20should%20be%20run%20from%20the%20directory%20of%20the%20...%3C/p%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box%20&body=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

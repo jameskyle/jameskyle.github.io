@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/infrastructure.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2012-07-15T15:20:00-07:00</updated><entry><title>A Boilerplate Comparison: Puppet</title><link href="http://blog.jameskyle.org/2012/07/puppet-boilerplate" rel="alternate"></link><updated>2012-07-15T15:20:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-07-15:2012/07/puppet-boilerplate</id><summary type="html">&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Here we cover the steps for deploying a package to a puppet agent/node.
+Like with chef, we assume a working installation.&lt;/p&gt;
+&lt;p&gt;Though I must take the opportunity to comment that the installation
+process for puppet was ridiculously easy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-ridiculously-easy-way"&gt;
+&lt;h2&gt;The ridiculously easy way&lt;/h2&gt;
+&lt;p&gt;Package installation can be performed completely through the console,
+e.g. web ui, for puppet. To do so, you go to &lt;a class="reference external" href="https://puppetmaster.me.com"&gt;https://puppetmaster.me.com&lt;/a&gt;
+and click 'Live Management' -&amp;gt; Advanced Tasks -&amp;gt; package tasks -&amp;gt;
+Install. Type in the package name you wish to install and click 'Run'.&lt;/p&gt;
+&lt;p&gt;That's it. Done.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-not-quite-ridiculously-easy-way"&gt;
+&lt;h2&gt;The not quite ridiculously easy way&lt;/h2&gt;
+&lt;p&gt;That seems almost too trivial. It's nice that the trivial tasks are
+trivial to perform, but let's take a closer look at what it takes to
+roll your own task and deploy it. It's more representative of how a
+sysadmin will interact with the framework and seems more fair to chef.&lt;/p&gt;
+&lt;div class="section" id="creating-a-module-from-scratch"&gt;
+&lt;h3&gt;Creating a module from scratch&lt;/h3&gt;
+&lt;p&gt;Puppet, like chef, can generate a module template. Puppet is very
+community centric and sharing of modules is the default. As such, the
+module template asks you to prepend your Puppet Forge username as it is
+the best practice naming convention for shared modules. Like in our
+previous walk through with chef, we're going to write a package for
+installing tmux.&lt;/p&gt;
+&lt;div class="section" id="create-the-package"&gt;
+&lt;h4&gt;Create the package&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% puppet module generate username-tmux
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You're rewarded with a directory like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Modulefile README     manifests  spec       tests
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="edit-modulefile"&gt;
+&lt;h4&gt;Edit Modulefile&lt;/h4&gt;
+&lt;p&gt;You should always edit the modulefile and enter pertinent information
+such as version, license, description, etc.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-tmux-class"&gt;
+&lt;h4&gt;Create tmux class&lt;/h4&gt;
+&lt;p&gt;The business is in the init.pp file, we edit that and add our package
+requirement.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="n"&gt;tmux&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;package&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;tmux&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="add-class-to-a-node"&gt;
+&lt;h4&gt;Add class to a node&lt;/h4&gt;
+&lt;p&gt;Finally, to apply the role to a node you add it to the nodes definition
+in the site.pp file. This isn't a hard, fast rule. Puppet can pull node
+configuration from external sources. Puppet Enterprise console provides
+this and so you could use the web frontend to add the class to your list
+in console and then apply it to a group. You could also provide your own
+backend.&lt;/p&gt;
+&lt;p&gt;However, the &amp;quot;basic&amp;quot; basic, out the box puppet involves editing the
+site.pp, so we&amp;amp;squot;ll add it to the default node here&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;tmux&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We also commit the package to our repository.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% git add modules/username-tmux manifests/site.pp
+% git commit modules/username-tmux manifests/site.pp -m &lt;span class="s2"&gt;&amp;quot;added tmux module&amp;quot;&lt;/span&gt;
+% git push origin master
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="comments"&gt;
+&lt;h3&gt;Comments&lt;/h3&gt;
+&lt;p&gt;If you noticed, we didn't cover how you upload your module and manifest
+like we did in the &lt;a class="reference external" href="/2012/07/infrastructure-automation-a-boilerplate-comparison/"&gt;Chef&lt;/a&gt; article. That's because puppet doesn't have a
+management tool for interacting with the puppet master like the knife
+tool. Deployment is left up to the administrator. Some common methods
+are using cap deploy, commit hooks, or pulling files down in a cron from
+the repo.&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="/2012/07/infrastructure-automation-a-boilerplate-comparison/"&gt;Previous Article&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="administration"></category><category term="chef"></category><category term="devops"></category><category term="infrastructure"></category><category term="linux"></category><category term="puppet"></category></entry><entry><title>Infrastructure Automation: A Boilerplate Comparison</title><link href="http://blog.jameskyle.org/2012/07/infrastructure-automation-a-boilerplate-comparison" rel="alternate"></link><updated>2012-07-08T11:33:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-07-08:2012/07/infrastructure-automation-a-boilerplate-comparison</id><summary type="html">&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;We've been using &lt;a class="reference external" href="http://opscode.com"&gt;Chef&lt;/a&gt; to deploy our infrastructure for a while now.
+One of the main sticking points we've run into is the barrier to entry
+for develoepers as a result of the boiler plate required to perform a
+simple deployment task. Our ideal framework would be equally accessible
+to the ops, who use the system every day, and development teams, who
+know their application environments best.&lt;/p&gt;
+&lt;p&gt;In that spirit, this article compares the boilerplate necessary to
+perform a simple configuraiton task. Since one of the most common, and
+straight forward, needs is installing a system package we'll use that as
+an example. This is not intended to demonstrate that one framework is
+overall &amp;quot;better&amp;quot; than another. Rather it's merely a comparison of
+workflows.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="contenders"&gt;
+&lt;h2&gt;Contenders&lt;/h2&gt;
+&lt;p&gt;The following frameworks are covered:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://opscode.com"&gt;Chef&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://puppetlabs.com/"&gt;Puppet&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="article-series-format"&gt;
+&lt;h2&gt;Article Series Format&lt;/h2&gt;
+&lt;p&gt;I already have a chef environment ready to go. So first, we'll cover
+that workflow. In subsequent posts, I'll cover the other frameworks.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-objective"&gt;
+&lt;h2&gt;The Objective&lt;/h2&gt;
+&lt;p&gt;To install the tmux package.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-chef-workflow"&gt;
+&lt;h2&gt;The Chef Workflow&lt;/h2&gt;
+&lt;p&gt;For the purposes of our example, we assume &lt;a class="reference external" href="http://wiki.opscode.com/display/chef/Chef+Server"&gt;Chef Server&lt;/a&gt; is already
+configured and working. We also assume a working repository is already
+created and the users credentials/environment is set up.&lt;/p&gt;
+&lt;div class="section" id="step-one-create-a-cookbook"&gt;
+&lt;h3&gt;Step One: Create a Cookbook&lt;/h3&gt;
+&lt;p&gt;First, we create the chef cookbook.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% knife cookbook create tmux
+** Creating cookbook tmux
+** Creating README for cookbook: tmux
+** Creating metadata for cookbook: tmux
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-two-edit-the-default-recipe"&gt;
+&lt;h3&gt;Step Two: Edit the Default Recipe&lt;/h3&gt;
+&lt;p&gt;Next, we edit the package to perform the task we need. To do so, we open
+the default recipe.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% vim cookbooks/tmux/recipes/default.rb
+&lt;/pre&gt;
+&lt;p&gt;And add the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# add multiple case statements for other target platforms&lt;/span&gt;
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:platform&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+  &lt;span class="k"&gt;when&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;ubuntu&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;debian&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;package&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tmux&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;action&lt;/span&gt; &lt;span class="ss"&gt;:install&lt;/span&gt;
+    &lt;span class="k"&gt;end&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Though technically not required, updating the metadata is certainly best
+practice.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% vim cookbooks/tmux/metadata.rb
+&lt;/pre&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;maintainer&lt;/span&gt;       &lt;span class="s2"&gt;&amp;quot;AT&amp;amp;T Foundry&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;maintainer_email&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;email@domain.com&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;license&lt;/span&gt;          &lt;span class="s2"&gt;&amp;quot;All rights reserved&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;description&lt;/span&gt;      &lt;span class="s2"&gt;&amp;quot;Installs/Configures tmux&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;long_description&lt;/span&gt; &lt;span class="no"&gt;IO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;File&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;File&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dirname&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;__FILE__&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;README.md&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="n"&gt;version&lt;/span&gt;          &lt;span class="s2"&gt;&amp;quot;0.0.1&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-three-add-the-cookbook-to-your-repository"&gt;
+&lt;h3&gt;Step Three: Add the Cookbook to Your Repository&lt;/h3&gt;
+&lt;pre class="literal-block"&gt;
+% git add cookbooks/tmux
+% git commit cookbooks/tmux -m &amp;quot;Tmux package cookbook added&amp;quot;
+% git pull origin master
+% git push origin master
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-four-upload-cookbook-to-chef-server"&gt;
+&lt;h3&gt;Step Four: Upload Cookbook to Chef Server&lt;/h3&gt;
+&lt;pre class="literal-block"&gt;
+% knife cookbook upload tmux
+Uploading tmux
+[0.0.1] upload complete
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-five-add-recipe-to-role"&gt;
+&lt;h3&gt;Step Five: Add Recipe to Role&lt;/h3&gt;
+&lt;p&gt;Next we need to add the recipe to a role. This may require the creation
+of a new role. In that case, an additional creation, commit, upload is
+required for the role.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% vim roles/tmux.json
+&lt;/pre&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tmux&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;default_attributes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;json_class&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Chef::Role&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;env_run_lists&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;run_list&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;recipe[tmux]&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;],&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;description&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Install Tmux&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;chef_type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;role&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;quot;override_attributes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Commit &amp;amp; Upload the role:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% knife role from file roles/tmux.json
+% git commit roles/tmux.json -m &amp;quot;added tmux role&amp;quot;
+% git push origin master
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-six-apply-role-to-server"&gt;
+&lt;h3&gt;Step Six: Apply Role to Server&lt;/h3&gt;
+&lt;p&gt;The final step is applying the role to a server.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+knife bootstrap 10.4.54.9 -i ~/.ssh/keys/jk328n_rsa -d ubuntu12.04-gems-att \
+  -x ubuntu --sudo -N jkyle-test -E foundry-services_pao1 -r 'role[tmux]'
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="followup-articles"&gt;
+&lt;h2&gt;Followup Articles&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="/2012/07/puppet-boilerplate/"&gt;Puppet Boiler Plate&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="administration"></category><category term="devops"></category><category term="infrastructure"></category><category term="linux"></category></entry></feed>

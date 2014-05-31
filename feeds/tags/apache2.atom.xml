@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/apache2.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2009-02-20T07:47:00-08:00</updated><entry><title>FIX mod_rewrite: could not init rewrite log lock in child</title><link href="http://blog.jameskyle.org/2009/02/could-not-init-rewrite-log-lock-fix" rel="alternate"></link><updated>2009-02-20T07:47:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-02-20:2009/02/could-not-init-rewrite-log-lock-fix</id><summary type="html">&lt;p&gt;Ran into this issue a couple of times already, duplicating it here so I
+dont' have to go dig for it again:&lt;/p&gt;
+&lt;p&gt;Error:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[crit] (2)No such file or directory: mod_rewrite: could not init rewrite log lock in child
+&lt;/pre&gt;
+&lt;p&gt;Change This:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^TRACE
+RewriteRule .* - [F]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^TRACE
+RewriteRule .* - [F]
+RewriteLog /var/log/apache2/rewrite.log
+RewriteLogLevel 0
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Original reference is &lt;a class="reference external" href="http://blog.latcarf.com/"&gt;here&lt;/a&gt;&lt;/p&gt;
+</summary><category term="administration"></category><category term="apache2"></category><category term="httpd"></category><category term="mod_rewrite"></category></entry></feed>

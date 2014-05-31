@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/backup.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2009-02-20T07:25:00-08:00</updated><entry><title>Auto-Configure OSX clients for BackupPC</title><link href="http://blog.jameskyle.org/2009/02/auto-configure-osx-clients-for-backuppc" rel="alternate"></link><updated>2009-02-20T07:25:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-02-20:2009/02/auto-configure-osx-clients-for-backuppc</id><summary type="html">&lt;p&gt;This script auto-configures osx 10.4-10.5 clients for backup via
+&lt;a class="reference external" href="http://backuppc.sourceforge.net/"&gt;BackupPC.&lt;/a&gt;&amp;nbsp;It creates a hidden backuppc user with standard
+permissions. Limits that users sudo permissions to rsync, sets up
+public/private key authentication, fliters all incoming ssh connections
+using that key to only allow rsync commands.&lt;/p&gt;
+&lt;p&gt;The project also comes with a Launchd Daemon that starts backuppc at
+startup and keeps it alive if anything happens.&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="http://github.com/jameskyle/backuppcosx/tree/master"&gt;BackupPCOSX&lt;/a&gt;&lt;/p&gt;
+</summary><category term="administration"></category><category term="backup"></category><category term="backuppc"></category><category term="osx"></category></entry></feed>

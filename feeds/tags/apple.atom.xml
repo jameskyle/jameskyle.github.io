@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/apple.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2008-09-09T07:28:00-07:00</updated><entry><title>Leopard Server Postfix TLS Error: cannot get private key from file /etc/certificates/mycert.key</title><link href="http://blog.jameskyle.org/2008/09/leopard-server-encrypted-tls-fix" rel="alternate"></link><updated>2008-09-09T07:28:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-09-09:2008/09/leopard-server-encrypted-tls-fix</id><summary type="html">&lt;p&gt;The problem here is that postfix is failing on encrypted TLS certs and
+OSX ServerAdmin created certs are encrypted. The fix is, as should be
+expected, to unencrypt the cert:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; /etc/certificates
+cp mycert.key mycert.key.saved
+openssl rsa -in mycert.key -out mycert.key.out
+cp -p mycert.key.out mycert.key
+postfix reload
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;credit to the apple discussion forums.&lt;/li&gt;
+&lt;/ul&gt;
+</summary><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category></entry><entry><title>Fix for missing X11 libraries in Leopard</title><link href="http://blog.jameskyle.org/2008/09/fix-for-missing-x11-libraries-in-leopard" rel="alternate"></link><updated>2008-09-04T17:43:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-09-04:2008/09/fix-for-missing-x11-libraries-in-leopard</id><summary type="html">&lt;p&gt;This solution comes straight from: &lt;a class="reference external" href="http://pennysmalls.com/2007/10/28/breakage-in-leopard-rmagick-fails-to-find-libdpstk1dylib/"&gt;Penny Smalls.&lt;/a&gt;. I've just put it
+here for personal reference.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+dyld: NSLinkModule() error
+dyld: Library not loaded: /usr/X11R6/lib/libdpstk.1.dylib
+  Referenced from: /usr/local/lib/ruby/gems/1.8/gems/rmagick-1.15.9/lib/RMagick.bundle
+  Reason: image not found
+Trace/BPT trap
+&lt;/pre&gt;
+&lt;p&gt;Those dylib files do not exist any more. But… I have a backup (I hope
+you do). I ended up doing this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; /Volumes/BackupDisk/usr/X11R6/lib
+sudo cp libdps*1.0* /usr/X11R6/lib/
+sudo ln -s /usr/X11R6/lib/libdpstk.1.0.dylib /usr/X11R6/lib/libdpstk.1.dylib
+sudo ln -s /usr/X11R6/lib/libdps.1.0.dylib /usr/X11R6/lib/libdps.1.dylib
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="x11"></category></entry><entry><title>Compiling lapack 3.1.1 on Leopard</title><link href="http://blog.jameskyle.org/2008/08/compiling-lapack-on-leopard" rel="alternate"></link><updated>2008-08-23T08:07:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-08-23:2008/08/compiling-lapack-on-leopard</id><summary type="html">&lt;p&gt;OSX contains an incomplete lapack library by default in the vecLib
+framework. But if you want the full power of lapack 3.1.1, you have to
+compile from source. This article documents that process, mostly so when
+I have to do it again I'll have a reference.&lt;/p&gt;
+&lt;p&gt;The first thing we notice is that OSX does not contain a fortran
+compiler in its developer tools. The &lt;a class="reference external" href="http://gcc.gnu.org/wiki/GFortran&amp;quot;"&gt;gfortran project&lt;/a&gt;&amp;nbsp; contains a
+nice dmg installer. Two other options are compiling from source or using
+macports. I chose macports.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo port install gcc43
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Create some convenient links for standard gfortran calls.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo ln -sf /opt/local/bin/gfortran-mp-4.3 /usr/local/bin/gfortran
+&lt;span class="nv"&gt;$ &lt;/span&gt;sudo ln -sf /opt/local/bin/gfortran-mp-4.3 /usr/local/bin/g77
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Next download &lt;a class="reference external" href="http://www.netlib.org/lapack/lapack.tgz"&gt;lapack.tgz&lt;/a&gt;&amp;nbsp;source (current 3.1.1 as of this writing)
+and untar it.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;tar xzvf lapack.tgz
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Lapack does not contain the standard configure script, so we have to
+edit the make.inc ourselves. Copy the make.inc.example to make.inc, then
+apply &lt;a class="reference external" href="/source/2008/08/make.inc.patch"&gt;this patch&lt;/a&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;patch &amp;lt; make.inc.patch
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That's it, all that's left is to compile. I do so with 6 make threads.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make -j6
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="programming"></category></entry><entry><title>Fix for max attachment size stuck at 0 bug in leopard server</title><link href="http://blog.jameskyle.org/2008/08/fix-for-max-attachment-size-stuck-at-0-bug-in-leopard-server" rel="alternate"></link><updated>2008-08-21T15:36:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-08-21:2008/08/fix-for-max-attachment-size-stuck-at-0-bug-in-leopard-server</id><summary type="html">&lt;p&gt;There's a bug in Server Admin which makes the max attachment size stick
+at 0 MB preventing file uploads. To fix this:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Manually set your preferred attachment size in /etc/wikid/wikid.conf
+under the &lt;em&gt;maxattachmentsize&lt;/em&gt;key&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Save file&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;restart the team server on the command line&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo serveradmin stop teams
+sudo serveradmin start teams
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</summary><category term="administration"></category><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category></entry></feed>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>James A. Kyle - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+
+<h1>Posts published by: James A. Kyle</h1>
+
+<article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2012/07/infrastructure-automation-a-boilerplate-comparison" rel="bookmark" title="Permalink to Infrastructure Automation: A Boilerplate Comparison">Infrastructure Automation: A Boilerplate Comparison</a>
+    </h2>
+    <p><div class="section" id="introduction">
+<h2>Introduction</h2>
+<p>We've been using <a class="reference external" href="http://opscode.com">Chef</a> to deploy our infrastructure for a while now.
+One of the main sticking points we've run into is the barrier to entry
+for develoepers as a result of the boiler plate required to perform a
+simple deployment task. Our ideal framework would be ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2012/02/chef-alternatives-for-debian-ubuntu" rel="bookmark" title="Permalink to Chef Alternatives for Debian/Ubuntu">Chef Alternatives for Debian/Ubuntu</a>
+    </h2>
+    <p><p>An update-alternatives script for chef. Currently only sets up a version
+installed in the 1.9.1 gems directory, but extendable to any version
+easily enough.</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+<span class="nv">RUBY_VERSION</span><span class="o">=</span>1.9.1
+<span class="nv">CHEF_VERSION</span><span class="o">=</span>0.10.8
+<span class="nv">GEM_ROOT</span><span class="o">=</span>/var/lib/gems/<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>/gems/chef-<span class="k">${</span><span class="nv">CHEF_VERSION</span><span class="k">}</span>update-alternatives <span class="se">\</span>
+   --install /usr/bin/chef-client chef ...</pre></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2012/02/ruby-alternatives-for-debianubuntu" rel="bookmark" title="Permalink to Ruby Alternatives for Debian/Ubuntu">Ruby Alternatives for Debian/Ubuntu</a>
+    </h2>
+    <p><p>A quick update-alternatives script for ruby versions on debian based
+systems. It only includes the ruby binaries, man pages, etc. included in
+the ruby1.8 and ruby1.9.1 debs. It's defaults to '1.9' when in auto
+mode.</p>
+<p>After running the script, you can switch between ruby version ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2012/01/adding-syntactic-sugar-to-python-dicts" rel="bookmark" title="Permalink to Adding Syntactic Sugar to Python dicts">Adding Syntactic Sugar to Python dicts</a>
+    </h2>
+    <p><div class="section" id="snippet">
+<h2>Snippet</h2>
+<p>This little snippet allows dict keys to be accessed like attributes. For
+example</p>
+<div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">CustomDict</span><span class="p">({</span><span class="s">&quot;foo&quot;</span><span class="p">:</span> <span class="s">&quot;bar&quot;</span><span class="p">,</span> <span class="s">&quot;bah&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;baz&quot;</span><span class="p">:</span> <span class="s">&quot;bot&quot;</span><span class="p">}})</span>
+</pre></div>
+<p>Can be accessed like</p>
+<div class="highlight"><pre><span class="n">d</span><span class="o">.</span><span class="n">foo</span> <span class="c"># returns &quot;bar&quot;</span>
+<span class="n">d</span><span class="o">.</span><span class="n">foo</span><span class="o">.</span><span class="n">bah</span><span class="o">.</span><span class="n">baz</span> <span class="c"># returns &quot;bot&quot;</span>
+</pre></div>
+<p>In addition to the hash key lookups.</p>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">CustomDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">d ...</span></pre></div></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2011/09/scriptingbridge-caching" rel="bookmark" title="Permalink to Improving ScriptingBridge Performance Using NSProxy &amp; NSCache">Improving ScriptingBridge Performance Using NSProxy &amp; NSCache</a>
+    </h2>
+    <p><div class="section" id="the-problem">
+<h2>The Problem</h2>
+<p>The ScriptingBridge API is an excellent way to tap into the internals of
+OS X applications with little effort. However, it does have its
+drawbacks. Not the least of which being <a class="reference external" href="http://en.wikipedia.org/wiki/Lazy_evaluation">lazy evaluation</a> of
+<a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/SBObject_Class/SBObject/SBObject.html">SBObject's</a> attributes. Lazy evaluation makes the retrieval of
+SBObject's very efficient since ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2011/06/rol-wheels-review" rel="bookmark" title="Permalink to Unboxing, first impressions, and 300 mile followup for Rol Wheel's Volant/RT">Unboxing, first impressions, and 300 mile followup for Rol Wheel's Volant/RT</a>
+    </h2>
+    <p><p>For the write up on why I chose Rol Wheels over the many other custom
+and commercial options for wheels, see my original post <a class="reference external" href="/2011/05/my-experience-as-a-newbie-cyclist-buying-his-first-set-of-non-stock-wheels/">My experience
+as a newbie cyclist buying his first set of non stock wheels.</a>.</p>
+<div class="section" id="the-unboxing">
+<h2>The Unboxing</h2>
+<div class="figure align-center">
+<img alt="Rol Wheels 1.jpg" src="/images/2011/06/Rol-Wheels-1.jpg" />
+</div>
+<p>Though packed in nothing but cardboard, the wheels were well ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2011/05/my-experience-as-a-newbie-cyclist-buying-his-first-set-of-non-stock-wheels" rel="bookmark" title="Permalink to My experience as a newbie cyclist buying his first set of non stock wheels.">My experience as a newbie cyclist buying his first set of non stock wheels.</a>
+    </h2>
+    <p><p>So, I've been rocking stock Open Sport's for about 10 or 11 thousand
+kilometers and they've about had it. Couple of good dings and not really
+holding true anymore. Time for some new wheels.</p>
+<div class="section" id="the-contenders">
+<h2>The Contenders</h2>
+<p>I looked at a few commercial wheel options and at four ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2011/02/vim-only-one-filename-allowed-fix" rel="bookmark" title="Permalink to Fix for MacVim Syntax Error, Throws &quot;Only one file name allowed&quot;">Fix for MacVim Syntax Error, Throws &quot;Only one file name allowed&quot;</a>
+    </h2>
+    <p><p>I keep a lot of my user installed applications in /Applications/User
+Utilities. Keeps some modicum of organization and reduces a bit of
+clutter in my /Applications directory. After moving <a class="reference external" href="http://code.google.com/p/macvim/">MacVim</a> to this
+directory, I began getting several errors when opening files. They were
+all of the same type.</p>
+<pre class="literal-block">
+E172 ...</pre></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2011/02/autocreate-django-user-profiles" rel="bookmark" title="Permalink to Automatically create django User Profiles as needed.">Automatically create django User Profiles as needed.</a>
+    </h2>
+    <p><p>Ran across a very nice, brief run down of creating user profiles for
+django on <a class="reference external" href="http://www.turnkeylinux.org/blog/django-profile">Turnkey Linux</a>.</p>
+<p>I was particularly pleased of this &quot;ism&quot; that creates user profiles on
+the fly on an as needed basis. As a bonus, it provides access to the
+profiles through a user.profile property ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2011/01/real-science-of-the-mind-a-reply" rel="bookmark" title="Permalink to Real Science of the Mind: A reply">Real Science of the Mind: A reply</a>
+    </h2>
+    <p><p>Tyler Burge wrote an interesting <a class="reference external" href="http://opinionator.blogs.nytimes.com/2010/12/19/a-real-science-of-mind/">op-ed</a> that took a pretty hostile
+tone toward neuroscience. Starting right off the bat referring to
+neuroscience as &quot;neurobabble&quot;. I took a few contentions with the fast
+and loose critique he provides.I propose that the dichotomy between
+explanation and description is false.</p>
+<p>For example ...</p></p>
+  </div>
+</article>
+<div class="pagination">
+            <a href="http://blog.jameskyle.org/author/james-a-kyle.html">&laquo;</a>
+    Page 2 / 5
+        <a href="http://blog.jameskyle.org/author/james-a-kyle3.html">&raquo;</a>
+</div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

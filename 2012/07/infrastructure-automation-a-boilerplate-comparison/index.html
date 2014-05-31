@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>Infrastructure Automation: A Boilerplate Comparison - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>Infrastructure Automation: A Boilerplate Comparison</h1>
+        
+        <div class="section" id="introduction">
+<h2>Introduction</h2>
+<p>We've been using <a class="reference external" href="http://opscode.com">Chef</a> to deploy our infrastructure for a while now.
+One of the main sticking points we've run into is the barrier to entry
+for develoepers as a result of the boiler plate required to perform a
+simple deployment task. Our ideal framework would be equally accessible
+to the ops, who use the system every day, and development teams, who
+know their application environments best.</p>
+<p>In that spirit, this article compares the boilerplate necessary to
+perform a simple configuraiton task. Since one of the most common, and
+straight forward, needs is installing a system package we'll use that as
+an example. This is not intended to demonstrate that one framework is
+overall &quot;better&quot; than another. Rather it's merely a comparison of
+workflows.</p>
+</div>
+<div class="section" id="contenders">
+<h2>Contenders</h2>
+<p>The following frameworks are covered:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://opscode.com">Chef</a></li>
+<li><a class="reference external" href="http://puppetlabs.com/">Puppet</a></li>
+</ul>
+</div>
+<div class="section" id="article-series-format">
+<h2>Article Series Format</h2>
+<p>I already have a chef environment ready to go. So first, we'll cover
+that workflow. In subsequent posts, I'll cover the other frameworks.</p>
+</div>
+<div class="section" id="the-objective">
+<h2>The Objective</h2>
+<p>To install the tmux package.</p>
+</div>
+<div class="section" id="the-chef-workflow">
+<h2>The Chef Workflow</h2>
+<p>For the purposes of our example, we assume <a class="reference external" href="http://wiki.opscode.com/display/chef/Chef+Server">Chef Server</a> is already
+configured and working. We also assume a working repository is already
+created and the users credentials/environment is set up.</p>
+<div class="section" id="step-one-create-a-cookbook">
+<h3>Step One: Create a Cookbook</h3>
+<p>First, we create the chef cookbook.</p>
+<pre class="literal-block">
+% knife cookbook create tmux
+** Creating cookbook tmux
+** Creating README for cookbook: tmux
+** Creating metadata for cookbook: tmux
+</pre>
+</div>
+<div class="section" id="step-two-edit-the-default-recipe">
+<h3>Step Two: Edit the Default Recipe</h3>
+<p>Next, we edit the package to perform the task we need. To do so, we open
+the default recipe.</p>
+<pre class="literal-block">
+% vim cookbooks/tmux/recipes/default.rb
+</pre>
+<p>And add the following:</p>
+<div class="highlight"><pre><span class="c1"># add multiple case statements for other target platforms</span>
+<span class="k">case</span> <span class="n">node</span><span class="o">[</span><span class="ss">:platform</span><span class="o">]</span>
+  <span class="k">when</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span><span class="s2">&quot;debian&quot;</span>
+    <span class="n">package</span> <span class="s2">&quot;tmux&quot;</span> <span class="k">do</span>
+      <span class="n">action</span> <span class="ss">:install</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</pre></div>
+<p>Though technically not required, updating the metadata is certainly best
+practice.</p>
+<pre class="literal-block">
+% vim cookbooks/tmux/metadata.rb
+</pre>
+<div class="highlight"><pre><span class="n">maintainer</span>       <span class="s2">&quot;AT&amp;T Foundry&quot;</span>
+<span class="n">maintainer_email</span> <span class="s2">&quot;email@domain.com&quot;</span>
+<span class="n">license</span>          <span class="s2">&quot;All rights reserved&quot;</span>
+<span class="n">description</span>      <span class="s2">&quot;Installs/Configures tmux&quot;</span>
+<span class="n">long_description</span> <span class="no">IO</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">),</span> <span class="s1">&#39;README.md&#39;</span><span class="p">))</span>
+<span class="n">version</span>          <span class="s2">&quot;0.0.1&quot;</span>
+</pre></div>
+</div>
+<div class="section" id="step-three-add-the-cookbook-to-your-repository">
+<h3>Step Three: Add the Cookbook to Your Repository</h3>
+<pre class="literal-block">
+% git add cookbooks/tmux
+% git commit cookbooks/tmux -m &quot;Tmux package cookbook added&quot;
+% git pull origin master
+% git push origin master
+</pre>
+</div>
+<div class="section" id="step-four-upload-cookbook-to-chef-server">
+<h3>Step Four: Upload Cookbook to Chef Server</h3>
+<pre class="literal-block">
+% knife cookbook upload tmux
+Uploading tmux
+[0.0.1] upload complete
+</pre>
+</div>
+<div class="section" id="step-five-add-recipe-to-role">
+<h3>Step Five: Add Recipe to Role</h3>
+<p>Next we need to add the recipe to a role. This may require the creation
+of a new role. In that case, an additional creation, commit, upload is
+required for the role.</p>
+<pre class="literal-block">
+% vim roles/tmux.json
+</pre>
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;tmux&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;default_attributes&quot;</span><span class="p">:</span> <span class="p">{</span>   <span class="p">},</span>
+  <span class="nt">&quot;json_class&quot;</span><span class="p">:</span> <span class="s2">&quot;Chef::Role&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;env_run_lists&quot;</span><span class="p">:</span> <span class="p">{</span>   <span class="p">},</span>
+  <span class="nt">&quot;run_list&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">&quot;recipe[tmux]&quot;</span>
+  <span class="p">],</span>
+  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Install Tmux&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;chef_type&quot;</span><span class="p">:</span> <span class="s2">&quot;role&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;override_attributes&quot;</span><span class="p">:</span> <span class="p">{</span>   <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>Commit &amp; Upload the role:</p>
+<pre class="literal-block">
+% knife role from file roles/tmux.json
+% git commit roles/tmux.json -m &quot;added tmux role&quot;
+% git push origin master
+</pre>
+</div>
+<div class="section" id="step-six-apply-role-to-server">
+<h3>Step Six: Apply Role to Server</h3>
+<p>The final step is applying the role to a server.</p>
+<pre class="literal-block">
+knife bootstrap 10.4.54.9 -i ~/.ssh/keys/jk328n_rsa -d ubuntu12.04-gems-att \
+  -x ubuntu --sudo -N jkyle-test -E foundry-services_pao1 -r 'role[tmux]'
+</pre>
+</div>
+</div>
+<div class="section" id="followup-articles">
+<h2>Followup Articles</h2>
+<ul class="simple">
+<li><a class="reference external" href="/2012/07/puppet-boilerplate/">Puppet Boiler Plate</a></li>
+</ul>
+</div>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=Infrastructure%20Automation%3A%20A%20Boilerplate%20Comparison%20 http%3A//blog.jameskyle.org/2012/07/infrastructure-automation-a-boilerplate-comparison" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2012/07/infrastructure-automation-a-boilerplate-comparison&p[images][0]=&p[title]=Infrastructure%20Automation%3A%20A%20Boilerplate%20Comparison%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22introduction%22%3E%0A%3Ch2%3EIntroduction%3C/h2%3E%0A%3Cp%3EWe%27ve%20been%20using%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//opscode.com%22%3EChef%3C/a%3E%20to%20deploy%20our%20infrastructure%20for%20a%20while%20now.%0AOne%20of%20the%20main%20sticking%20points%20we%27ve%20run%20into%20is%20the%20barrier%20to%20entry%0Afor%20develoepers%20as%20a%20result%20of%20the%20boiler%20plate%20required%20to%20perform%20a%0Asimple%20deployment%20task.%20Our%20ideal%20framework%20would%20be%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2012/07/infrastructure-automation-a-boilerplate-comparison" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=Infrastructure%20Automation%3A%20A%20Boilerplate%20Comparison%20&body=http%3A//blog.jameskyle.org/2012/07/infrastructure-automation-a-boilerplate-comparison" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2012/07/infrastructure-automation-a-boilerplate-comparison";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

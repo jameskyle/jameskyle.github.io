@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/mac.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2010-08-21T09:35:00-07:00</updated><entry><title>Useful Defaults Hacks for OS X</title><link href="http://blog.jameskyle.org/2010/08/osx-defaults-hacks" rel="alternate"></link><updated>2010-08-21T09:35:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-08-21:2010/08/osx-defaults-hacks</id><summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Disable Guest Accounts for Shares on OSX Tiger&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo defaults write /Library/Preferences/com.apple.AppleFileServer guestAccess -bool false
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Disable Dashboard&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.dashboard mcx-disabled -boolean YES
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Reduce Safari Rendering delay&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.Safari WebKitInitialTimedLayoutDelay 0.25
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Increase animation speed of sheets&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write NSGlobalDomain NSWindowResizeTime .001
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Disable spotlight&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+edit /etc/hostconfig to change &amp;quot;SPOTLIGHT=-YES-&amp;quot; to &amp;quot;SPOTLIGHT=-NO-&amp;quot;
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Enable Safari debug menu&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.Safari IncludeDebugMenu 1
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Get rid of .DS_Store files on network shares (specifically works for
+smb shares)&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.desktopservices DSDontWriteNetworkStores true
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Show full path to current directory in Finder title&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.finder _FXShowPosixPathInTitle -bool YES
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Mount external drives at boot rather then on user login&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write /Library/Preferences/SystemConfiguration/autodiskmount
+&lt;/pre&gt;
+&lt;p&gt;AutomountDisksWithoutUserLogin -bool true&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Setting a custom software update server for a client&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write /Library/Preferences/com.apple.SoftwareUpdate CatalogURL &amp;quot;http://customupdateserver.com/index.sucatalog&amp;quot;
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Show All Files in Finder&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.finder AppleShowAllFiles TRUE
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Terminal Focus Follows Mouse&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.Terminal FocusFollowsMouse -string YES
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Add Application to OSX Dock (example uses Calculator.app)&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.dock persistent-apps -array-add &amp;quot;&amp;lt; dict&amp;gt;tile-data file-data_CFURLString /Applications/Calculator.app/_CFURLStringType0 &amp;quot;;
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Disable the OSX Crash Reporter&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.CrashReporter DialogType none
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Add Recent Applications Stack to the Dock&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.dock persistent-others -array-add '{ &amp;quot;tile-data&amp;quot; = { &amp;quot;list-type&amp;quot; = 1; }; &amp;quot;tile-type&amp;quot; = &amp;quot;recents-tile&amp;quot;; }'
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Change Login Screen Background&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo defaults write /Library/Preferences/com.apple.loginwindow DesktopPicture &amp;quot;/Library/Desktop Pictures/Aqua Blue.jpg&amp;quot;
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Disable Time Machine External Disk as Backup Prompt&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool YES
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Disable mouse/trackpad acceleration&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+defaults write .GlobalPreferences com.apple.mouse.scaling -1
+&lt;/pre&gt;
+&lt;pre class="literal-block"&gt;
+defaults write .GlobalPreferences com.apple.trackpad.scaling -1
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</summary><category term="administration"></category><category term="mac"></category><category term="osx"></category><category term="tips"></category><category term="utilities"></category></entry><entry><title>Compiling a 4-way universal perl binary on osx</title><link href="http://blog.jameskyle.org/2009/08/4-way-universal-perl" rel="alternate"></link><updated>2009-08-12T13:35:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-08-12:2009/08/4-way-universal-perl</id><summary type="html">&lt;p&gt;If you don't like having all of your perl modules overwritten by
+cavalier osx server updates, then you're either going with a macports
+install or rolling your own. And if you don't want to give up
+mod_auth_apple, you're probably rolling your own.&lt;/p&gt;
+&lt;p&gt;If you're using mod_perl on osx, then you've probably already run into
+the issues with the 4-way httpd fat binary and a flat arch mod_perl not
+working. There are various posts around the internet on how to set
+archflags to get around this. However, if you're already compiling your
+own perl binary the easiest method is to compile it with the flags you
+want passed onto your perl modules.&lt;/p&gt;
+&lt;p&gt;So this is how to compile your perl binary with a 4-way (ppc ppc64
+x86_64 i686) universal arch and by extension, compile all subsequent
+modules with the same:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;SDK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/Developer/SDKs/MacOSX10.5.sdk/
+./Configure -Accflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch x86_64 -arch ppc64 \&lt;/span&gt;
+&lt;span class="s2"&gt;  -fPIC -nostdinc -B$SDK/usr/include/gcc \&lt;/span&gt;
+&lt;span class="s2"&gt;  -B$SDK/usr/lib/gcc -isystem$SDK/usr/include \&lt;/span&gt;
+&lt;span class="s2"&gt;  -F$SDK/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+  -Aldflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch ppc64 -arch x86_64 \&lt;/span&gt;
+&lt;span class="s2"&gt;  -Wl,-syslibroot,$SDK&amp;quot;&lt;/span&gt; -de
+
+make
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="administration"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="perl"></category><category term="programming"></category></entry><entry><title>Fixing errant Share Points</title><link href="http://blog.jameskyle.org/2008/09/fixing-errant-share-points" rel="alternate"></link><updated>2008-09-19T07:30:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-09-19:2008/09/fixing-errant-share-points</id><summary type="html">&lt;p&gt;Recently, I ran into an issue where Share Points which were removed from
+Server Admin were showing up as stale links in my clients. Though not
+deal breaking, it was annoying as it indicating some sort of corruption
+in my ldap configuration.&lt;/p&gt;
+&lt;p&gt;After digging around, I found that the records still existed in my
+server's LDAP under /Mounts. Including a duplicate entry for my
+/Network/Applications entry. By removing these and reloading the clients
+automount (sudo automount), everything went back to normal.&lt;/p&gt;
+</summary><category term="dscl"></category><category term="ldap"></category><category term="mac"></category><category term="osx"></category><category term="share points"></category></entry><entry><title>Leopard Server Postfix TLS Error: cannot get private key from file /etc/certificates/mycert.key</title><link href="http://blog.jameskyle.org/2008/09/leopard-server-encrypted-tls-fix" rel="alternate"></link><updated>2008-09-09T07:28:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-09-09:2008/09/leopard-server-encrypted-tls-fix</id><summary type="html">&lt;p&gt;The problem here is that postfix is failing on encrypted TLS certs and
+OSX ServerAdmin created certs are encrypted. The fix is, as should be
+expected, to unencrypt the cert:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; /etc/certificates
+cp mycert.key mycert.key.saved
+openssl rsa -in mycert.key -out mycert.key.out
+cp -p mycert.key.out mycert.key
+postfix reload
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;credit to the apple discussion forums.&lt;/li&gt;
+&lt;/ul&gt;
+</summary><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category></entry><entry><title>Fix for missing X11 libraries in Leopard</title><link href="http://blog.jameskyle.org/2008/09/fix-for-missing-x11-libraries-in-leopard" rel="alternate"></link><updated>2008-09-04T17:43:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-09-04:2008/09/fix-for-missing-x11-libraries-in-leopard</id><summary type="html">&lt;p&gt;This solution comes straight from: &lt;a class="reference external" href="http://pennysmalls.com/2007/10/28/breakage-in-leopard-rmagick-fails-to-find-libdpstk1dylib/"&gt;Penny Smalls.&lt;/a&gt;. I've just put it
+here for personal reference.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+dyld: NSLinkModule() error
+dyld: Library not loaded: /usr/X11R6/lib/libdpstk.1.dylib
+  Referenced from: /usr/local/lib/ruby/gems/1.8/gems/rmagick-1.15.9/lib/RMagick.bundle
+  Reason: image not found
+Trace/BPT trap
+&lt;/pre&gt;
+&lt;p&gt;Those dylib files do not exist any more. But… I have a backup (I hope
+you do). I ended up doing this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; /Volumes/BackupDisk/usr/X11R6/lib
+sudo cp libdps*1.0* /usr/X11R6/lib/
+sudo ln -s /usr/X11R6/lib/libdpstk.1.0.dylib /usr/X11R6/lib/libdpstk.1.dylib
+sudo ln -s /usr/X11R6/lib/libdps.1.0.dylib /usr/X11R6/lib/libdps.1.dylib
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="x11"></category></entry><entry><title>Compiling lapack 3.1.1 on Leopard</title><link href="http://blog.jameskyle.org/2008/08/compiling-lapack-on-leopard" rel="alternate"></link><updated>2008-08-23T08:07:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-08-23:2008/08/compiling-lapack-on-leopard</id><summary type="html">&lt;p&gt;OSX contains an incomplete lapack library by default in the vecLib
+framework. But if you want the full power of lapack 3.1.1, you have to
+compile from source. This article documents that process, mostly so when
+I have to do it again I'll have a reference.&lt;/p&gt;
+&lt;p&gt;The first thing we notice is that OSX does not contain a fortran
+compiler in its developer tools. The &lt;a class="reference external" href="http://gcc.gnu.org/wiki/GFortran&amp;quot;"&gt;gfortran project&lt;/a&gt;&amp;nbsp; contains a
+nice dmg installer. Two other options are compiling from source or using
+macports. I chose macports.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo port install gcc43
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Create some convenient links for standard gfortran calls.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo ln -sf /opt/local/bin/gfortran-mp-4.3 /usr/local/bin/gfortran
+&lt;span class="nv"&gt;$ &lt;/span&gt;sudo ln -sf /opt/local/bin/gfortran-mp-4.3 /usr/local/bin/g77
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Next download &lt;a class="reference external" href="http://www.netlib.org/lapack/lapack.tgz"&gt;lapack.tgz&lt;/a&gt;&amp;nbsp;source (current 3.1.1 as of this writing)
+and untar it.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;tar xzvf lapack.tgz
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Lapack does not contain the standard configure script, so we have to
+edit the make.inc ourselves. Copy the make.inc.example to make.inc, then
+apply &lt;a class="reference external" href="/source/2008/08/make.inc.patch"&gt;this patch&lt;/a&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;patch &amp;lt; make.inc.patch
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That's it, all that's left is to compile. I do so with 6 make threads.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make -j6
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="programming"></category></entry><entry><title>Fix for max attachment size stuck at 0 bug in leopard server</title><link href="http://blog.jameskyle.org/2008/08/fix-for-max-attachment-size-stuck-at-0-bug-in-leopard-server" rel="alternate"></link><updated>2008-08-21T15:36:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-08-21:2008/08/fix-for-max-attachment-size-stuck-at-0-bug-in-leopard-server</id><summary type="html">&lt;p&gt;There's a bug in Server Admin which makes the max attachment size stick
+at 0 MB preventing file uploads. To fix this:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Manually set your preferred attachment size in /etc/wikid/wikid.conf
+under the &lt;em&gt;maxattachmentsize&lt;/em&gt;key&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Save file&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;restart the team server on the command line&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo serveradmin stop teams
+sudo serveradmin start teams
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</summary><category term="administration"></category><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category></entry></feed>

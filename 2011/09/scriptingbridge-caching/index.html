@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>Improving ScriptingBridge Performance Using NSProxy &amp; NSCache - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>Improving ScriptingBridge Performance Using NSProxy &amp; NSCache</h1>
+        
+        <div class="section" id="the-problem">
+<h2>The Problem</h2>
+<p>The ScriptingBridge API is an excellent way to tap into the internals of
+OS X applications with little effort. However, it does have its
+drawbacks. Not the least of which being <a class="reference external" href="http://en.wikipedia.org/wiki/Lazy_evaluation">lazy evaluation</a> of
+<a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/SBObject_Class/SBObject/SBObject.html">SBObject's</a> attributes. Lazy evaluation makes the retrieval of
+SBObject's very efficient since all of the objects attributes are not
+retrieved at the same time. However, if you need to sort those objects
+by a particular key (say the name of a movie) the latency of
+ScriptingBridge becomes glaringly obvious to the point of becoming
+unusable.</p>
+</div>
+<div class="section" id="the-solution">
+<h2>The Solution</h2>
+<p>We can solve this problem using a combination of <a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/NSCache_Class/Reference/Reference.html">NSCache</a> and
+<a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSProxy_Class/Reference/Reference.html">NSProxy</a>. NSProxy provides a relatively simple API for wrapping
+<a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSObject_Class/Reference/Reference.html">NSObject's</a> and intercepting <a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtHowMessagingWorks.html">messages</a> sent to them. By doing so,
+you can interecept the message and if it's been previously called,
+retrieve the value from an NSCache.</p>
+</div>
+<div class="section" id="the-implementation">
+<h2>The Implementation</h2>
+<p>For our example, we'll use iTunes. To do so we first have to generate an
+iTunes objc header file using <a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ScriptingBridgeConcepts/UsingScriptingBridge/UsingScriptingBridge.html">sdef and sdp</a>.</p>
+<pre class="literal-block">
+% sdef /Applications/iTunes.app | sdp -fh --basename iTunes
+</pre>
+<p>This produces a header file called &quot;iTunes.h&quot; that we include in our
+project to instantiate the iTunes <a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/SBApplication_Class/SBApplication/SBApplication.html">SBApplication</a> object.</p>
+<p>This is what our source looks like so far:</p>
+<div class="highlight"><pre><span class="n">NSArray</span><span class="o">*</span> <span class="nf">getTracks</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">iTunesApplication</span> <span class="o">*</span><span class="n">itunes</span><span class="p">;</span>
+  <span class="n">itunes</span> <span class="o">=</span> <span class="p">[</span><span class="n">SBApplication</span> <span class="n">applicationWithBundleIdentifier</span><span class="o">:</span><span class="s">@&quot;com.apple.iTunes&quot;</span><span class="p">];</span>      <span class="c1">// Retrieve a list of movies in our iTunes library.</span>
+  <span class="n">NSArray</span> <span class="o">*</span><span class="n">sources</span> <span class="o">=</span> <span class="p">[[</span><span class="n">itunes</span> <span class="n">sources</span><span class="p">]</span> <span class="n">get</span><span class="p">];</span>
+  <span class="n">NSPredicate</span> <span class="o">*</span><span class="n">predicate</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSPredicate</span>
+                      <span class="nl">predicateWithFormat:</span><span class="s">@&quot;name == &#39;Library&#39; &amp;&amp; kind == %i&quot;</span><span class="p">,</span>
+                      <span class="n">iTunesESrcLibrary</span><span class="p">];</span>      <span class="n">NSArray</span> <span class="o">*</span><span class="n">libs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sources</span> <span class="n">filteredArrayUsingPredicate</span><span class="o">:</span><span class="n">predicate</span><span class="p">];</span>      <span class="n">NSMutableArray</span> <span class="o">*</span><span class="n">theMovies</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+  <span class="n">NSArray</span> <span class="o">*</span><span class="n">playlists</span><span class="p">;</span>
+  <span class="n">NSArray</span> <span class="o">*</span><span class="n">movieLists</span><span class="p">;</span>      <span class="k">for</span> <span class="p">(</span><span class="n">iTunesSource</span> <span class="o">*</span><span class="n">source</span> <span class="k">in</span> <span class="n">libs</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">playlists</span> <span class="o">=</span> <span class="p">[</span><span class="n">source</span> <span class="n">playlists</span><span class="p">];</span>
+    <span class="n">movieLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">playlists</span> <span class="n">filteredArrayUsingPredicate</span><span class="o">:</span>
+                  <span class="p">[</span><span class="n">NSPredicate</span> <span class="n">predicateWithFormat</span><span class="o">:</span><span class="s">@&quot;name == &#39;Movies&#39;&quot;</span><span class="p">]];</span>        <span class="k">for</span> <span class="p">(</span><span class="n">iTunesPlaylist</span> <span class="o">*</span><span class="n">playlist</span> <span class="k">in</span> <span class="n">movieLists</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">iTunesTrack</span> <span class="o">*</span><span class="n">track</span> <span class="k">in</span> <span class="p">[</span><span class="n">playlist</span> <span class="n">tracks</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">theMovies</span> <span class="n">addObject</span><span class="o">:</span><span class="n">track</span><span class="p">];</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>      <span class="k">return</span> <span class="n">theMovies</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<div class="section" id="the-itunestrackproxy-object">
+<h2>The iTunesTrackProxy Object</h2>
+<p>Not terribly interesting, but now to the fun part. We create a proxy
+object to wrap the tracks we retrieved in our getTracks method and act
+as an intermediary to any requests for track attributes.</p>
+<p>For our purposes we need to override three of the NSProxy objects
+methods to handle <a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSInvocation_Class/Reference/Reference.html">NSInvocations</a> sent to the track object.</p>
+<ul class="simple">
+<li><ul class="first">
+<li>(NSMethodSignature *)methodSignatureForSelector:(SEL)sel</li>
+</ul>
+</li>
+<li><ul class="first">
+<li>(void)forwardInvocation:(NSInvocation *)invocation</li>
+</ul>
+</li>
+<li><ul class="first">
+<li>(BOOL)respondsToSelector:(SEL)aSelector</li>
+</ul>
+</li>
+</ul>
+<p>We want to respond to all the same methods that the original iTunesTrack
+object does, so we simply pass the method to the proxies track object.</p>
+<div class="highlight"><pre><span class="k">-</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nf">respondsToSelector:</span><span class="p">(</span><span class="kt">SEL</span><span class="p">)</span><span class="nv">aSelector</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">track</span> <span class="n">respondsToSelector</span><span class="o">:</span><span class="n">aSelector</span><span class="p">];</span>
+<span class="p">}</span>
+</pre></div>
+<p>We also want our object to transparantly behave just like a iTunesTrack
+for method returns. So all method signatures will also be identical.</p>
+<div class="highlight"><pre><span class="k">-</span> <span class="p">(</span><span class="n">NSMethodSignature</span> <span class="o">*</span><span class="p">)</span><span class="nf">methodSignatureForSelector:</span><span class="p">(</span><span class="kt">SEL</span><span class="p">)</span><span class="nv">sel</span>
+<span class="p">{</span>
+  <span class="n">NSMethodSignature</span> <span class="o">*</span><span class="n">sig</span><span class="p">;</span>
+  <span class="n">sig</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">track</span> <span class="n">methodSignatureForSelector</span><span class="o">:</span><span class="n">sel</span><span class="p">];</span>
+  <span class="k">return</span> <span class="n">sig</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<div class="section" id="the-real-action">
+<h3>The real action</h3>
+<p>The real action happens in the forwardInvocation. This is where we catch
+message invocations intended for the iTunesTrack object and return the
+values we want from the sources we want (e.g. NSCache). Since I'm not
+covering the uninteresting boiler plate code in detail, here's our
+iTunesTrackProxy header and implementation source so far:</p>
+<div class="highlight"><pre><span class="cp">#import     @class iTunesTrack;    @interface iTunesTrackProxy : NSProxy {</span>
+  <span class="k">@private</span>
+  <span class="n">iTunesTrack</span> <span class="o">*</span><span class="n">_track</span><span class="p">;</span>
+  <span class="n">NSCache</span> <span class="o">*</span><span class="n">_cache</span><span class="p">;</span>
+<span class="p">}</span>    <span class="o">-</span> <span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="n">initWithTrack</span><span class="o">:</span><span class="p">(</span><span class="n">iTunesTrack</span> <span class="o">*</span><span class="p">)</span><span class="n">track</span><span class="p">;</span>    <span class="k">@property</span><span class="p">(</span><span class="n">readonly</span><span class="p">)</span> <span class="n">iTunesTrack</span> <span class="o">*</span><span class="n">track</span><span class="p">;</span>
+<span class="k">@end</span>
+</pre></div>
+<div class="highlight"><pre><span class="cp">#import &quot;iTunesTrackProxy.h&quot;</span>
+<span class="cp">#import &quot;iTunes.h&quot;    @implementation iTunesTrackProxy    - (id)initWithTrack:(iTunesTrack *)track</span>
+<span class="p">{</span>
+  <span class="n">_track</span> <span class="o">=</span> <span class="p">[</span><span class="n">track</span> <span class="n">retain</span><span class="p">];</span>
+  <span class="n">_cache</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSCache</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+  <span class="k">return</span> <span class="n">self</span><span class="p">;</span>
+<span class="p">}</span>    <span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">dealloc</span>
+<span class="p">{</span>
+  <span class="p">[</span><span class="n">_track</span> <span class="n">release</span><span class="p">];</span>
+  <span class="p">[</span><span class="n">_cache</span> <span class="n">release</span><span class="p">];</span>
+  <span class="p">[</span><span class="n">super</span> <span class="n">dealloc</span><span class="p">];</span>
+<span class="p">}</span>    <span class="o">-</span> <span class="p">(</span><span class="n">NSMethodSignature</span> <span class="o">*</span><span class="p">)</span><span class="n">methodSignatureForSelector</span><span class="o">:</span><span class="p">(</span><span class="kt">SEL</span><span class="p">)</span><span class="n">sel</span>
+<span class="p">{</span>
+  <span class="n">NSMethodSignature</span> <span class="o">*</span><span class="n">sig</span><span class="p">;</span>
+  <span class="n">sig</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">track</span> <span class="n">methodSignatureForSelector</span><span class="o">:</span><span class="n">sel</span><span class="p">];</span>
+  <span class="k">return</span> <span class="n">sig</span><span class="p">;</span>
+<span class="p">}</span>    <span class="o">-</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="n">respondsToSelector</span><span class="o">:</span><span class="p">(</span><span class="kt">SEL</span><span class="p">)</span><span class="n">aSelector</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">track</span> <span class="n">respondsToSelector</span><span class="o">:</span><span class="n">aSelector</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="o">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">forwardInvocation</span><span class="o">:</span><span class="p">(</span><span class="n">NSInvocation</span> <span class="o">*</span><span class="p">)</span><span class="n">invocation</span>
+<span class="p">{</span>    <span class="p">}</span>
+
+<span class="k">@synthesize</span> <span class="n">track</span> <span class="o">=</span> <span class="n">_track</span><span class="p">;</span>
+<span class="k">@end</span>
+</pre></div>
+</div>
+<div class="section" id="first-attempt-at-the-forwardinvocation-method">
+<h3>First attempt at the forwardInvocation method</h3>
+<p>A naive first attempt might look similar to this:</p>
+<div class="highlight"><pre><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">forwardInvocation:</span><span class="p">(</span><span class="n">NSInvocation</span> <span class="o">*</span><span class="p">)</span><span class="nv">invocation</span>
+<span class="p">{</span>
+  <span class="c1">// Using the string representation of the selector as the NSCache key.</span>
+  <span class="n">NSString</span> <span class="o">*</span><span class="n">key</span> <span class="o">=</span> <span class="n">NSStringFromSelector</span><span class="p">([</span><span class="n">invocation</span> <span class="n">selector</span><span class="p">]);</span>      <span class="c1">// First check and see if we&#39;ve already cached the object</span>
+  <span class="kt">id</span> <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">_cache</span> <span class="n">objectForKey</span><span class="o">:</span><span class="n">key</span><span class="p">];</span>      <span class="c1">// If the object is cached, use it as the returnValue</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">[</span><span class="n">invocation</span> <span class="n">setReturnValue</span><span class="o">:&amp;</span><span class="n">result</span><span class="p">];</span>       <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// if not cached, forward it to the track object, then cache the return</span>
+    <span class="p">[</span><span class="n">invocation</span> <span class="n">invokeWithTarget</span><span class="o">:</span><span class="n">self</span><span class="p">.</span><span class="n">track</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">invocation</span> <span class="n">getReturnValue</span><span class="o">:&amp;</span><span class="n">result</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">_cache</span> <span class="n">setObject</span><span class="o">:</span><span class="n">result</span> <span class="n">forKey</span><span class="o">:</span><span class="n">key</span><span class="p">];</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>Simple enough. However, it makes a critically flawed
+assumption.Specifically that all method invocations to the iTunesTrack
+object return NSObjects. A quick glance at the iTunes.h header proves
+otherwise and many return primitive types. Just to keep everything
+interesting, NSCache only stores NSObjects, thus we have to transform
+the primitive return types to an NSObject when storing and retrieving
+these values.</p>
+<p>To resolve this oversight we create a few more methods.</p>
+<ul class="simple">
+<li>(void)setValueFromTrack:(NSInvocation *)invocation</li>
+<li>(void)setValueFromCacheObj:(id)obj invocation:(NSInvocation *)inv</li>
+<li>(id)mapBuffer:(voidPtr)buffer type:(NSString *)type</li>
+<li>(void *)mapObject:(id)obj key:(NSString *)key</li>
+</ul>
+</div>
+<div class="section" id="final-implementation">
+<h3>Final implementation</h3>
+<p>Let's walk through each of our new methods and then the final
+implementation of the forwardInvocation method.</p>
+<div class="section" id="setvaluefromtrack">
+<h4>setValueFromTrack</h4>
+<p>If the result is not found in the cache, this method retrieves it from
+track itself. If it's an NSObject, it stores the value directly in the
+NSCache. If it's a primitive, it passes the value to the mapBuffer:type
+method to retrieve an appropriate object for storing in the NSCache.</p>
+<div class="highlight"><pre><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">setValueFromTrack:</span><span class="p">(</span><span class="n">NSInvocation</span> <span class="o">*</span><span class="p">)</span><span class="nv">invocation</span>
+<span class="p">{</span>
+  <span class="n">NSString</span> <span class="o">*</span><span class="n">key</span> <span class="o">=</span> <span class="n">NSStringFromSelector</span><span class="p">([</span><span class="n">invocation</span> <span class="n">selector</span><span class="p">]);</span>      <span class="n">NSString</span> <span class="o">*</span><span class="n">returnType</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span>
+                          <span class="nl">stringWithUTF8String:</span><span class="p">[[</span><span class="n">invocation</span> <span class="n">methodSignature</span><span class="p">]</span> <span class="n">methodReturnType</span><span class="p">]];</span>
+  <span class="kt">id</span> <span class="n">result</span><span class="p">;</span>      <span class="c1">// retrieve value from track object</span>
+  <span class="p">[</span><span class="n">invocation</span> <span class="n">invokeWithTarget</span><span class="o">:</span><span class="n">self</span><span class="p">.</span><span class="n">track</span><span class="p">];</span>      <span class="c1">// if object is of type NSObject.</span>
+  <span class="k">if</span> <span class="p">([</span><span class="n">returnType</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;@&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="p">[</span><span class="n">invocation</span> <span class="n">getReturnValue</span><span class="o">:&amp;</span><span class="n">result</span><span class="p">];</span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// retrieved value does not exist for track</span>
+      <span class="c1">// set to default</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="s">@&quot;None&quot;</span><span class="p">;</span>
+      <span class="p">[</span><span class="n">invocation</span> <span class="n">setReturnValue</span><span class="o">:&amp;</span><span class="n">result</span><span class="p">];</span>
+    <span class="p">}</span>        <span class="p">[</span><span class="n">_cache</span> <span class="n">setObject</span><span class="o">:</span><span class="n">result</span> <span class="n">forKey</span><span class="o">:</span><span class="n">key</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="kt">void</span><span class="o">*</span> <span class="n">buffer</span><span class="p">;</span>
+    <span class="n">NSUInteger</span> <span class="n">length</span> <span class="o">=</span> <span class="p">[[</span><span class="n">invocation</span> <span class="n">methodSignature</span><span class="p">]</span>
+                         <span class="n">methodReturnLength</span><span class="p">];</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">length</span><span class="p">);</span>
+    <span class="p">[</span><span class="n">invocation</span> <span class="n">getReturnValue</span><span class="o">:</span><span class="n">buffer</span><span class="p">];</span>        <span class="kt">id</span> <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="n">mapBuffer</span><span class="o">:</span><span class="n">buffer</span> <span class="n">type</span><span class="o">:</span><span class="n">returnType</span><span class="p">];</span>
+    <span class="c1">// done with buffer</span>
+    <span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>        <span class="c1">// cache value</span>
+    <span class="p">[</span><span class="n">_cache</span> <span class="n">setObject</span><span class="o">:</span><span class="n">obj</span> <span class="n">forKey</span><span class="o">:</span><span class="n">key</span><span class="p">];</span>
+  <span class="p">}</span>    <span class="p">}</span>
+</pre></div>
+<p>In this implementation we see a new object in play, specifically the
+<a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSMethodSignature_Class/Reference/Reference.html">NSMessageSignature</a> and its methodReturnType. The methodReturnType is
+an <a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html">objc type encoding</a>. Here, we only check for the &quot;&#64;&quot;, or NSObject,
+type. In our mapBuffer:type: method we'll need to handle all the other
+types we care about.</p>
+</div>
+<div class="section" id="mapbuffer-type">
+<h4>mapBuffer:type:</h4>
+<p>For iTunesTrack objects, NSNumber is perfectly adequate at storing all
+the primitives we're interested in storing. Also, to make mapping of
+buffers to void pointers easier, we create a union.</p>
+<div class="highlight"><pre><span class="k">typedef</span> <span class="k">union</span> <span class="p">{</span>
+  <span class="kt">char</span>               <span class="o">*</span><span class="n">c</span><span class="p">;</span>
+  <span class="kt">int</span>                <span class="o">*</span><span class="n">i</span><span class="p">;</span>
+  <span class="kt">short</span>              <span class="o">*</span><span class="n">s</span><span class="p">;</span>
+  <span class="kt">long</span>               <span class="o">*</span><span class="n">l</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="kt">long</span>          <span class="o">*</span><span class="n">q</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span>      <span class="o">*</span><span class="n">C</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">int</span>       <span class="o">*</span><span class="n">I</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">short</span>     <span class="o">*</span><span class="n">S</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">long</span>      <span class="o">*</span><span class="n">L</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">Q</span><span class="p">;</span>
+  <span class="kt">float</span>              <span class="o">*</span><span class="n">f</span><span class="p">;</span>
+  <span class="kt">double</span>             <span class="o">*</span><span class="n">d</span><span class="p">;</span>
+  <span class="kt">_Bool</span>              <span class="o">*</span><span class="n">B</span><span class="p">;</span>
+  <span class="kt">void</span>               <span class="o">*</span><span class="n">v</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">TRACKDATA</span><span class="p">;</span>
+</pre></div>
+<p>The name of each union item is the same as its type encoding key. We use
+the union and the appropriate type encoding to store the primitive data
+type in an NSNumber in the mapBuffer:type: method.</p>
+<div class="highlight"><pre><span class="k">-</span> <span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="nf">mapBuffer:</span><span class="p">(</span><span class="n">voidPtr</span><span class="p">)</span><span class="nv">buffer</span> <span class="nf">type:</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">type</span>
+<span class="p">{</span>
+  <span class="kt">id</span> <span class="n">obj</span><span class="p">;</span>      <span class="n">TRACKDATA</span> <span class="n">data</span><span class="p">;</span>
+  <span class="n">data</span><span class="p">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">;</span>      <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;c&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithChar</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">c</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;i&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithInt</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">i</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;s&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithShort</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">s</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;l&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithLong</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">l</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;q&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithLongLong</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">q</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;C&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithUnsignedChar</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">C</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;I&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithUnsignedInt</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">I</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;S&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithUnsignedShort</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">S</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;L&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithUnsignedLong</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">L</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;Q&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithUnsignedLongLong</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">Q</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;f&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithFloat</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">f</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;d&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithDouble</span><span class="o">:*</span><span class="n">data</span><span class="p">.</span><span class="n">d</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;B&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="c1">// The BOOL type is a special case, so we do a little dance here.</span>
+    <span class="kt">BOOL</span> <span class="n">val</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="p">.</span><span class="n">B</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">val</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="n">val</span> <span class="o">=</span> <span class="nb">NO</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="n">numberWithBool</span><span class="o">:</span><span class="n">val</span><span class="p">];</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// Raise an exception if we receive a data type we&#39;re not prepared</span>
+    <span class="c1">// for...</span>
+    <span class="p">[</span><span class="n">NSException</span>
+     <span class="nl">raise:</span><span class="s">@&quot;Unhandled NSMethodSignature:methodReturnType:&quot;</span>
+     <span class="nl">format:</span><span class="s">@&quot;NSMethodSignature:methodReturnType: %@&quot;</span><span class="p">,</span> <span class="n">type</span><span class="p">];</span>
+  <span class="p">}</span>      <span class="k">return</span> <span class="n">obj</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="setvaluefromcacheobj-invocation">
+<h4>setValueFromCacheObj:invocation:</h4>
+<p>The reverse case is retrieving an object from the cache. We accomplish
+that by first checking if the invocation's returnType is an object and
+if not transforming our cache object into a primitive type with
+mapObject:type.</p>
+<div class="highlight"><pre><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">setValueFromCacheObj:</span><span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="nv">obj</span> <span class="nf">invocation:</span><span class="p">(</span><span class="n">NSInvocation</span> <span class="o">*</span><span class="p">)</span><span class="nv">inv</span>
+<span class="p">{</span>
+  <span class="n">NSString</span> <span class="o">*</span><span class="n">returnType</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span>
+                          <span class="nl">stringWithUTF8String:</span><span class="p">[[</span><span class="n">inv</span> <span class="n">methodSignature</span><span class="p">]</span> <span class="n">methodReturnType</span><span class="p">]];</span>       <span class="k">if</span> <span class="p">([</span><span class="n">returnType</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;@&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="p">[</span><span class="n">inv</span> <span class="n">setReturnValue</span><span class="o">:&amp;</span><span class="n">obj</span><span class="p">];</span>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="n">mapObject</span><span class="o">:</span><span class="n">obj</span> <span class="n">type</span><span class="o">:</span><span class="n">returnType</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">inv</span> <span class="n">setReturnValue</span><span class="o">:</span><span class="n">buffer</span><span class="p">];</span>
+    <span class="c1">// done with buffer</span>
+    <span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+  <span class="p">}</span>     <span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="mapobject-type">
+<h4>mapObject:type:</h4>
+<p>The reverse mapping from object to buffer is done by the mapObject:type:
+method. It's pretty much just the inverse of the mapBuffer:type: method.</p>
+<div class="highlight"><pre><span class="k">-</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="nf">mapObject:</span><span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="nv">obj</span> <span class="nf">type:</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">type</span>
+<span class="p">{</span>
+  <span class="kt">void</span> <span class="o">*</span><span class="n">buffer</span><span class="p">;</span>      <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;c&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">charValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;i&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">intValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;s&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">short</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">short</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">short</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">shortValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;l&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">long</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">longValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;q&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">longLongValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;C&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">unsignedCharValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;I&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">unsignedIntValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;S&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">short</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">short</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">short</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">unsignedShortValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;L&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">unsignedLongValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;Q&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">unsignedLongLongValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;f&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">float</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">float</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">floatValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;d&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">double</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">double</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">doubleValue</span><span class="p">];</span>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">type</span> <span class="n">isEqualToString</span><span class="o">:</span><span class="s">@&quot;B&quot;</span><span class="p">])</span> <span class="p">{</span>
+    <span class="kt">_Bool</span> <span class="n">val</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([</span><span class="n">obj</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+      <span class="n">val</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="n">val</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">_Bool</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">_Bool</span><span class="p">));</span>
+    <span class="o">*</span><span class="p">(</span><span class="kt">_Bool</span> <span class="o">*</span><span class="p">)</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">val</span><span class="p">;</span>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="p">[</span><span class="n">NSException</span>
+     <span class="nl">raise:</span><span class="s">@&quot;Unhandled NSMethodSignature:methodReturnType:&quot;</span>
+     <span class="nl">format:</span><span class="s">@&quot;NSMethodSignature:methodReturnType: %@&quot;</span><span class="p">,</span> <span class="n">type</span><span class="p">];</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">buffer</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="summary-benchmarks">
+<h2>Summary &amp; Benchmarks</h2>
+<p>That pretty much wraps it up. We can use our iTunesProxy object as a
+drop in replacement for the iTunesTrack object and it will cache all
+values for that track. This vastly improves query intensive operations
+such as sorting.</p>
+<p>In fact, we'll use sorting as a demonstration on what we've gained from
+our work. The following output is from the main function attached to the
+article.</p>
+<pre class="literal-block">
+We retrieved 254 unproxied movies
+We retrieved 254 proxied movies
+Time elapsed for track sort: -7.293006
+Time elapsed for proxy sort: -0.567359
+</pre>
+<p>Not the fastest sort in the world, but we did get a 13x improvement
+bringing the performance from &quot;application breaking&quot; to perfectly
+workable. Of course, most of the overhead in that second run is from the
+initial caching of the track values. Let's see what we get on a <em>second</em>
+run of our proxy array:</p>
+<pre class="literal-block">
+Time elapsed for proxy sort second run: -0.017478
+</pre>
+<p>That's more like it! After the initial hit when caching our variables,
+we are rewarded with a 365x increase in sorting speed.</p>
+<p>It's easy to see how this pattern is extendible outside the scope of
+iTunes tracks or even ScriptingBridge to any situation where the cost of
+retrieval far out weighs a minor hit to memory.</p>
+</div>
+<div class="section" id="full-source-files">
+<h2>Full Source Files</h2>
+<ul class="simple">
+<li><a class="reference external" href="/source/2011/09/iTunes.h">iTunes.h</a></li>
+<li><a class="reference external" href="/source/2011/09/iTunesTrackProxy.h">iTunesTrackProxy.h</a></li>
+<li><a class="reference external" href="/source/2011/09/iTunesTrackProxy.m">iTunesTrackProxy.m</a></li>
+<li><a class="reference external" href="/source/2011/09/main.m">main.m</a></li>
+<li><a class="reference external" href="/source/2011/09/Makefile">Makefile</a></li>
+</ul>
+</div>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=Improving%20ScriptingBridge%20Performance%20Using%20NSProxy%20%26amp%3B%20NSCache%20 http%3A//blog.jameskyle.org/2011/09/scriptingbridge-caching" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2011/09/scriptingbridge-caching&p[images][0]=&p[title]=Improving%20ScriptingBridge%20Performance%20Using%20NSProxy%20%26amp%3B%20NSCache%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22the-problem%22%3E%0A%3Ch2%3EThe%20Problem%3C/h2%3E%0A%3Cp%3EThe%20ScriptingBridge%20API%20is%20an%20excellent%20way%20to%20tap%20into%20the%20internals%20of%0AOS%20X%20applications%20with%20little%20effort.%20However%2C%20it%20does%20have%20its%0Adrawbacks.%20Not%20the%20least%20of%20which%20being%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//en.wikipedia.org/wiki/Lazy_evaluation%22%3Elazy%20evaluation%3C/a%3E%20of%0A%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//developer.apple.com/library/mac/%23documentation/Cocoa/Reference/SBObject_Class/SBObject/SBObject.html%22%3ESBObject%27s%3C/a%3E%20attributes.%20Lazy%20evaluation%20makes%20the%20retrieval%20of%0ASBObject%27s%20very%20efficient%20since%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2011/09/scriptingbridge-caching" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=Improving%20ScriptingBridge%20Performance%20Using%20NSProxy%20%26amp%3B%20NSCache%20&body=http%3A//blog.jameskyle.org/2011/09/scriptingbridge-caching" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2011/09/scriptingbridge-caching";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

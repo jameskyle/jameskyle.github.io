@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/xcode.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2010-05-23T12:43:00-07:00</updated><entry><title>Qt4DataFormatter (custom Xcode data formatters for Qt4 objects)</title><link href="http://blog.jameskyle.org/2010/05/xcode-qt4-data-formatter" rel="alternate"></link><updated>2010-05-23T12:43:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-05-23:2010/05/xcode-qt4-data-formatter</id><summary type="html">&lt;p&gt;I do most of my development on OS X, including Qt4 projects. Qt4 objects
+are particularly averse to inspection in the Xcode debugger.
+Fortunately, Xcode has a &lt;a class="reference external" href="http://developer.apple.com/mac/library/documentation/DeveloperTools/Conceptual/XcodeDebugging/220-Viewing_Variables_and_Memory/variables_and_memory.html"&gt;data formatter plugin API&lt;/a&gt; for displaying
+summaries of &amp;nbsp;user defined objects. Unfortunately, the documentation
+isn't as complete as one would hope. The example program doesn't even
+compile. Through a bit of trial and error, I was able to create data
+formatters for some basic Qt4 objects. Included are:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;QString&lt;/li&gt;
+&lt;li&gt;QVariant&lt;/li&gt;
+&lt;li&gt;QModelIndex&lt;/li&gt;
+&lt;li&gt;QFile&lt;/li&gt;
+&lt;li&gt;QDomNode&lt;/li&gt;
+&lt;li&gt;QDomElement&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I'm adding other objects on an as needed basis. Adding other QObjects is
+trivial using the existing methods as a template. Basically, you just
+create a display message using a QString and standard Qt4 API's, then
+have the new data formatter function return the already implemented
+printQString(QString* str, int ID) method. For example, if we wished to
+create a summary for QObject's that displayed the QObject's classname,
+we would add a method to Qt4DataFormatter.cpp in the form of:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="nf"&gt;printQObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QObject&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ID&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;QString&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ClassName: %1&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="n"&gt;QString&lt;/span&gt; &lt;span class="n"&gt;className&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Undefined&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// make sure we have access to the plugin function list&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;_pbxgdb_plugin_functions&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;className&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ogj&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;metaObject&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;className&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;printQString&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;className&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;ID&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Recompile, then install (or link) the plugin to your:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;~/Library/Application&lt;span class="se"&gt;\ &lt;/span&gt;Support/Developer/Shared/Xcode/CustomDataViews/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;or&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/Developer/Library/Xcode/CustomDataViews/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It's that easy. The &lt;a class="reference external" href="http://github.com/jameskyle/Qt4DataFormatter"&gt;Qt4DataFormatter project&lt;/a&gt; is hosted on github.
+Please see the README for the project as well.&lt;/p&gt;
+</summary><category term="data formatters"></category><category term="programming"></category><category term="qt4"></category><category term="xcode"></category></entry><entry><title>Customized Qt4 Generated Xcode Projects</title><link href="http://blog.jameskyle.org/2010/05/customized-qt4-generated-xcode-projects" rel="alternate"></link><updated>2010-05-18T15:52:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-05-18:2010/05/customized-qt4-generated-xcode-projects</id><summary type="html">&lt;p&gt;One of the very nice features of Qt's qmake is the ability to generate
+platform specific IDE projects. However, unless I've missed something in
+the Qt docs customizing the build settings for generated projects is
+very limited. Since often run qmake to update other generated files
+(ui_, moc_, etc), I had to reconfigure Xcode each time. To get around
+this, I wrote a Python script that that first runs qmake with -spec
+macx-xcode and then modifies the generated Xcode project with custom
+settings. The custom settings themselves are defined in a &lt;a class="reference external" href="http://www.yaml.org/"&gt;YAML&lt;/a&gt; file.
+The script expects to be run from the Qt project directory and expects
+to find a file called xcode.yml in that directory that contains your
+custom build options. My xcode.yml:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="l-Scalar-Plain"&gt;pbxproject&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;compatibilityVersion&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;Xcode 3.2&lt;/span&gt;
+&lt;span class="l-Scalar-Plain"&gt;Debug&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;ONLY_ACTIVE_ARCH&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;YES&amp;quot;&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;SDKROOT&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;/Developer/SDKs/MacOSX10.6.sdk&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;ARCHS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;$(ARCHS_STANDARD_32_64_BIT)&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;VALID_ARCHS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;i386&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;x86_64&amp;quot;&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;YES&amp;quot;&lt;/span&gt;
+&lt;span class="l-Scalar-Plain"&gt;Release&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;ONLY_ACTIVE_ARCH&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;NO&amp;quot;&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;VALID_ARCHS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;i386&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;x86_64&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;ppc&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;ppc64&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The environment variables and their values are a 1-to-1 for what you see
+in Xcode's Build pane of Project Info if you right click on a field and
+select &amp;quot;Show Definitions&amp;quot; and &amp;quot;Show Settings Names&amp;quot;. The source can be
+downloaded &lt;a class="reference external" href="http://github.com/jameskyle/Qt4-Xcode-Config"&gt;here&lt;/a&gt;.&lt;/p&gt;
+</summary><category term="programming"></category><category term="qt4"></category><category term="xcode"></category></entry></feed>

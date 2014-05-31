@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>administration - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+
+<h1>Post tagged: administration</h1>
+
+<article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2009/08/4-way-universal-perl" rel="bookmark" title="Permalink to Compiling a 4-way universal perl binary on osx">Compiling a 4-way universal perl binary on osx</a>
+    </h2>
+    <p><p>If you don't like having all of your perl modules overwritten by
+cavalier osx server updates, then you're either going with a macports
+install or rolling your own. And if you don't want to give up
+mod_auth_apple, you're probably rolling your own.</p>
+<p>If you're using ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2009/02/could-not-init-rewrite-log-lock-fix" rel="bookmark" title="Permalink to <em>FIX</em> mod_rewrite: could not init rewrite log lock in child"><em>FIX</em> mod_rewrite: could not init rewrite log lock in child</a>
+    </h2>
+    <p><p>Ran into this issue a couple of times already, duplicating it here so I
+dont' have to go dig for it again:</p>
+<p>Error:</p>
+<pre class="literal-block">
+[crit] (2)No such file or directory: mod_rewrite: could not init rewrite log lock in child
+</pre>
+<p>Change This:</p>
+<div class="highlight"><pre>RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^TRACE
+RewriteRule .* - [F]
+</pre></div>
+<p>To this ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2009/02/auto-configure-osx-clients-for-backuppc" rel="bookmark" title="Permalink to Auto-Configure OSX clients for BackupPC">Auto-Configure OSX clients for BackupPC</a>
+    </h2>
+    <p><p>This script auto-configures osx 10.4-10.5 clients for backup via
+<a class="reference external" href="http://backuppc.sourceforge.net/">BackupPC.</a>&nbsp;It creates a hidden backuppc user with standard
+permissions. Limits that users sudo permissions to rsync, sets up
+public/private key authentication, fliters all incoming ssh connections
+using that key to only allow rsync commands.</p>
+<p>The project also ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2008/12/command-line-group-management" rel="bookmark" title="Permalink to Command Line Group Management">Command Line Group Management</a>
+    </h2>
+    <p><p>Adding a user:</p>
+<div class="highlight"><pre>dscl . append /Groups/admin GroupMembership gneagle
+</pre></div>
+<p>Removing a user:</p>
+<div class="highlight"><pre>dscl . delete /Groups/admin GroupMembership gneagle
+</pre></div>
+<p>Reading the membership of the admin group:</p>
+<div class="highlight"><pre>dscl . <span class="nb">read</span> /Groups/admin GroupMembership
+</pre></div>
+<p>This comes with a nod to <a class="reference external" href="http://managingosx.wordpress.com/2006/09/15/add-a-user-to-the-admin-group-via-command-line-20/">Managing OSX</a></p>
+</p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2008/10/disable-extended-attributes-for-tar-backup" rel="bookmark" title="Permalink to Disable Extended Attributes for Tar Backup">Disable Extended Attributes for Tar Backup</a>
+    </h2>
+    <p><p>To disable the tar'ing of extended attributes (those pesky ._foo
+files), export the following variable:</p>
+<p>For Tiger:</p>
+<div class="highlight"><pre><span class="nb">export </span><span class="nv">COPY_EXTENDED_ATTRIBUTES_DISABLE</span><span class="o">=</span><span class="nb">true</span>
+</pre></div>
+<p>For Leopard &amp; Snow Leopard:</p>
+<div class="highlight"><pre><span class="nb">export </span><span class="nv">COPYFILE_DISABLE</span><span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2008/08/fix-for-max-attachment-size-stuck-at-0-bug-in-leopard-server" rel="bookmark" title="Permalink to Fix for max attachment size stuck at 0 bug in leopard server">Fix for max attachment size stuck at 0 bug in leopard server</a>
+    </h2>
+    <p><p>There's a bug in Server Admin which makes the max attachment size stick
+at 0 MB preventing file uploads. To fix this:</p>
+<ul>
+<li><p class="first">Manually set your preferred attachment size in /etc/wikid/wikid.conf
+under the <em>maxattachmentsize</em>key</p>
+</li>
+<li><p class="first">Save file</p>
+</li>
+<li><p class="first">restart the team server on the command line</p>
+<div class="highlight"><pre>sudo serveradmin ...</pre></div></li></ul></p>
+  </div>
+</article>
+<div class="pagination">
+            <a href="http://blog.jameskyle.org/tag/administration.html">&laquo;</a>
+    Page 2 / 2
+</div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

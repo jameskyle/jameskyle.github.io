@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+
+
+
+      <article>
+        <h1><a href="http://blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit">Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit</a></h1>
+        <div class="section" id="motivation">
+<h2>Motivation</h2>
+<p>Most continuous integration platforms support the xunit/junit formats for test
+results. They allow a greater granularity of test management above a simple
+pass/fail. <a class="reference external" href="https://nose.readthedocs.org/en/latest/">Nose</a> supports xunit reports by default, but <a class="reference external" href="http://pep8.readthedocs.org/en/latest/">PEP8</a> and <a class="reference external" href="http://www.pylint.org/">PyLint</a> do not.
+By integrating PEP8 &amp; PyLint into nose tests, we can include their results in
+our xunit reports. This allows easy tracking of lint and pep failures and
+linking them to issues.</p>
+</div>
+<div class="section" id="technique-limitations">
+<h2>Technique &amp; Limitations</h2>
+<p>In both cases I used the technique of collecting results, then using a test
+<a class="reference external" href="http://nose.readthedocs.org/en/latest/writing_tests.html#test-generators">generator pattern</a> with the PEP or lint output as the error message. This has
+the benefit of easily integrating with nose's xunit output plugin. However, it
+does come with the disadvantage that tests do not persist across runs. This is
+due to the test only existing when it <em>fails</em> and disappearing when it does not.
+The consequence is that if your CI tracks 'fixed' bugs, it'll lose that metric
+since the test never technically succeeds ... it just disappears.</p>
+<p>Providing persistance would require a bit of footwork to track past failures
+and generate a test, with the same name, with a 'pass' flag in the xunit.</p>
+</div>
+<div class="section" id="pep8">
+<h2>PEP8</h2>
+<p>I couldn't find a method of extracting test data directly from the pep8
+reports. To work around that, I subclassed the StandardReport and overrode the
+get_file_results method so data is collected in an array of results.</p>
+<pre class="code python literal-block">
+<span class="k">class</span> <span class="nc">CustomReport</span><span class="p">(</span><span class="n">pep8</span><span class="o">.</span><span class="n">StandardReport</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;
+    Collect report into an array of results.
+    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">get_file_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s">'path'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+                    <span class="s">'row'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_offset</span> <span class="o">+</span> <span class="n">line_number</span><span class="p">,</span>
+                    <span class="s">'col'</span><span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="s">'code'</span><span class="p">:</span> <span class="n">code</span><span class="p">,</span>
+                    <span class="s">'text'</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                <span class="p">})</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_errors</span>
+</pre>
+<p>Next, a generator requires a test method to yield a function and its args which
+in turn produces a test result. I created a small wrapper method to always fail.</p>
+<pre class="code python literal-block">
+<span class="k">def</span> <span class="nf">fail</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;
+    Fails with message.
+    &quot;&quot;&quot;</span>
+    <span class="n">assert_true</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</pre>
+<p>Finally, I created a test method that programmatically calls pep8 on the
+project and generates a failure for each error found.</p>
+<pre class="code python literal-block">
+<span class="k">def</span> <span class="nf">test_pep8_conformance</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;
+    Test for pep8 conformance
+    &quot;&quot;&quot;</span>
+    <span class="c"># Here I'm matching the project path so I can remove the prefix path</span>
+    <span class="c"># in the output. This strips the often obtuse absolute paths in CI</span>
+    <span class="c"># environments. Yours will obviously differ.</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r'.*(roadrage/roadrage.*\.py)'</span><span class="p">)</span>
+    <span class="n">pep8style</span> <span class="o">=</span> <span class="n">pep8</span><span class="o">.</span><span class="n">StyleGuide</span><span class="p">(</span><span class="n">reporter</span><span class="o">=</span><span class="n">CustomReport</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+    <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">'..'</span><span class="p">))</span>
+    <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">pyfile</span><span class="p">)</span> <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">pyfile</span> <span class="ow">in</span> <span class="n">files</span>
+        <span class="k">if</span> <span class="n">pyfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">'.py'</span><span class="p">)]</span>
+    <span class="n">report</span> <span class="o">=</span> <span class="n">pep8style</span><span class="o">.</span><span class="n">init_report</span><span class="p">()</span>
+    <span class="n">pep8style</span><span class="o">.</span><span class="n">check_files</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;{path}: {code} {row}, {col} - {text}&quot;</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">]</span>
+
+        <span class="k">yield</span> <span class="n">fail</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">rel_path</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'code'</span><span class="p">],</span>
+            <span class="n">row</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'row'</span><span class="p">],</span>
+            <span class="n">col</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'col'</span><span class="p">],</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'text'</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre>
+<p>These are placed where nose can find them, in my case tests/test_pep8.py.
+Here's the full source.</p>
+<pre class="code python literal-block">
+<span class="sd">&quot;&quot;&quot;
+Provides code conformance testing.
+
+We do it here so we can collect errors into the xunit report for CI
+integration.
+&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pep8</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_true</span>  <span class="c"># pylint: disable=E0611</span>
+
+<span class="n">PROJ_ROOT</span> <span class="o">=</span> <span class="s">&quot;roadrage/roadrage&quot;</span>
+
+<span class="k">def</span> <span class="nf">fail</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;
+    Fails with message.
+    &quot;&quot;&quot;</span>
+    <span class="n">assert_true</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CustomReport</span><span class="p">(</span><span class="n">pep8</span><span class="o">.</span><span class="n">StandardReport</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;
+    Collect report into an array of results.
+    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">get_file_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s">'path'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+                    <span class="s">'row'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_offset</span> <span class="o">+</span> <span class="n">line_number</span><span class="p">,</span>
+                    <span class="s">'col'</span><span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="s">'code'</span><span class="p">:</span> <span class="n">code</span><span class="p">,</span>
+                    <span class="s">'text'</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                <span class="p">})</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_errors</span>
+
+
+<span class="k">def</span> <span class="nf">test_pep8_conformance</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;
+    Test for pep8 conformance
+    &quot;&quot;&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r'.*({0}.*\.py)'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PROJ_ROOT</span><span class="p">)</span>
+    <span class="n">pep8style</span> <span class="o">=</span> <span class="n">pep8</span><span class="o">.</span><span class="n">StyleGuide</span><span class="p">(</span><span class="n">reporter</span><span class="o">=</span><span class="n">CustomReport</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+    <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">'..'</span><span class="p">))</span>
+    <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">pyfile</span><span class="p">)</span> <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">pyfile</span> <span class="ow">in</span> <span class="n">files</span>
+        <span class="k">if</span> <span class="n">pyfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">'.py'</span><span class="p">)]</span>
+    <span class="n">report</span> <span class="o">=</span> <span class="n">pep8style</span><span class="o">.</span><span class="n">init_report</span><span class="p">()</span>
+    <span class="n">pep8style</span><span class="o">.</span><span class="n">check_files</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;{path}: {code} {row}, {col} - {text}&quot;</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">]</span>
+
+        <span class="k">yield</span> <span class="n">fail</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">rel_path</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'code'</span><span class="p">],</span>
+            <span class="n">row</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'row'</span><span class="p">],</span>
+            <span class="n">col</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'col'</span><span class="p">],</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'text'</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre>
+</div>
+<div class="section" id="pylint">
+<h2>PyLint</h2>
+<p>I used a very similar method with PyLint, with one exception. I couldn't figure
+out how to do it purely programmatically. The failure was primarily due to a
+bug in the current version where the py_run method ignored the pylintrc options
+passed to it. I seriously can't find the bug report now, but it was being
+tracked. My workaround involved configuring a custom output template, shelling
+out, and capturing then parsing the output.</p>
+<p>The method requires pylintrc settings for the msg template that separates
+each field by a '|' and disabling of the verbose reporting options.</p>
+<pre class="code ini literal-block">
+<span class="na">msg-template</span><span class="o">=</span><span class="s">{path}|{msg_id}|{line},{column}|{msg}</span>
+<span class="na">reports</span><span class="o">=</span><span class="s">no</span>
+</pre>
+<pre class="code python literal-block">
+<span class="sd">&quot;&quot;&quot;
+Provides lint testing for the roadrage project.
+&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">PIPE</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_true</span>  <span class="c"># pylint: disable=E0611</span>
+
+
+<span class="k">def</span> <span class="nf">fail</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;
+    Fails with message.
+    &quot;&quot;&quot;</span>
+    <span class="n">assert_true</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_lint_conformance</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;
+    Collects all lint tests and creates nose errors.
+    &quot;&quot;&quot;</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">'..'</span><span class="p">,</span> <span class="s">'..'</span><span class="p">))</span>
+    <span class="n">rcfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">'.pylintrc'</span><span class="p">)</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s">'pylint'</span><span class="p">,</span> <span class="s">'roadrage'</span><span class="p">,</span> <span class="s">'--rcfile={0}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rcfile</span><span class="p">)]</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
+    <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span>
+              <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+              <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">'*'</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">err</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">'|'</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;{path}: {code} ({position}) - {msg}&quot;</span>
+        <span class="k">yield</span> <span class="n">fail</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+            <span class="n">msg</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="p">)</span>
+</pre>
+</div>
+<div class="section" id="external-links">
+<h2>External Links</h2>
+<ul class="simple">
+<li><a class="reference external" href="http://pep8.readthedocs.org/en/latest/">PEP8</a></li>
+<li><a class="reference external" href="http://www.pylint.org/">PyLint</a></li>
+<li><a class="reference external" href="https://nose.readthedocs.org/en/latest/">Nose</a></li>
+</ul>
+</div>
+
+      </article>
+      <section>
+          <p id="post-share-links">
+              Share on:
+              <a href="http://twitter.com/home?status=Integrating%20PEP8%20%26amp%3B%20PyLint%20Tests%20with%20Nose%20%26amp%3B%20Xunit%20 http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" target="_blank" title="Share on Twitter">Twitter</a>
+              ❄
+              <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit&p[images][0]=&p[title]=Integrating%20PEP8%20%26amp%3B%20PyLint%20Tests%20with%20Nose%20%26amp%3B%20Xunit%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22motivation%22%3E%0A%3Ch2%3EMotivation%3C/h2%3E%0A%3Cp%3EMost%20continuous%20integration%20platforms%20support%20the%20xunit/junit%20formats%20for%20test%0Aresults.%20They%20allow%20a%20greater%20granularity%20of%20test%20management%20above%20a%20simple%0Apass/fail.%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//nose.readthedocs.org/en/latest/%22%3ENose%3C/a%3E%20supports%20xunit%20reports%20by%20default%2C%20but%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//pep8.readthedocs.org/en/latest/%22%3EPEP8%3C/a%3E%20and%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.pylint.org/%22%3EPyLint%3C/a%3E%20do%20not.%0ABy%20integrating%20PEP8%20%26amp%3B%20PyLint%20into%20nose%20tests%2C%20we%20can%20include%20their%20results%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+              ❄
+              <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" target="_blank" title="Share on Google Plus">Google+</a>
+              ❄
+              <a href="mailto:?subject=Integrating%20PEP8%20%26amp%3B%20PyLint%20Tests%20with%20Nose%20%26amp%3B%20Xunit%20&body=http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" target="_blank" title="Share via Email">Email</a>
+          </p>
+      </section>
+      <hr />
+
+        <div>
+          <h3>Last posts</h3>
+          <ol class="archive">
+    
+
+
+      <li>
+<a href="http://blog.jameskyle.org/2014/04/coreos-docker-remote-api-tls" rel="bookmark" title="Permalink to Configuring Docker Remote API with TLS on CoreOS">Configuring Docker Remote API with TLS on CoreOS</a>
+  <time datetime="2014-04-18T09:09:25" pubdate>Fri 18 April 2014</time>
+<p class="tags">tags: <a href="http://blog.jameskyle.org/tag/docker coreos administration">docker coreos administration</a></p></a>      </li>
+
+
+      <li>
+<a href="http://blog.jameskyle.org/2014/03/osxfuse-kext-fails-on-mavericks" rel="bookmark" title="Permalink to OSXFuse 2.6.2 Kext Fails to Load in Mavericks">OSXFuse 2.6.2 Kext Fails to Load in Mavericks</a>
+  <time datetime="2014-03-19T13:33:14" pubdate>Wed 19 March 2014</time>
+<p class="tags">tags: <a href="http://blog.jameskyle.org/tag/osx administration">osx administration</a></p></a>      </li>
+
+
+      <li>
+<a href="http://blog.jameskyle.org/2013/08/howto-create-debian-packages-from-source" rel="bookmark" title="Permalink to HowTo Create Debian Packages from Source">HowTo Create Debian Packages from Source</a>
+  <time datetime="2013-08-17T13:44:11" pubdate>Sat 17 August 2013</time>
+<p class="tags">tags: <a href="http://blog.jameskyle.org/tag/debian sysadmin apt">debian sysadmin apt</a></p></a>      </li>
+
+
+      <li>
+<a href="http://blog.jameskyle.org/2013/08/charybdis-with-puppet" rel="bookmark" title="Permalink to Title">Title</a>
+  <time datetime="2013-08-17T12:04:49" pubdate>Sat 17 August 2013</time>
+<p class="tags">tags: <a href="http://blog.jameskyle.org/tag/charybdis puppet">charybdis puppet</a></p></a>      </li>
+
+
+      <li>
+<a href="http://blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" rel="bookmark" title="Permalink to Zsh Script to Create VMware Fusion 5 Vagrant Box">Zsh Script to Create VMware Fusion 5 Vagrant Box</a>
+  <time datetime="2013-05-25T09:03:50" pubdate>Sat 25 May 2013</time>
+<p class="tags">tags: <a href="http://blog.jameskyle.org/tag/vmware">vmware</a><a href="http://blog.jameskyle.org/tag/vagrant">vagrant</a><a href="http://blog.jameskyle.org/tag/scripts">scripts</a></p></a>      </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </ol>
+        </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

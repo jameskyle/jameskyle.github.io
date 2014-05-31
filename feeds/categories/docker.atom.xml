@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/categories/docker.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-04-18T09:09:25-07:00</updated><entry><title>Configuring Docker Remote API with TLS on CoreOS</title><link href="http://blog.jameskyle.org/2014/04/coreos-docker-remote-api-tls" rel="alternate"></link><updated>2014-04-18T09:09:25-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-04-18:2014/04/coreos-docker-remote-api-tls</id><summary type="html">&lt;div class="section" id="problem"&gt;
+&lt;h2&gt;Problem&lt;/h2&gt;
+&lt;p&gt;I recently set up a CoreOS box for futzing around and wanted to use it as a
+replacement for my qemu-kvm workflow (amongst other things). Typically this
+involves spinning up various distros of linux to compile software, provide
+services, or do demos on. They're typically ephemeral in that I frequently tear
+them down when I'm done and the workspace is configured automatically using
+&lt;a class="reference external" href="https://github.com/jameskyle/setup"&gt;some setup&lt;/a&gt; scripts. Before I'd done this with virsh behind a rather
+restrictive vpn, but this box is a little more exposed and I wanted some kind
+of auth in front. Luckily, docker 0.10.0 provides TLS authentication for its
+remote tcp API. Perfect.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="solution"&gt;
+&lt;h2&gt;Solution&lt;/h2&gt;
+&lt;p&gt;I'm going to assume you already have a &lt;a class="reference external" href="http://coreos.com/docs/"&gt;working coreos and docker&lt;/a&gt; instance
+somwhere. After that, we're going to merge a couple of tutorials from the
+&lt;a class="reference external" href="http://docs.docker.io/examples/https/"&gt;docker side&lt;/a&gt; for https auth and the &lt;a class="reference external" href="http://coreos.com/docs/launching-containers/building/customizing-docker/#enable-the-remote-api-on-a-new-socket"&gt;coreos side&lt;/a&gt; for configuring the remote
+api. But we're not going to use the docker-tcp.socket example as I was unable to
+get that to work with the docker cert options.&lt;/p&gt;
+&lt;div class="section" id="creating-certificates"&gt;
+&lt;h3&gt;Creating Certificates&lt;/h3&gt;
+&lt;p&gt;Docker uses client/server certificates to grant access. So we need to create
+some private/public key pairs and a CA serial file. The example below creates
+one with a 10 year expiration.&lt;/p&gt;
+&lt;pre class="code sh literal-block"&gt;
+&lt;span class="c"&gt;#!/bin/bash
+&lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt; -ex
+mkdir certs &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;cd &lt;/span&gt;certs
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Creating server keys...&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;echo &lt;/span&gt;01 &amp;gt; ca.srl
+openssl genrsa -des3 -out ca-key.pem
+openssl req -new -x509 -days 3650 -key ca-key.pem -out ca.pem
+openssl genrsa -des3 -out server-key.pem
+openssl req -new -key server-key.pem -out server.csr
+openssl x509 -req -days 365 -in server.csr -CA ca.pem -CAkey ca-key.pem &lt;span class="se"&gt;\
+&lt;/span&gt;    -out server-cert.pem
+
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Creating client keys...&amp;quot;&lt;/span&gt;
+openssl genrsa -des3 -out client-key.pem
+openssl req -new -key client-key.pem -out client.csr
+&lt;span class="nb"&gt;echo &lt;/span&gt;&lt;span class="nv"&gt;extendedKeyUsage&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; clientAuth &amp;gt; extfile.cnf
+openssl x509 -req -days 365 -in client.csr -CA ca.pem -CAkey ca-key.pem &lt;span class="se"&gt;\
+&lt;/span&gt;    -out client-cert.pem -extfile extfile.cnf
+
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Stripping passwords from keys...&amp;quot;&lt;/span&gt;
+openssl rsa -in server-key.pem -out server-key.pem
+openssl rsa -in client-key.pem -out client-key.pem
+&lt;/pre&gt;
+&lt;p&gt;After being asked a bunch of annoying questions, you'll need to copy the
+generated client certificates from your server to your client or vice versa if
+you created the certs on your client.&lt;/p&gt;
+&lt;p&gt;Make sure you use the correct FQDN (or '*' to match all servers) of the server
+for the server certificate. We don't have a fully working dns for our lab
+network, so I just made sure I had a /etc/hosts entry on my client.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="configuring-coreos"&gt;
+&lt;h3&gt;Configuring CoreOS&lt;/h3&gt;
+&lt;p&gt;We need to tweak the default docker.service definition in CoreOS to use the
+TLS certs we created. This should be done as root. The below script &lt;em&gt;assumes
+the server certificates are in working directory of the script&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class="code sh literal-block"&gt;
+&lt;span class="c"&gt;#!/bin/bash
+&lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt; -ex
+systemctl stop docker
+systemctl disable docker
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Copying scripts to /var/ssl/&amp;quot;&lt;/span&gt;
+mkdir -p /var/ssl
+cp ca.pem server-cert.pem server-key.pem /var/ssl/
+
+cat&lt;span class="s"&gt;&amp;lt;&amp;lt;-EOF &amp;gt; /etc/systemd/system/docker.service
+[Unit]
+Description=Docker Application Container Engine
+Documentation=http://docs.docker.io
+
+[Service]
+ExecStartPre=/bin/mount --make-rprivate /
+# Run docker but don't have docker automatically restart
+# containers. This is a job for systemd and unit files.
+ExecStart=/usr/bin/docker -d -s=btrfs -r=false --tlsverify --tlscacert=/var/ssl/ca.pem --tlscert=/var/ssl/server-cert.pem --tlskey=/var/ssl/server-key.pem -H fd:// -H 0.0.0.0:4243
+#ExecStart=/usr/bin/docker -d -s=btrfs -r=false -H fd://
+
+[Install]
+WantedBy=multi-user.target
+EOF&lt;/span&gt;
+
+systemctl &lt;span class="nb"&gt;enable&lt;/span&gt; /etc/systemd/system/docker.service
+systemctl start docker
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="setting-up-your-client"&gt;
+&lt;h3&gt;Setting Up Your Client&lt;/h3&gt;
+&lt;p&gt;Coy the client certificates to a good location, I put mine in ~/.docker/. Also,
+for convenience, set the DOCKER_HOST environment variable.&lt;/p&gt;
+&lt;pre class="code sh literal-block"&gt;
+mkdir ~/.docker
+cp ca.pem ~/.docker
+cp client-cert.pem ~/.docker/cert.pem
+cp client-key.pem ~/.docker/key.pem
+
+&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;DOCKER_HOST&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&amp;lt;docker service fqdn&amp;gt;:4243
+&lt;/pre&gt;
+&lt;p&gt;If you named the files exactly like above, you should be able to access your
+TLS protected docker api with with the following command from your client.&lt;/p&gt;
+&lt;pre class="code sh literal-block"&gt;
+docker --tlsverify images
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="external-links"&gt;
+&lt;h2&gt;External Links&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://www.docker.io"&gt;Docker&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://coreos.com"&gt;CoreOS&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="docker coreos administration"></category></entry></feed>

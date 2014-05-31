@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/categories/linux.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2012-02-05T10:32:00-08:00</updated><entry><title>Chef Alternatives for Debian/Ubuntu</title><link href="http://blog.jameskyle.org/2012/02/chef-alternatives-for-debian-ubuntu" rel="alternate"></link><updated>2012-02-05T10:32:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-02-05:2012/02/chef-alternatives-for-debian-ubuntu</id><summary type="html">&lt;p&gt;An update-alternatives script for chef. Currently only sets up a version
+installed in the 1.9.1 gems directory, but extendable to any version
+easily enough.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
+&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0.10.8
+&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
+   --install /usr/bin/chef-client chef &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-client 500 &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/chef-solo chef-solo &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/knife knife &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/shef shef  &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/shef
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="administration"></category><category term="debian"></category><category term="linux"></category><category term="ubuntu"></category></entry></feed>

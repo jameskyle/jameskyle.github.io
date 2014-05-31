@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/perl.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2009-08-12T13:35:00-07:00</updated><entry><title>Compiling a 4-way universal perl binary on osx</title><link href="http://blog.jameskyle.org/2009/08/4-way-universal-perl" rel="alternate"></link><updated>2009-08-12T13:35:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-08-12:2009/08/4-way-universal-perl</id><summary type="html">&lt;p&gt;If you don't like having all of your perl modules overwritten by
+cavalier osx server updates, then you're either going with a macports
+install or rolling your own. And if you don't want to give up
+mod_auth_apple, you're probably rolling your own.&lt;/p&gt;
+&lt;p&gt;If you're using mod_perl on osx, then you've probably already run into
+the issues with the 4-way httpd fat binary and a flat arch mod_perl not
+working. There are various posts around the internet on how to set
+archflags to get around this. However, if you're already compiling your
+own perl binary the easiest method is to compile it with the flags you
+want passed onto your perl modules.&lt;/p&gt;
+&lt;p&gt;So this is how to compile your perl binary with a 4-way (ppc ppc64
+x86_64 i686) universal arch and by extension, compile all subsequent
+modules with the same:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;SDK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/Developer/SDKs/MacOSX10.5.sdk/
+./Configure -Accflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch x86_64 -arch ppc64 \&lt;/span&gt;
+&lt;span class="s2"&gt;  -fPIC -nostdinc -B$SDK/usr/include/gcc \&lt;/span&gt;
+&lt;span class="s2"&gt;  -B$SDK/usr/lib/gcc -isystem$SDK/usr/include \&lt;/span&gt;
+&lt;span class="s2"&gt;  -F$SDK/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+  -Aldflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch ppc64 -arch x86_64 \&lt;/span&gt;
+&lt;span class="s2"&gt;  -Wl,-syslibroot,$SDK&amp;quot;&lt;/span&gt; -de
+
+make
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="administration"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="perl"></category><category term="programming"></category></entry></feed>

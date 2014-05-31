@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>Toggling NSMenuItems for a NSSearchField Menu Template - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>Toggling NSMenuItems for a NSSearchField Menu Template</h1>
+        
+        <div class="section" id="the-problem">
+<h2>The Problem</h2>
+<p>Creating NSMenus for NSSearchFields involves specifying a particular
+NSMenu as the NSSearchField's 'Menu Template'. The problem with this is
+that the actual NSMenu is not used, a copy is made. The result is that
+its impossible to access the NSMenu or its NSMenuItems through
+IBOutlets. Thus, modification of the NSMenuItem's state, title, etc.
+attributes are not done in the &quot;Standard Way&quot;.</p>
+</div>
+<div class="section" id="the-solution">
+<h2>The Solution</h2>
+<p>This wasn't immediately obvious to me from the documentation or API
+references and caused a good bit of confusion, digging, and googling
+before I turned up an answer. I'm sure this is in part due to my newness
+with The Cocoa Way®. Regardless, it deserves a post so I'll remember it.</p>
+<p>The magic bullet is to set your controller to the delegate for the
+NSSearchField and implement the validateMenuItem:. Each time the NSMenu
+is refreshed, the validateMenuItem is called for each NSMenuItem at
+which time you can modify its state or attributes.</p>
+</div>
+<div class="section" id="the-implementation">
+<h2>The Implementation</h2>
+<p>Here we do a quick implementation to demonstrate the validateMenuItem in
+action. I'm going to use PyObjc for brevity, but it should suffice to
+demonstrate the approach.</p>
+<div class="section" id="create-a-pyobjc-cocoa-application-with-a-nssearchfield-using-a-menu-template">
+<h3>Create a PyObjc Cocoa Application with a NSSearchField using a Menu Template.</h3>
+<p>I've named my project ModifySearchMenu. The object is to create an
+IBAction that is assigned to the NSMenuItems action. When the item is
+clicked, we set it as the current menu item. We check this value in
+validateMenuItem and assign the appropriate state. validateMenuItem
+returns either YES or NO if the NSMenuItem should be active or not.</p>
+<div class="section" id="drag-a-nssearchfield-widget-to-the-default-nswindow">
+<h4>Drag a NSSearchField widget to the default NSWindow.</h4>
+<div class="figure align-center">
+<img alt="Screen shot 2010-10-07 at 4.11.22 PM.png" src="/images/2010/10/Search_Item.png" />
+<p class="caption">Screen shot 2010-10-07 at 4.11.22 PM.png</p>
+</div>
+</div>
+<div class="section" id="create-a-nsmenu-instance">
+<h4>Create a NSMenu instance</h4>
+<div class="figure align-center">
+<img alt="Screen shot 2010-10-07 at 4.13.26 PM.png" src="/images/2010/10/NSMenu.png" />
+<p class="caption">Screen shot 2010-10-07 at 4.13.26 PM.png</p>
+</div>
+</div>
+<div class="section" id="set-the-appdelegate-as-the-delegate-for-the-nssearchfield">
+<h4>Set the AppDelegate as the delegate for the NSSearchField</h4>
+<div class="figure align-center">
+<img alt="Screen shot 2010-10-07 at 4.14.24 PM.png" src="/images/2010/10/ModifySearchFieldDelegate.png" />
+<p class="caption">Screen shot 2010-10-07 at 4.14.24 PM.png</p>
+</div>
+</div>
+<div class="section" id="implement-the-validatemenuitem-method-in-your-appdelegate-and-create-an-ibaction-to-register-the-clicked-menu-item">
+<h4>Implement the validateMenuItem method in your AppDelegate and create an IBAction to register the clicked menu item.</h4>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">Foundation</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">AppKit</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">Cocoa</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">objc</span> <span class="kn">import</span> <span class="n">IBAction</span>
+<span class="kn">from</span> <span class="nn">objc</span> <span class="kn">import</span> <span class="n">YES</span>
+<span class="k">class</span> <span class="nc">ModifySearchMenuAppDelegate</span><span class="p">(</span><span class="n">NSObject</span><span class="p">):</span>
+    <span class="n">currentItem</span> <span class="o">=</span> <span class="s">u&quot;Item 1&quot;</span><span class="k">def</span> <span class="nf">applicationDidFinishLaunching_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
+        <span class="n">NSLog</span><span class="p">(</span><span class="s">&quot;Application did finish launching.&quot;</span><span class="p">)</span>    <span class="nd">@IBAction</span>
+    <span class="k">def</span> <span class="nf">setCurrentMenuItem_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentItem</span> <span class="o">=</span> <span class="n">sender</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="k">def</span> <span class="nf">validateMenuItem_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentItem</span><span class="p">:</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setState_</span><span class="p">(</span><span class="n">NSOnState</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setState_</span><span class="p">(</span><span class="n">NSOffState</span><span class="p">)</span>        <span class="k">return</span> <span class="n">YES</span>
+</pre></div>
+</div>
+<div class="section" id="connect-it-up-in-ib-don-t-forget-to-set-your-menu-template">
+<h4>Connect it up in IB. Don't forget to set your Menu Template.</h4>
+<p><img alt="Screen shot 2010-10-07 at 4.28.00 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.28.00-PM.png" />
+<img alt="Screen shot 2010-10-07 at 4.30.02 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.30.02-PM.png" /></p>
+</div>
+<div class="section" id="once-this-is-done-clicking-one-menu-item-will-toggle-it-to-the-on-state-and-all-others-to-the-off-state-on-the-next-display">
+<h4>Once this is done, clicking one menu item will toggle it to the on state and all others to the off state on the next display.</h4>
+<p><img alt="Screen shot 2010-10-07 at 4.30.51 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.30.51-PM.png" />
+<img alt="Screen shot 2010-10-07 at 4.31.00 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.31.00-PM.png" />
+<img alt="Screen shot 2010-10-07 at 4.31.09 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.31.09-PM.png" /></p>
+</div>
+</div>
+</div>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=Toggling%20NSMenuItems%20for%20a%20NSSearchField%20Menu%20Template%20 http%3A//blog.jameskyle.org/2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template&p[images][0]=&p[title]=Toggling%20NSMenuItems%20for%20a%20NSSearchField%20Menu%20Template%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22the-problem%22%3E%0A%3Ch2%3EThe%20Problem%3C/h2%3E%0A%3Cp%3ECreating%20NSMenus%20for%20NSSearchFields%20involves%20specifying%20a%20particular%0ANSMenu%20as%20the%20NSSearchField%27s%20%27Menu%20Template%27.%20The%20problem%20with%20this%20is%0Athat%20the%20actual%20NSMenu%20is%20not%20used%2C%20a%20copy%20is%20made.%20The%20result%20is%20that%0Aits%20impossible%20to%20access%20the%20NSMenu%20or%20its%20NSMenuItems%20through%0AIBOutlets.%20Thus%2C%20modification%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=Toggling%20NSMenuItems%20for%20a%20NSSearchField%20Menu%20Template%20&body=http%3A//blog.jameskyle.org/2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

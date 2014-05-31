@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>Dell Perc 5i on Ubuntu 64 - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>Dell Perc 5i on Ubuntu 64</h1>
+        
+        <p>I've been setting up an Ubuntu server on a Dell with a 29xx series with
+a Perc 5i SAS/SATA RAID controller. It took a bit of digging around and
+piecing together posts on the ubuntu forums and random blogs, but I'm
+pretty sure I've got it all up and working. Here's the short story:</p>
+<ol class="arabic">
+<li><p class="first">Add the deb ports for dell's Open Management tools to your
+sources.conf</p>
+<ol class="arabic simple">
+<li>/etc/apt/sources.list: deb <a class="reference external" href="ftp://ftp.sara.nl/pub/sara-omsa">ftp://ftp.sara.nl/pub/sara-omsa</a> dell
+sara</li>
+<li>add the sara key to your gpg list<ol class="arabic">
+<li>wget <a class="reference external" href="http://ftp.sara.nl/debian_sara.asc">http://ftp.sara.nl/debian_sara.asc</a></li>
+<li>sudo apt-key add debian_sara.asc</li>
+</ol>
+</li>
+<li>apt-get update</li>
+</ol>
+</li>
+<li><p class="first">Install snmp tools</p>
+<ol class="arabic simple">
+<li>apt-get install snmp snmpd</li>
+</ol>
+</li>
+<li><p class="first">Install openipmi and ipmitool</p>
+<ol class="arabic simple">
+<li>apt-get install openipmi</li>
+<li>apt-get install ipmitool</li>
+<li>there's an open Ubuntu bug <a class="reference external" href="https://bugs.launchpad.net/ubuntu/+source/ipmitool/+bug/110992">#110992</a> that requires ipmi_devinf
+and ipmi_si to be appended to /dev/modules by hand to enable
+creation of the /dev/ipm* needed by ipmitool on start-up.</li>
+</ol>
+</li>
+<li><p class="first">Install lib32 ncurses and ia32-libs</p>
+</li>
+<li><ol class="first arabic simple">
+<li>apt-get install -f lib32ncurses5</li>
+<li>apt-get install -f ia32-libs</li>
+</ol>
+</li>
+<li><p class="first">Install dell's omsa tools</p>
+<ol class="arabic simple">
+<li>apt-get install dellomsa</li>
+</ol>
+</li>
+<li><p class="first">Update your libraries</p>
+<ol class="arabic simple">
+<li>ldconfig</li>
+<li><ol class="first arabic">
+<li>this takes care of a few errors I got that looked like this</li>
+<li>/opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d: error while
+loading shared libraries: libdcsmil32.so.5: cannot open shared
+object file: No such file or directory</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p class="first">Place the following init script and put it in /etc/init.d/</p>
+<ol class="arabic">
+<li><div class="first"><div class="highlight"><pre><span class="c">#!/bin/sh</span>
+
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_snmp32d
+
+/opt/dell/srvadmin/dataeng/bin/dataeng status
+
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+
+/etc/init.d/dataeng stop ; modprobe mptctl ; /etc/init.d/dataeng start
+
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d
+/opt/dell/srvadmin/dataeng/bin/dsm_sa_snmp32d
+
+/opt/dell/srvadmin/dataeng/bin/dataeng status
+
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+/opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
+</pre></div>
+</div></li>
+</ol>
+</li>
+<li><p class="first">Enable snmp in omsa tools</p>
+<ol class="arabic simple">
+<li>/etc/init.d/dataeng enablesnmp</li>
+</ol>
+</li>
+<li><p class="first">Execute the dell_omsa.sh script to get up and running</p>
+<ol class="arabic simple">
+<li>/etc/init.d/dell_omsa.sh</li>
+</ol>
+</li>
+<li><p class="first">Register the new driver module with omsa</p>
+<ol class="arabic simple">
+<li>/etc/init.d/instsvcdrv restart</li>
+</ol>
+</li>
+<li><p class="first">Edit your /etc/snmp/snmpd.conf so it can be used (I take no
+responsibility if the following settings are not appropriate security
+for your network)</p>
+<ol class="arabic simple">
+<li>change: com2sec paranoid default public to com2sec readonly
+default public</li>
+</ol>
+</li>
+<li><p class="first">Change the way taht ubuntu starts snmpd</p>
+<ol class="arabic simple">
+<li>/etc/default/snmpd: change</li>
+<li>SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -I -smux -p
+/var/run/snmpd.pid 127.0.0.1' to</li>
+<li>SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -p /var/run/snmpd.pid
+127.0.0.1'</li>
+</ol>
+</li>
+<li><p class="first">/etc/init.d/snmpd restart</p>
+</li>
+<li><p class="first">/etc/init.d/dataeng restart</p>
+</li>
+<li><p class="first">Verify snmpd</p>
+<ol class="arabic simple">
+<li>snmpwalk -OS -v 1 -c public localhost .1.3.6.1.4.1.674.10892.1</li>
+</ol>
+</li>
+<li><p class="first">Start OMSA web services on reboot</p>
+<ol class="arabic simple">
+<li>update-rc.d dsm_om_connsvc defaults</li>
+</ol>
+</li>
+<li><p class="first">Finally, by default you must log into the web admin with the root
+account. So enable root account</p>
+<ol class="arabic simple">
+<li>sudo passwd root</li>
+</ol>
+</li>
+<li><p class="first">One more catch for 64 bit ubuntu users, you must change the lib paths
+in /etc/pam.d/omauth and install 32 bit pam libs</p>
+<ol class="arabic simple">
+<li>change all instances of /lib/security/ to /lib32/security</li>
+<li>download the i386 versions of the following libs (you can
+determine the package that provides a particular lib by dpkg -S
+/path/to/file, e.g. dpkg -S /lib/security/pam_unix.so)<ol class="arabic">
+<li>libselinux1_2.0.15-2ubuntu1_i386.deb</li>
+<li>libpam-modules_0.99.7.1-5ubuntu1_i386.deb</li>
+<li>libsepol1_2.0.3-1_i386.deb</li>
+</ol>
+</li>
+<li>Extract them to a tmp directory<ol class="arabic">
+<li>dpkg-deb -x &lt;libname&gt; /tmp/lib32s</li>
+</ol>
+</li>
+<li>then copy the following over to /lib32 and /lib32/security<ol class="arabic">
+<li>lib/libsepol.so.1</li>
+<li>lib/libselinux.so.1</li>
+<li>lib/security/pam_unix.so</li>
+<li>lib/security/pam_nologin.so</li>
+</ol>
+</li>
+<li>run ldconfig</li>
+</ol>
+</li>
+<li><p class="first">You should now be able to log into the OMSA web manager at
+<a class="reference external" href="https://localhost">https://localhost</a>:1311 using your root name password</p>
+</li>
+<li><p class="first">Having root enabled can be viewed as a security list, so you probably
+want to add a normal admin user to OMSA's manager group and disable
+root</p>
+<ol class="arabic simple">
+<li>adduser dellroot</li>
+<li>usermod -g root dellroot # user must be added to the root group to
+gain admin privileges in OMSA manager</li>
+</ol>
+</li>
+</ol>
+<p>I'd like to thank the <a class="reference external" href="http://sadsoftware.blogspot.com/2008/08/installing-dell-omsa-and-snmp-in-ubuntu.html">sad software blogger</a> for a good bit of this
+information, especially pertaining to snmp.</p>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=Dell%20Perc%205i%20on%20Ubuntu%2064%20 http%3A//blog.jameskyle.org/2010/01/dell-perc-5i-on-ubuntu-64" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2010/01/dell-perc-5i-on-ubuntu-64&p[images][0]=&p[title]=Dell%20Perc%205i%20on%20Ubuntu%2064%20&p[summary]=%3Cp%3EI%27ve%20been%20setting%20up%20an%20Ubuntu%20server%20on%20a%20Dell%20with%20a%2029xx%20series%20with%0Aa%20Perc%205i%20SAS/SATA%20RAID%20controller.%20It%20took%20a%20bit%20of%20digging%20around%20and%0Apiecing%20together%20posts%20on%20the%20ubuntu%20forums%20and%20random%20blogs%2C%20but%20I%27m%0Apretty%20sure%20I%27ve%20got%20it%20...%3C/p%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2010/01/dell-perc-5i-on-ubuntu-64" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=Dell%20Perc%205i%20on%20Ubuntu%2064%20&body=http%3A//blog.jameskyle.org/2010/01/dell-perc-5i-on-ubuntu-64" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2010/01/dell-perc-5i-on-ubuntu-64";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

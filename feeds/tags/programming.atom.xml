@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/programming.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2012-01-28T16:44:00-08:00</updated><entry><title>Adding Syntactic Sugar to Python dicts</title><link href="http://blog.jameskyle.org/2012/01/adding-syntactic-sugar-to-python-dicts" rel="alternate"></link><updated>2012-01-28T16:44:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-01-28:2012/01/adding-syntactic-sugar-to-python-dicts</id><summary type="html">&lt;div class="section" id="snippet"&gt;
+&lt;h2&gt;Snippet&lt;/h2&gt;
+&lt;p&gt;This little snippet allows dict keys to be accessed like attributes. For
+example&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CustomDict&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;foo&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;bar&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;bah&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;baz&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;bot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}})&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Can be accessed like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;foo&lt;/span&gt; &lt;span class="c"&gt;# returns &amp;quot;bar&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;foo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bah&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;baz&lt;/span&gt; &lt;span class="c"&gt;# returns &amp;quot;bot&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In addition to the hash key lookups.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;CustomDict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__dict__&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;iteritems&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CustomDict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="nb"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__setitem__&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;values&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="programming"></category><category term="python"></category><category term="recipes"></category></entry><entry><title>Improving ScriptingBridge Performance Using NSProxy &amp; NSCache</title><link href="http://blog.jameskyle.org/2011/09/scriptingbridge-caching" rel="alternate"></link><updated>2011-09-10T12:55:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2011-09-10:2011/09/scriptingbridge-caching</id><summary type="html">&lt;div class="section" id="the-problem"&gt;
+&lt;h2&gt;The Problem&lt;/h2&gt;
+&lt;p&gt;The ScriptingBridge API is an excellent way to tap into the internals of
+OS X applications with little effort. However, it does have its
+drawbacks. Not the least of which being &lt;a class="reference external" href="http://en.wikipedia.org/wiki/Lazy_evaluation"&gt;lazy evaluation&lt;/a&gt; of
+&lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/SBObject_Class/SBObject/SBObject.html"&gt;SBObject's&lt;/a&gt; attributes. Lazy evaluation makes the retrieval of
+SBObject's very efficient since all of the objects attributes are not
+retrieved at the same time. However, if you need to sort those objects
+by a particular key (say the name of a movie) the latency of
+ScriptingBridge becomes glaringly obvious to the point of becoming
+unusable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-solution"&gt;
+&lt;h2&gt;The Solution&lt;/h2&gt;
+&lt;p&gt;We can solve this problem using a combination of &lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/NSCache_Class/Reference/Reference.html"&gt;NSCache&lt;/a&gt; and
+&lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSProxy_Class/Reference/Reference.html"&gt;NSProxy&lt;/a&gt;. NSProxy provides a relatively simple API for wrapping
+&lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSObject_Class/Reference/Reference.html"&gt;NSObject's&lt;/a&gt; and intercepting &lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtHowMessagingWorks.html"&gt;messages&lt;/a&gt; sent to them. By doing so,
+you can interecept the message and if it's been previously called,
+retrieve the value from an NSCache.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-implementation"&gt;
+&lt;h2&gt;The Implementation&lt;/h2&gt;
+&lt;p&gt;For our example, we'll use iTunes. To do so we first have to generate an
+iTunes objc header file using &lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ScriptingBridgeConcepts/UsingScriptingBridge/UsingScriptingBridge.html"&gt;sdef and sdp&lt;/a&gt;.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% sdef /Applications/iTunes.app | sdp -fh --basename iTunes
+&lt;/pre&gt;
+&lt;p&gt;This produces a header file called &amp;quot;iTunes.h&amp;quot; that we include in our
+project to instantiate the iTunes &lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/SBApplication_Class/SBApplication/SBApplication.html"&gt;SBApplication&lt;/a&gt; object.&lt;/p&gt;
+&lt;p&gt;This is what our source looks like so far:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;NSArray&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="nf"&gt;getTracks&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;iTunesApplication&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;itunes&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="n"&gt;itunes&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;SBApplication&lt;/span&gt; &lt;span class="n"&gt;applicationWithBundleIdentifier&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;com.apple.iTunes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="c1"&gt;// Retrieve a list of movies in our iTunes library.&lt;/span&gt;
+  &lt;span class="n"&gt;NSArray&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;sources&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[[&lt;/span&gt;&lt;span class="n"&gt;itunes&lt;/span&gt; &lt;span class="n"&gt;sources&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="n"&gt;NSPredicate&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;predicate&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSPredicate&lt;/span&gt;
+                      &lt;span class="nl"&gt;predicateWithFormat:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;name == &amp;#39;Library&amp;#39; &amp;amp;&amp;amp; kind == %i&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                      &lt;span class="n"&gt;iTunesESrcLibrary&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="n"&gt;NSArray&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;libs&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sources&lt;/span&gt; &lt;span class="n"&gt;filteredArrayUsingPredicate&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;predicate&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="n"&gt;NSMutableArray&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;theMovies&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSMutableArray&lt;/span&gt; &lt;span class="n"&gt;array&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="n"&gt;NSArray&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;playlists&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="n"&gt;NSArray&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;movieLists&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;iTunesSource&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;libs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;playlists&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt; &lt;span class="n"&gt;playlists&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="n"&gt;movieLists&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;playlists&lt;/span&gt; &lt;span class="n"&gt;filteredArrayUsingPredicate&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+                  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSPredicate&lt;/span&gt; &lt;span class="n"&gt;predicateWithFormat&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;name == &amp;#39;Movies&amp;#39;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]];&lt;/span&gt;        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;iTunesPlaylist&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;playlist&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;movieLists&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;iTunesTrack&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;playlist&lt;/span&gt; &lt;span class="n"&gt;tracks&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;theMovies&lt;/span&gt; &lt;span class="n"&gt;addObject&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;theMovies&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-itunestrackproxy-object"&gt;
+&lt;h2&gt;The iTunesTrackProxy Object&lt;/h2&gt;
+&lt;p&gt;Not terribly interesting, but now to the fun part. We create a proxy
+object to wrap the tracks we retrieved in our getTracks method and act
+as an intermediary to any requests for track attributes.&lt;/p&gt;
+&lt;p&gt;For our purposes we need to override three of the NSProxy objects
+methods to handle &lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSInvocation_Class/Reference/Reference.html"&gt;NSInvocations&lt;/a&gt; sent to the track object.&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;ul class="first"&gt;
+&lt;li&gt;(NSMethodSignature *)methodSignatureForSelector:(SEL)sel&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;ul class="first"&gt;
+&lt;li&gt;(void)forwardInvocation:(NSInvocation *)invocation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;ul class="first"&gt;
+&lt;li&gt;(BOOL)respondsToSelector:(SEL)aSelector&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We want to respond to all the same methods that the original iTunesTrack
+object does, so we simply pass the method to the proxies track object.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;BOOL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nf"&gt;respondsToSelector:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;SEL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;aSelector&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt; &lt;span class="n"&gt;respondsToSelector&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;aSelector&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We also want our object to transparantly behave just like a iTunesTrack
+for method returns. So all method signatures will also be identical.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSMethodSignature&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nf"&gt;methodSignatureForSelector:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;SEL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;sel&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;NSMethodSignature&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="n"&gt;sig&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt; &lt;span class="n"&gt;methodSignatureForSelector&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;sel&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="the-real-action"&gt;
+&lt;h3&gt;The real action&lt;/h3&gt;
+&lt;p&gt;The real action happens in the forwardInvocation. This is where we catch
+message invocations intended for the iTunesTrack object and return the
+values we want from the sources we want (e.g. NSCache). Since I'm not
+covering the uninteresting boiler plate code in detail, here's our
+iTunesTrackProxy header and implementation source so far:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#import     @class iTunesTrack;    @interface iTunesTrackProxy : NSProxy {&lt;/span&gt;
+  &lt;span class="k"&gt;@private&lt;/span&gt;
+  &lt;span class="n"&gt;iTunesTrack&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;_track&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="n"&gt;NSCache&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;_cache&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;initWithTrack&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;iTunesTrack&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;    &lt;span class="k"&gt;@property&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;readonly&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;iTunesTrack&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;@end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#import &amp;quot;iTunesTrackProxy.h&amp;quot;&lt;/span&gt;
+&lt;span class="cp"&gt;#import &amp;quot;iTunes.h&amp;quot;    @implementation iTunesTrackProxy    - (id)initWithTrack:(iTunesTrack *)track&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;_track&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt; &lt;span class="n"&gt;retain&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="n"&gt;_cache&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[[&lt;/span&gt;&lt;span class="n"&gt;NSCache&lt;/span&gt; &lt;span class="n"&gt;alloc&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;init&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;self&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;dealloc&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;_track&lt;/span&gt; &lt;span class="n"&gt;release&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;_cache&lt;/span&gt; &lt;span class="n"&gt;release&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;super&lt;/span&gt; &lt;span class="n"&gt;dealloc&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSMethodSignature&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;methodSignatureForSelector&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;SEL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;sel&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;NSMethodSignature&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="n"&gt;sig&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt; &lt;span class="n"&gt;methodSignatureForSelector&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;sel&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;BOOL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;respondsToSelector&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;SEL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;aSelector&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt; &lt;span class="n"&gt;respondsToSelector&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;aSelector&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;forwardInvocation&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSInvocation&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;    &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="k"&gt;@synthesize&lt;/span&gt; &lt;span class="n"&gt;track&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;_track&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;@end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="first-attempt-at-the-forwardinvocation-method"&gt;
+&lt;h3&gt;First attempt at the forwardInvocation method&lt;/h3&gt;
+&lt;p&gt;A naive first attempt might look similar to this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nf"&gt;forwardInvocation:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSInvocation&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;invocation&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// Using the string representation of the selector as the NSCache key.&lt;/span&gt;
+  &lt;span class="n"&gt;NSString&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NSStringFromSelector&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;selector&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;      &lt;span class="c1"&gt;// First check and see if we&amp;#39;ve already cached the object&lt;/span&gt;
+  &lt;span class="kt"&gt;id&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;_cache&lt;/span&gt; &lt;span class="n"&gt;objectForKey&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="c1"&gt;// If the object is cached, use it as the returnValue&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;setReturnValue&lt;/span&gt;&lt;span class="o"&gt;:&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;       &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// if not cached, forward it to the track object, then cache the return&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;invokeWithTarget&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;getReturnValue&lt;/span&gt;&lt;span class="o"&gt;:&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;_cache&lt;/span&gt; &lt;span class="n"&gt;setObject&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="n"&gt;forKey&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Simple enough. However, it makes a critically flawed
+assumption.Specifically that all method invocations to the iTunesTrack
+object return NSObjects. A quick glance at the iTunes.h header proves
+otherwise and many return primitive types. Just to keep everything
+interesting, NSCache only stores NSObjects, thus we have to transform
+the primitive return types to an NSObject when storing and retrieving
+these values.&lt;/p&gt;
+&lt;p&gt;To resolve this oversight we create a few more methods.&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;(void)setValueFromTrack:(NSInvocation *)invocation&lt;/li&gt;
+&lt;li&gt;(void)setValueFromCacheObj:(id)obj invocation:(NSInvocation *)inv&lt;/li&gt;
+&lt;li&gt;(id)mapBuffer:(voidPtr)buffer type:(NSString *)type&lt;/li&gt;
+&lt;li&gt;(void *)mapObject:(id)obj key:(NSString *)key&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="final-implementation"&gt;
+&lt;h3&gt;Final implementation&lt;/h3&gt;
+&lt;p&gt;Let's walk through each of our new methods and then the final
+implementation of the forwardInvocation method.&lt;/p&gt;
+&lt;div class="section" id="setvaluefromtrack"&gt;
+&lt;h4&gt;setValueFromTrack&lt;/h4&gt;
+&lt;p&gt;If the result is not found in the cache, this method retrieves it from
+track itself. If it's an NSObject, it stores the value directly in the
+NSCache. If it's a primitive, it passes the value to the mapBuffer:type
+method to retrieve an appropriate object for storing in the NSCache.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nf"&gt;setValueFromTrack:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSInvocation&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;invocation&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;NSString&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NSStringFromSelector&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;selector&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;      &lt;span class="n"&gt;NSString&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;returnType&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSString&lt;/span&gt;
+                          &lt;span class="nl"&gt;stringWithUTF8String:&lt;/span&gt;&lt;span class="p"&gt;[[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;methodSignature&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;methodReturnType&lt;/span&gt;&lt;span class="p"&gt;]];&lt;/span&gt;
+  &lt;span class="kt"&gt;id&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="c1"&gt;// retrieve value from track object&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;invokeWithTarget&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;track&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="c1"&gt;// if object is of type NSObject.&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;returnType&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;@&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;getReturnValue&lt;/span&gt;&lt;span class="o"&gt;:&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="c1"&gt;// retrieved value does not exist for track&lt;/span&gt;
+      &lt;span class="c1"&gt;// set to default&lt;/span&gt;
+      &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;@&amp;quot;None&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+      &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;setReturnValue&lt;/span&gt;&lt;span class="o"&gt;:&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;_cache&lt;/span&gt; &lt;span class="n"&gt;setObject&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="n"&gt;forKey&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;NSUInteger&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;methodSignature&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+                         &lt;span class="n"&gt;methodReturnLength&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;invocation&lt;/span&gt; &lt;span class="n"&gt;getReturnValue&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;        &lt;span class="kt"&gt;id&lt;/span&gt; &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt; &lt;span class="n"&gt;mapBuffer&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;returnType&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="c1"&gt;// done with buffer&lt;/span&gt;
+    &lt;span class="n"&gt;free&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;        &lt;span class="c1"&gt;// cache value&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;_cache&lt;/span&gt; &lt;span class="n"&gt;setObject&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;forKey&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In this implementation we see a new object in play, specifically the
+&lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSMethodSignature_Class/Reference/Reference.html"&gt;NSMessageSignature&lt;/a&gt; and its methodReturnType. The methodReturnType is
+an &lt;a class="reference external" href="http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html"&gt;objc type encoding&lt;/a&gt;. Here, we only check for the &amp;quot;&amp;#64;&amp;quot;, or NSObject,
+type. In our mapBuffer:type: method we'll need to handle all the other
+types we care about.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="mapbuffer-type"&gt;
+&lt;h4&gt;mapBuffer:type:&lt;/h4&gt;
+&lt;p&gt;For iTunesTrack objects, NSNumber is perfectly adequate at storing all
+the primitives we're interested in storing. Also, to make mapping of
+buffers to void pointers easier, we create a union.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kt"&gt;char&lt;/span&gt;               &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;int&lt;/span&gt;                &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;short&lt;/span&gt;              &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;long&lt;/span&gt;               &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt;          &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;      &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;C&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;       &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;I&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;short&lt;/span&gt;     &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;S&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt;      &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;L&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;Q&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;float&lt;/span&gt;              &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;double&lt;/span&gt;             &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;_Bool&lt;/span&gt;              &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kt"&gt;void&lt;/span&gt;               &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;TRACKDATA&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The name of each union item is the same as its type encoding key. We use
+the union and the appropriate type encoding to store the primitive data
+type in an NSNumber in the mapBuffer:type: method.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nf"&gt;mapBuffer:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;voidPtr&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;buffer&lt;/span&gt; &lt;span class="nf"&gt;type:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSString&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;type&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kt"&gt;id&lt;/span&gt; &lt;span class="n"&gt;obj&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="n"&gt;TRACKDATA&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;c&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithChar&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;i&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithInt&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;s&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithShort&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;l&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithLong&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;q&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithLongLong&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;C&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithUnsignedChar&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;C&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;I&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithUnsignedInt&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;I&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;S&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithUnsignedShort&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;S&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;L&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithUnsignedLong&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;L&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;Q&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithUnsignedLongLong&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Q&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;f&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithFloat&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithDouble&lt;/span&gt;&lt;span class="o"&gt;:*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;B&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// The BOOL type is a special case, so we do a little dance here.&lt;/span&gt;
+    &lt;span class="kt"&gt;BOOL&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;YES&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NO&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSNumber&lt;/span&gt; &lt;span class="n"&gt;numberWithBool&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// Raise an exception if we receive a data type we&amp;#39;re not prepared&lt;/span&gt;
+    &lt;span class="c1"&gt;// for...&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSException&lt;/span&gt;
+     &lt;span class="nl"&gt;raise:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;Unhandled NSMethodSignature:methodReturnType:&amp;quot;&lt;/span&gt;
+     &lt;span class="nl"&gt;format:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;NSMethodSignature:methodReturnType: %@&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;obj&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="setvaluefromcacheobj-invocation"&gt;
+&lt;h4&gt;setValueFromCacheObj:invocation:&lt;/h4&gt;
+&lt;p&gt;The reverse case is retrieving an object from the cache. We accomplish
+that by first checking if the invocation's returnType is an object and
+if not transforming our cache object into a primitive type with
+mapObject:type.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nf"&gt;setValueFromCacheObj:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;obj&lt;/span&gt; &lt;span class="nf"&gt;invocation:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSInvocation&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;inv&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;NSString&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;returnType&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSString&lt;/span&gt;
+                          &lt;span class="nl"&gt;stringWithUTF8String:&lt;/span&gt;&lt;span class="p"&gt;[[&lt;/span&gt;&lt;span class="n"&gt;inv&lt;/span&gt; &lt;span class="n"&gt;methodSignature&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;methodReturnType&lt;/span&gt;&lt;span class="p"&gt;]];&lt;/span&gt;       &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;returnType&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;@&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;inv&lt;/span&gt; &lt;span class="n"&gt;setReturnValue&lt;/span&gt;&lt;span class="o"&gt;:&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;        &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;self&lt;/span&gt; &lt;span class="n"&gt;mapObject&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;returnType&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;inv&lt;/span&gt; &lt;span class="n"&gt;setReturnValue&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="c1"&gt;// done with buffer&lt;/span&gt;
+    &lt;span class="n"&gt;free&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;     &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="mapobject-type"&gt;
+&lt;h4&gt;mapObject:type:&lt;/h4&gt;
+&lt;p&gt;The reverse mapping from object to buffer is done by the mapObject:type:
+method. It's pretty much just the inverse of the mapBuffer:type: method.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nf"&gt;mapObject:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;obj&lt;/span&gt; &lt;span class="nf"&gt;type:&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSString&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;type&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;c&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;charValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;i&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;intValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;s&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;short&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;short&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;short&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;shortValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;l&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;longValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;q&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;longLongValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;C&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;unsignedCharValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;I&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;unsignedIntValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;S&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;short&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;short&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;short&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;unsignedShortValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;L&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;unsignedLongValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;Q&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;unsignedLongLongValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;f&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;float&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;floatValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;doubleValue&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="n"&gt;isEqualToString&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;B&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;_Bool&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt; &lt;span class="n"&gt;boolValue&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;_Bool&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;_Bool&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;_Bool&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;buffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;NSException&lt;/span&gt;
+     &lt;span class="nl"&gt;raise:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;Unhandled NSMethodSignature:methodReturnType:&amp;quot;&lt;/span&gt;
+     &lt;span class="nl"&gt;format:&lt;/span&gt;&lt;span class="s"&gt;@&amp;quot;NSMethodSignature:methodReturnType: %@&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;buffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="summary-benchmarks"&gt;
+&lt;h2&gt;Summary &amp;amp; Benchmarks&lt;/h2&gt;
+&lt;p&gt;That pretty much wraps it up. We can use our iTunesProxy object as a
+drop in replacement for the iTunesTrack object and it will cache all
+values for that track. This vastly improves query intensive operations
+such as sorting.&lt;/p&gt;
+&lt;p&gt;In fact, we'll use sorting as a demonstration on what we've gained from
+our work. The following output is from the main function attached to the
+article.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+We retrieved 254 unproxied movies
+We retrieved 254 proxied movies
+Time elapsed for track sort: -7.293006
+Time elapsed for proxy sort: -0.567359
+&lt;/pre&gt;
+&lt;p&gt;Not the fastest sort in the world, but we did get a 13x improvement
+bringing the performance from &amp;quot;application breaking&amp;quot; to perfectly
+workable. Of course, most of the overhead in that second run is from the
+initial caching of the track values. Let's see what we get on a &lt;em&gt;second&lt;/em&gt;
+run of our proxy array:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+Time elapsed for proxy sort second run: -0.017478
+&lt;/pre&gt;
+&lt;p&gt;That's more like it! After the initial hit when caching our variables,
+we are rewarded with a 365x increase in sorting speed.&lt;/p&gt;
+&lt;p&gt;It's easy to see how this pattern is extendible outside the scope of
+iTunes tracks or even ScriptingBridge to any situation where the cost of
+retrieval far out weighs a minor hit to memory.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="full-source-files"&gt;
+&lt;h2&gt;Full Source Files&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="/source/2011/09/iTunes.h"&gt;iTunes.h&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="/source/2011/09/iTunesTrackProxy.h"&gt;iTunesTrackProxy.h&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="/source/2011/09/iTunesTrackProxy.m"&gt;iTunesTrackProxy.m&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="/source/2011/09/main.m"&gt;main.m&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="/source/2011/09/Makefile"&gt;Makefile&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="cocoa"></category><category term="objc"></category><category term="osx"></category><category term="programming"></category></entry><entry><title>Fix for MacVim Syntax Error, Throws "Only one file name allowed"</title><link href="http://blog.jameskyle.org/2011/02/vim-only-one-filename-allowed-fix" rel="alternate"></link><updated>2011-02-25T11:58:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2011-02-25:2011/02/vim-only-one-filename-allowed-fix</id><summary type="html">&lt;p&gt;I keep a lot of my user installed applications in /Applications/User
+Utilities. Keeps some modicum of organization and reduces a bit of
+clutter in my /Applications directory. After moving &lt;a class="reference external" href="http://code.google.com/p/macvim/"&gt;MacVim&lt;/a&gt; to this
+directory, I began getting several errors when opening files. They were
+all of the same type.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+E172: Only one file name allowed
+&lt;/pre&gt;
+&lt;p&gt;With occurrances on several lines in the runtime/syntax/vim.vim file.
+Opening the file, I found syntax like the following&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:perlpath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You may notice the perpath variable is where the problem lies. the space
+gives the appearance of two arguments instead of a single path. We can
+prevent this by using fnameescape For me, these errors occurred on lines
+585, 607, and 628.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Line 585&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:perlpath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:perlpath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Line 607&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:rubypath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:rubypath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Line 628&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:pythonpath
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:pythonpath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;All done.&lt;/p&gt;
+</summary><category term="programming"></category><category term="vim"></category></entry><entry><title>Automatically create django User Profiles as needed.</title><link href="http://blog.jameskyle.org/2011/02/autocreate-django-user-profiles" rel="alternate"></link><updated>2011-02-25T11:10:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2011-02-25:2011/02/autocreate-django-user-profiles</id><summary type="html">&lt;p&gt;Ran across a very nice, brief run down of creating user profiles for
+django on &lt;a class="reference external" href="http://www.turnkeylinux.org/blog/django-profile"&gt;Turnkey Linux&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I was particularly pleased of this &amp;quot;ism&amp;quot; that creates user profiles on
+the fly on an as needed basis. As a bonus, it provides access to the
+profiles through a user.profile property. All you have to do is place
+the following property declaration at the bottom of your profile's
+models.py.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;User&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;profile&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;property&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;UserProfile&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;objects&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_or_create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And that's it. Now, when someuser.profile is called, it'll create a
+default profile if needed or return that user's profile if it exists.
+See the original article for a full User Profile quickstart.&lt;/p&gt;
+</summary><category term="django"></category><category term="programming"></category><category term="python"></category></entry><entry><title>Toggling NSMenuItems for a NSSearchField Menu Template</title><link href="http://blog.jameskyle.org/2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template" rel="alternate"></link><updated>2010-10-07T16:07:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-10-07:2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template</id><summary type="html">&lt;div class="section" id="the-problem"&gt;
+&lt;h2&gt;The Problem&lt;/h2&gt;
+&lt;p&gt;Creating NSMenus for NSSearchFields involves specifying a particular
+NSMenu as the NSSearchField's 'Menu Template'. The problem with this is
+that the actual NSMenu is not used, a copy is made. The result is that
+its impossible to access the NSMenu or its NSMenuItems through
+IBOutlets. Thus, modification of the NSMenuItem's state, title, etc.
+attributes are not done in the &amp;quot;Standard Way&amp;quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-solution"&gt;
+&lt;h2&gt;The Solution&lt;/h2&gt;
+&lt;p&gt;This wasn't immediately obvious to me from the documentation or API
+references and caused a good bit of confusion, digging, and googling
+before I turned up an answer. I'm sure this is in part due to my newness
+with The Cocoa Way®. Regardless, it deserves a post so I'll remember it.&lt;/p&gt;
+&lt;p&gt;The magic bullet is to set your controller to the delegate for the
+NSSearchField and implement the validateMenuItem:. Each time the NSMenu
+is refreshed, the validateMenuItem is called for each NSMenuItem at
+which time you can modify its state or attributes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-implementation"&gt;
+&lt;h2&gt;The Implementation&lt;/h2&gt;
+&lt;p&gt;Here we do a quick implementation to demonstrate the validateMenuItem in
+action. I'm going to use PyObjc for brevity, but it should suffice to
+demonstrate the approach.&lt;/p&gt;
+&lt;div class="section" id="create-a-pyobjc-cocoa-application-with-a-nssearchfield-using-a-menu-template"&gt;
+&lt;h3&gt;Create a PyObjc Cocoa Application with a NSSearchField using a Menu Template.&lt;/h3&gt;
+&lt;p&gt;I've named my project ModifySearchMenu. The object is to create an
+IBAction that is assigned to the NSMenuItems action. When the item is
+clicked, we set it as the current menu item. We check this value in
+validateMenuItem and assign the appropriate state. validateMenuItem
+returns either YES or NO if the NSMenuItem should be active or not.&lt;/p&gt;
+&lt;div class="section" id="drag-a-nssearchfield-widget-to-the-default-nswindow"&gt;
+&lt;h4&gt;Drag a NSSearchField widget to the default NSWindow.&lt;/h4&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.11.22 PM.png" src="/images/2010/10/Search_Item.png" /&gt;
+&lt;p class="caption"&gt;Screen shot 2010-10-07 at 4.11.22 PM.png&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-a-nsmenu-instance"&gt;
+&lt;h4&gt;Create a NSMenu instance&lt;/h4&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.13.26 PM.png" src="/images/2010/10/NSMenu.png" /&gt;
+&lt;p class="caption"&gt;Screen shot 2010-10-07 at 4.13.26 PM.png&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="set-the-appdelegate-as-the-delegate-for-the-nssearchfield"&gt;
+&lt;h4&gt;Set the AppDelegate as the delegate for the NSSearchField&lt;/h4&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.14.24 PM.png" src="/images/2010/10/ModifySearchFieldDelegate.png" /&gt;
+&lt;p class="caption"&gt;Screen shot 2010-10-07 at 4.14.24 PM.png&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="implement-the-validatemenuitem-method-in-your-appdelegate-and-create-an-ibaction-to-register-the-clicked-menu-item"&gt;
+&lt;h4&gt;Implement the validateMenuItem method in your AppDelegate and create an IBAction to register the clicked menu item.&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;Foundation&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;AppKit&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;Cocoa&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;objc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;IBAction&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;objc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;YES&lt;/span&gt;
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ModifySearchMenuAppDelegate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSObject&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;currentItem&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;u&amp;quot;Item 1&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;applicationDidFinishLaunching_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sender&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;NSLog&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Application did finish launching.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;    &lt;span class="nd"&gt;@IBAction&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setCurrentMenuItem_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sender&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;currentItem&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sender&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;validateMenuItem_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;currentItem&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setState_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSOnState&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setState_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NSOffState&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;YES&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="connect-it-up-in-ib-don-t-forget-to-set-your-menu-template"&gt;
+&lt;h4&gt;Connect it up in IB. Don't forget to set your Menu Template.&lt;/h4&gt;
+&lt;p&gt;&lt;img alt="Screen shot 2010-10-07 at 4.28.00 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.28.00-PM.png" /&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.30.02 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.30.02-PM.png" /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="once-this-is-done-clicking-one-menu-item-will-toggle-it-to-the-on-state-and-all-others-to-the-off-state-on-the-next-display"&gt;
+&lt;h4&gt;Once this is done, clicking one menu item will toggle it to the on state and all others to the off state on the next display.&lt;/h4&gt;
+&lt;p&gt;&lt;img alt="Screen shot 2010-10-07 at 4.30.51 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.30.51-PM.png" /&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.31.00 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.31.00-PM.png" /&gt;
+&lt;img alt="Screen shot 2010-10-07 at 4.31.09 PM.png" src="/images/2010/10/Screen-shot-2010-10-07-at-4.31.09-PM.png" /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="cocoa"></category><category term="objc"></category><category term="osx"></category><category term="programming"></category><category term="pyobjc"></category><category term="python"></category></entry><entry><title>Nose Unit Testing Quick Start</title><link href="http://blog.jameskyle.org/2010/10/nose-unit-testing-quick-start" rel="alternate"></link><updated>2010-10-02T15:00:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-10-02:2010/10/nose-unit-testing-quick-start</id><summary type="html">&lt;p&gt;This is just a quick &amp;quot;get up and running fast&amp;quot; walk through on using the
+&lt;a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.2/"&gt;Nose&lt;/a&gt; Unit Testing framework. The reference documentation for Nose is
+great, but their site seems a little light on the quick start side. I
+assume you have python installed. If you're unsure how to install
+python, see your OS documentation.&lt;/p&gt;
+&lt;div class="section" id="install-nose"&gt;
+&lt;h2&gt;Install Nose&lt;/h2&gt;
+&lt;p&gt;Install Nose using your OS's package manager or with easy_install. For
+example:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% easy_install nose
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-some-code-for-testing"&gt;
+&lt;h2&gt;Create Some Code for Testing&lt;/h2&gt;
+&lt;p&gt;As an example, I've created the class below I'll use in the unit test
+examples.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;A&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Some Value&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;return_true&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Truedef&lt;/span&gt; &lt;span class="n"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;KeyError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-unit-test-classes"&gt;
+&lt;h2&gt;Create Unit Test Classes&lt;/h2&gt;
+&lt;p&gt;There are many approaches to writing Nose unit tests. I normally write a
+test class for each class or module I wish to test.&amp;nbsp;Nose will load and
+run any class whose name is preceded by Test such as TestClassA or
+TestA. When it discovers a class, it uses its default testMatch regex to
+find any methods that match. Again, we'll use the test_method()
+convention for our tests.&amp;nbsp;For more information see the&amp;nbsp; &lt;a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.1/writing_tests.html"&gt;Writing Tests&lt;/a&gt;
+reference.&lt;/p&gt;
+&lt;p&gt;A few notes on the testing example.&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;Nose supports fixtures, though we won't use them here. I have
+included the fixture methods in the below example, but only provide a
+comment explaining their use in the source.&lt;/li&gt;
+&lt;li&gt;The nose.tools packages comes with many helper methods that make
+testing syntactically clearer for common test cases. In this example,
+we use assert_equal, assert_not_equal, the raises decorator, and
+assert_raises. For a full list see the&amp;nbsp;&lt;a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/doc/module_nose.tools.html"&gt;nose.tools
+documentation&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;For organizational purposes, I create a subdirectory in my project
+called &amp;quot;tests&amp;quot;. This is not required.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;a&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;assert_equal&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;assert_not_equal&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;assert_raises&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;nose.tools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;raises&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;TestA&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setup_class&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;klass&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once for each class before any tests are run&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;teardown_class&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;klass&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once for each class _after_ all tests are run&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setUp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once before _each_ test method is executed&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;teardown&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;This method is run once after _each_ test method is executed&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_init&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;assert_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Some Value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;assert_not_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Incorrect Value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_return_true&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;assert_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_true&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;assert_not_equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_true&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="bp"&gt;False&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;        &lt;span class="n"&gt;assert_raises&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ne"&gt;KeyError&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;A value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@raises&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ne"&gt;KeyError&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_raise_exc_with_decorator&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;A message&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="run-tests"&gt;
+&lt;h2&gt;Run Tests&lt;/h2&gt;
+&lt;p&gt;All that's left is to run our tests. Nose comes with a command line
+utility called 'nosetests'. The simplest usage is to call nosetests from
+within your project directory and pass the 'tests' directory as an
+argument. For example,&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests tests
+&lt;/pre&gt;
+&lt;p&gt;For our examples, this outputs the following test summary:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ % nosetests tests
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s  OK
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="adding-code-coverage"&gt;
+&lt;h2&gt;Adding Code Coverage&lt;/h2&gt;
+&lt;p&gt;One useful metric for the completeness of your unit tests is the concept
+of code coverage. Nose comes out of the box with support for the
+&lt;a class="reference external" href="http://pypi.python.org/pypi/coverage"&gt;coverage module&lt;/a&gt;. First, install coverage using your package manager
+or by:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% easy_install coverage
+&lt;/pre&gt;
+&lt;p&gt;To generate a coverage report using the nosetests utility, simply add
+the --with-coverage. By default, coverage generates data for all modules
+found in the current directory.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage
+&lt;/pre&gt;
+&lt;p&gt;If you've included a few 3rd party modules, then you could be looking at
+a lot of information you don't care much about. If this is the case, you
+can also specify the specific modules you wish to run reports on. In our
+example, you would do so by running&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage --cover-package a
+&lt;/pre&gt;
+&lt;p&gt;The --cover-package switch can be used multiple times. If you had a
+b.py, you could&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage --cover-package a --cover-package b
+&lt;/pre&gt;
+&lt;p&gt;If we run coverage on our example tests, we get:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% nosetests --with-coverage
+....
+Name    Stmts   Miss  Cover   Missing
+-------------------------------------
+a           8      0   100%
+----------------------------------------------------------------------
+Ran 4 tests in 0.006sOK
+&lt;/pre&gt;
+&lt;/div&gt;
+</summary><category term="programming"></category><category term="python"></category><category term="unit testing"></category><category term="utilities"></category></entry><entry><title>enum masks idiom in python</title><link href="http://blog.jameskyle.org/2010/09/enum-masks-idiom-in-python" rel="alternate"></link><updated>2010-09-01T13:44:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-09-01:2010/09/enum-masks-idiom-in-python</id><summary type="html">&lt;p&gt;We've all seen this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Foo&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="nl"&gt;public:&lt;/span&gt;
+  &lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="n"&gt;FooType&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;FooTypeOne&lt;/span&gt;    &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0x1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;FooTypeTwo&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0x1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;FooTypeThree&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0x1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;FLAGS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ONE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;TWO&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;THREE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;FOUR&lt;/span&gt;
+  &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I needed to implement something similar in python. Before doing so, I
+check to see what the canonical way of doing so is (e.g. 'switch' vs.
+'dispatch dictionary'). Here it is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;ONE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TWO&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;THREE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;FOUR&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;frozenset&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;one two three four&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;()]&lt;/span&gt;
+&lt;span class="n"&gt;FLAGS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;frozenset&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;ONE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TWO&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;THREE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;FOUR&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Foo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_flag&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;mask&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;flag&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;FLAGS&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;flag&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;mask&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;flag&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;foo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Foo&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="n"&gt;foo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;print_flag&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ONE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;TWO&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;frozenset&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="s"&gt;&amp;#39;one&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;span class="nb"&gt;frozenset&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="s"&gt;&amp;#39;two&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In addition to the expected binary masking functionality by leveraging
+the bitwise math operators of sets, we get a human readable text &amp;quot;label&amp;quot;
+for printing or displaying the flag. (thanks to Aaron Gallagher &amp;#64;
+#python)&lt;/p&gt;
+</summary><category term="masks"></category><category term="programming"></category><category term="python"></category></entry><entry><title>Qt4DataFormatter (custom Xcode data formatters for Qt4 objects)</title><link href="http://blog.jameskyle.org/2010/05/xcode-qt4-data-formatter" rel="alternate"></link><updated>2010-05-23T12:43:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-05-23:2010/05/xcode-qt4-data-formatter</id><summary type="html">&lt;p&gt;I do most of my development on OS X, including Qt4 projects. Qt4 objects
+are particularly averse to inspection in the Xcode debugger.
+Fortunately, Xcode has a &lt;a class="reference external" href="http://developer.apple.com/mac/library/documentation/DeveloperTools/Conceptual/XcodeDebugging/220-Viewing_Variables_and_Memory/variables_and_memory.html"&gt;data formatter plugin API&lt;/a&gt; for displaying
+summaries of &amp;nbsp;user defined objects. Unfortunately, the documentation
+isn't as complete as one would hope. The example program doesn't even
+compile. Through a bit of trial and error, I was able to create data
+formatters for some basic Qt4 objects. Included are:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;QString&lt;/li&gt;
+&lt;li&gt;QVariant&lt;/li&gt;
+&lt;li&gt;QModelIndex&lt;/li&gt;
+&lt;li&gt;QFile&lt;/li&gt;
+&lt;li&gt;QDomNode&lt;/li&gt;
+&lt;li&gt;QDomElement&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I'm adding other objects on an as needed basis. Adding other QObjects is
+trivial using the existing methods as a template. Basically, you just
+create a display message using a QString and standard Qt4 API's, then
+have the new data formatter function return the already implemented
+printQString(QString* str, int ID) method. For example, if we wished to
+create a summary for QObject's that displayed the QObject's classname,
+we would add a method to Qt4DataFormatter.cpp in the form of:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="nf"&gt;printQObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QObject&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ID&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;QString&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ClassName: %1&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="n"&gt;QString&lt;/span&gt; &lt;span class="n"&gt;className&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Undefined&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// make sure we have access to the plugin function list&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;_pbxgdb_plugin_functions&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;className&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ogj&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;metaObject&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;className&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;printQString&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;className&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;ID&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Recompile, then install (or link) the plugin to your:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;~/Library/Application&lt;span class="se"&gt;\ &lt;/span&gt;Support/Developer/Shared/Xcode/CustomDataViews/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;or&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/Developer/Library/Xcode/CustomDataViews/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It's that easy. The &lt;a class="reference external" href="http://github.com/jameskyle/Qt4DataFormatter"&gt;Qt4DataFormatter project&lt;/a&gt; is hosted on github.
+Please see the README for the project as well.&lt;/p&gt;
+</summary><category term="data formatters"></category><category term="programming"></category><category term="qt4"></category><category term="xcode"></category></entry><entry><title>Customized Qt4 Generated Xcode Projects</title><link href="http://blog.jameskyle.org/2010/05/customized-qt4-generated-xcode-projects" rel="alternate"></link><updated>2010-05-18T15:52:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-05-18:2010/05/customized-qt4-generated-xcode-projects</id><summary type="html">&lt;p&gt;One of the very nice features of Qt's qmake is the ability to generate
+platform specific IDE projects. However, unless I've missed something in
+the Qt docs customizing the build settings for generated projects is
+very limited. Since often run qmake to update other generated files
+(ui_, moc_, etc), I had to reconfigure Xcode each time. To get around
+this, I wrote a Python script that that first runs qmake with -spec
+macx-xcode and then modifies the generated Xcode project with custom
+settings. The custom settings themselves are defined in a &lt;a class="reference external" href="http://www.yaml.org/"&gt;YAML&lt;/a&gt; file.
+The script expects to be run from the Qt project directory and expects
+to find a file called xcode.yml in that directory that contains your
+custom build options. My xcode.yml:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="l-Scalar-Plain"&gt;pbxproject&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;compatibilityVersion&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;Xcode 3.2&lt;/span&gt;
+&lt;span class="l-Scalar-Plain"&gt;Debug&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;ONLY_ACTIVE_ARCH&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;YES&amp;quot;&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;SDKROOT&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;/Developer/SDKs/MacOSX10.6.sdk&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;ARCHS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;$(ARCHS_STANDARD_32_64_BIT)&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;VALID_ARCHS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;i386&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;x86_64&amp;quot;&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;YES&amp;quot;&lt;/span&gt;
+&lt;span class="l-Scalar-Plain"&gt;Release&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;ONLY_ACTIVE_ARCH&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;NO&amp;quot;&lt;/span&gt;
+  &lt;span class="l-Scalar-Plain"&gt;VALID_ARCHS&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;i386&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;x86_64&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;ppc&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;ppc64&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The environment variables and their values are a 1-to-1 for what you see
+in Xcode's Build pane of Project Info if you right click on a field and
+select &amp;quot;Show Definitions&amp;quot; and &amp;quot;Show Settings Names&amp;quot;. The source can be
+downloaded &lt;a class="reference external" href="http://github.com/jameskyle/Qt4-Xcode-Config"&gt;here&lt;/a&gt;.&lt;/p&gt;
+</summary><category term="programming"></category><category term="qt4"></category><category term="xcode"></category></entry><entry><title>Compiling a 4-way universal perl binary on osx</title><link href="http://blog.jameskyle.org/2009/08/4-way-universal-perl" rel="alternate"></link><updated>2009-08-12T13:35:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-08-12:2009/08/4-way-universal-perl</id><summary type="html">&lt;p&gt;If you don't like having all of your perl modules overwritten by
+cavalier osx server updates, then you're either going with a macports
+install or rolling your own. And if you don't want to give up
+mod_auth_apple, you're probably rolling your own.&lt;/p&gt;
+&lt;p&gt;If you're using mod_perl on osx, then you've probably already run into
+the issues with the 4-way httpd fat binary and a flat arch mod_perl not
+working. There are various posts around the internet on how to set
+archflags to get around this. However, if you're already compiling your
+own perl binary the easiest method is to compile it with the flags you
+want passed onto your perl modules.&lt;/p&gt;
+&lt;p&gt;So this is how to compile your perl binary with a 4-way (ppc ppc64
+x86_64 i686) universal arch and by extension, compile all subsequent
+modules with the same:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;SDK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/Developer/SDKs/MacOSX10.5.sdk/
+./Configure -Accflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch x86_64 -arch ppc64 \&lt;/span&gt;
+&lt;span class="s2"&gt;  -fPIC -nostdinc -B$SDK/usr/include/gcc \&lt;/span&gt;
+&lt;span class="s2"&gt;  -B$SDK/usr/lib/gcc -isystem$SDK/usr/include \&lt;/span&gt;
+&lt;span class="s2"&gt;  -F$SDK/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+  -Aldflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch ppc64 -arch x86_64 \&lt;/span&gt;
+&lt;span class="s2"&gt;  -Wl,-syslibroot,$SDK&amp;quot;&lt;/span&gt; -de
+
+make
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="administration"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="perl"></category><category term="programming"></category></entry><entry><title>30 Days with TextMate</title><link href="http://blog.jameskyle.org/2009/06/30-days-with-textmate" rel="alternate"></link><updated>2009-06-15T19:32:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-06-15:2009/06/30-days-with-textmate</id><summary type="html">&lt;p&gt;I've been a vim user for years, but since moving to OSX I've been
+hearing a lot about TextMate. Since I always encourage others to keep an
+open mind and learn new things, I decided to give this editor a solid
+shot.
+For the next 30 days, I'll TextMate for all my editing, coding, and
+general editing needs. I'll keep a tally of pros and cons that I
+encounter along the way.&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="15%" /&gt;
+&lt;col width="35%" /&gt;
+&lt;col width="51%" /&gt;
+&lt;/colgroup&gt;
+&lt;thead valign="bottom"&gt;
+&lt;tr&gt;&lt;th class="head"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th class="head"&gt;Vim&lt;/th&gt;
+&lt;th class="head"&gt;Textmate&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Snippets&lt;/td&gt;
+&lt;td&gt;I'm told there's a plugin
+called SnipMate, haven't
+tried it yet though&lt;/td&gt;
+&lt;td&gt;Killer feature, highly customizable
+and flexible (any scripting language
+you want.)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Stability&lt;/td&gt;
+&lt;td&gt;rock solid&lt;/td&gt;
+&lt;td&gt;Crashes frequently. Not every 5m or
+anything, but about once or twice a
+day. *Seems to be related to a bug
+in the help search menu. You can
+avoid crashing by not launching
+commands through the help search.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+</summary><category term="osx"></category><category term="programming"></category><category term="textmate"></category></entry><entry><title>Showing tabs in Vim</title><link href="http://blog.jameskyle.org/2009/02/showing-tabs-in-vim" rel="alternate"></link><updated>2009-02-20T15:01:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-02-20:2009/02/showing-tabs-in-vim</id><summary type="html">&lt;p&gt;Now that the lab has decided to use Python, I occasionally run into the
+dreaded &amp;quot;indentation error&amp;quot; that is darn near impossible to find by eye.
+This is often due to differences in text editor settings, diff'ing two
+files, etc.&lt;/p&gt;
+&lt;p&gt;I've looked for some easy solution on this, the most common retort is
+&amp;quot;use a decent editor&amp;quot;. Which by decent, they mean whatever you're not
+using right now and if you follow the suggestions you end up playing
+marry-go-round with all the most popular editors (emacs, vim, textmate,
+komodo, Wing, whatever).Â&lt;/p&gt;
+&lt;p&gt;Well, this is the best actual solution I've found when it rears its ugly
+head. In vim:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;syn&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; TAB_CHAR &lt;span class="s2"&gt;&amp;quot;\t&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;hi&lt;/span&gt; link TAB_CHAR &lt;span class="k"&gt;Error&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;After that, you'll see nice highlighted dots showing the indentation
+depth. Ugly, but then you can pick out the tabs. I'm sure all the other
+excellent editors above also have this ability. :)&lt;/p&gt;
+</summary><category term="editors"></category><category term="programming"></category><category term="tabs"></category><category term="vim"></category></entry><entry><title>Agile Project Setup for Python</title><link href="http://blog.jameskyle.org/2009/02/agile-project-setup-for-python" rel="alternate"></link><updated>2009-02-20T09:37:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-02-20:2009/02/agile-project-setup-for-python</id><summary type="html">&lt;p&gt;This is a quick summarization of the screen casts found at &lt;a class="reference external" href="http://showmedo.com/videos/video?name=2910000&amp;amp;fromSeriesID=291"&gt;ShowMeDo.&lt;/a&gt;.
+It's a good quick reference for getting a project up and going with
+nosetests, easy_install, virtualenv, pastescript, and sphinx for
+documentation.&lt;/p&gt;
+&lt;p&gt;This is notÂ&amp;nbsp;intendedÂ&amp;nbsp;to be a zero to go walk through or a cut/paste
+example. Depending on particular setup, you may need to install various
+modules before hand etc. For information on doing so, refer to beginner
+python tutorials and the respective package sites.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;virtualenv mydemo
+&lt;span class="nv"&gt;$ &lt;/span&gt;&lt;span class="nb"&gt;cd &lt;/span&gt;mydemo &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;source &lt;/span&gt;bin/activate
+&lt;span class="nv"&gt;$ &lt;/span&gt;easy_install pastescript
+&lt;span class="nv"&gt;$ &lt;/span&gt;mkdir src &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;cd &lt;/span&gt;src &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; paster create mypackage
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We want our modules available to interactive shells and such so:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;&lt;span class="nb"&gt;cd &lt;/span&gt;mypackage &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; python setup.py develop
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Setting up testing:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;easy_install nose
+&lt;span class="nv"&gt;$ &lt;/span&gt;easy_install coverage
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Finally, we install sphinx for professional looking, easy to maintain
+documentation.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;easy_install sphinx
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Install whatever else you need and you're ready to go.&lt;/p&gt;
+&lt;p&gt;Many thanks to &lt;a class="reference external" href="http://www.percious.com"&gt;Christopher Perkins&lt;/a&gt; for putting together the screen
+casts that I based this quick reference on.&lt;/p&gt;
+</summary><category term="programming"></category><category term="python"></category><category term="virtualenv"></category></entry><entry><title>Compiling lapack 3.1.1 on Leopard</title><link href="http://blog.jameskyle.org/2008/08/compiling-lapack-on-leopard" rel="alternate"></link><updated>2008-08-23T08:07:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-08-23:2008/08/compiling-lapack-on-leopard</id><summary type="html">&lt;p&gt;OSX contains an incomplete lapack library by default in the vecLib
+framework. But if you want the full power of lapack 3.1.1, you have to
+compile from source. This article documents that process, mostly so when
+I have to do it again I'll have a reference.&lt;/p&gt;
+&lt;p&gt;The first thing we notice is that OSX does not contain a fortran
+compiler in its developer tools. The &lt;a class="reference external" href="http://gcc.gnu.org/wiki/GFortran&amp;quot;"&gt;gfortran project&lt;/a&gt;&amp;nbsp; contains a
+nice dmg installer. Two other options are compiling from source or using
+macports. I chose macports.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo port install gcc43
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Create some convenient links for standard gfortran calls.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;sudo ln -sf /opt/local/bin/gfortran-mp-4.3 /usr/local/bin/gfortran
+&lt;span class="nv"&gt;$ &lt;/span&gt;sudo ln -sf /opt/local/bin/gfortran-mp-4.3 /usr/local/bin/g77
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Next download &lt;a class="reference external" href="http://www.netlib.org/lapack/lapack.tgz"&gt;lapack.tgz&lt;/a&gt;&amp;nbsp;source (current 3.1.1 as of this writing)
+and untar it.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;tar xzvf lapack.tgz
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Lapack does not contain the standard configure script, so we have to
+edit the make.inc ourselves. Copy the make.inc.example to make.inc, then
+apply &lt;a class="reference external" href="/source/2008/08/make.inc.patch"&gt;this patch&lt;/a&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;patch &amp;lt; make.inc.patch
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That's it, all that's left is to compile. I do so with 6 make threads.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make -j6
+&lt;/pre&gt;&lt;/div&gt;
+</summary><category term="apple"></category><category term="leopard"></category><category term="mac"></category><category term="osx"></category><category term="programming"></category></entry></feed>

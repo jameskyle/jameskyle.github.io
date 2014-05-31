@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/ldap.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2008-09-19T07:30:00-07:00</updated><entry><title>Fixing errant Share Points</title><link href="http://blog.jameskyle.org/2008/09/fixing-errant-share-points" rel="alternate"></link><updated>2008-09-19T07:30:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2008-09-19:2008/09/fixing-errant-share-points</id><summary type="html">&lt;p&gt;Recently, I ran into an issue where Share Points which were removed from
+Server Admin were showing up as stale links in my clients. Though not
+deal breaking, it was annoying as it indicating some sort of corruption
+in my ldap configuration.&lt;/p&gt;
+&lt;p&gt;After digging around, I found that the records still existed in my
+server's LDAP under /Mounts. Including a duplicate entry for my
+/Network/Applications entry. By removing these and reloading the clients
+automount (sudo automount), everything went back to normal.&lt;/p&gt;
+</summary><category term="dscl"></category><category term="ldap"></category><category term="mac"></category><category term="osx"></category><category term="share points"></category></entry></feed>

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>python - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+
+<h1>Post tagged: python</h1>
+
+<article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2012/12/deploying-pelican-blog-with-bitbucket-commit-hooks" rel="bookmark" title="Permalink to Deploying Pelican Blog with Bitbucket Commit Hooks">Deploying Pelican Blog with Bitbucket Commit Hooks</a>
+    </h2>
+    <p><img alt="Schaffhausen Watch" class="align-center" src="/images/2012/11/schaffhausen-watch.jpg" style="width: 362.5px; height: 282.0px;" />
+<div class="section" id="migrating-from-wordpress">
+<h2>Migrating from Wordpress</h2>
+<p>I recently migrated my blog from <a class="reference external" href="http://wordpress.org">Wordpress</a> to <a class="reference external" href="http://blog.getpelican.com">Pelican</a>. There are a few
+incentives to do so. Not the least of which is using <a class="reference external" href="http://daringfireball.net/projects/markdown/">Markdown</a> or <a class="reference external" href="http://docutils.sourceforge.net/rst.html">reST</a> for
+markup and free distributed backups with <a class="reference external" href="http://git-scm.com">Git</a>.</p>
+<p>There are some drawbacks as well. The one I'd miss the ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2012/01/adding-syntactic-sugar-to-python-dicts" rel="bookmark" title="Permalink to Adding Syntactic Sugar to Python dicts">Adding Syntactic Sugar to Python dicts</a>
+    </h2>
+    <p><div class="section" id="snippet">
+<h2>Snippet</h2>
+<p>This little snippet allows dict keys to be accessed like attributes. For
+example</p>
+<div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">CustomDict</span><span class="p">({</span><span class="s">&quot;foo&quot;</span><span class="p">:</span> <span class="s">&quot;bar&quot;</span><span class="p">,</span> <span class="s">&quot;bah&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;baz&quot;</span><span class="p">:</span> <span class="s">&quot;bot&quot;</span><span class="p">}})</span>
+</pre></div>
+<p>Can be accessed like</p>
+<div class="highlight"><pre><span class="n">d</span><span class="o">.</span><span class="n">foo</span> <span class="c"># returns &quot;bar&quot;</span>
+<span class="n">d</span><span class="o">.</span><span class="n">foo</span><span class="o">.</span><span class="n">bah</span><span class="o">.</span><span class="n">baz</span> <span class="c"># returns &quot;bot&quot;</span>
+</pre></div>
+<p>In addition to the hash key lookups.</p>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">CustomDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">d ...</span></pre></div></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2011/02/autocreate-django-user-profiles" rel="bookmark" title="Permalink to Automatically create django User Profiles as needed.">Automatically create django User Profiles as needed.</a>
+    </h2>
+    <p><p>Ran across a very nice, brief run down of creating user profiles for
+django on <a class="reference external" href="http://www.turnkeylinux.org/blog/django-profile">Turnkey Linux</a>.</p>
+<p>I was particularly pleased of this &quot;ism&quot; that creates user profiles on
+the fly on an as needed basis. As a bonus, it provides access to the
+profiles through a user.profile property ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2010/10/toggling-nsmenuitems-for-a-nssearchfield-menu-template" rel="bookmark" title="Permalink to Toggling NSMenuItems for a NSSearchField Menu Template">Toggling NSMenuItems for a NSSearchField Menu Template</a>
+    </h2>
+    <p><div class="section" id="the-problem">
+<h2>The Problem</h2>
+<p>Creating NSMenus for NSSearchFields involves specifying a particular
+NSMenu as the NSSearchField's 'Menu Template'. The problem with this is
+that the actual NSMenu is not used, a copy is made. The result is that
+its impossible to access the NSMenu or its NSMenuItems through
+IBOutlets. Thus, modification ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2010/10/nose-unit-testing-quick-start" rel="bookmark" title="Permalink to Nose Unit Testing Quick Start">Nose Unit Testing Quick Start</a>
+    </h2>
+    <p><p>This is just a quick &quot;get up and running fast&quot; walk through on using the
+<a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.2/">Nose</a> Unit Testing framework. The reference documentation for Nose is
+great, but their site seems a little light on the quick start side. I
+assume you have python installed. If you're unsure how to ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2010/09/enum-masks-idiom-in-python" rel="bookmark" title="Permalink to enum masks idiom in python">enum masks idiom in python</a>
+    </h2>
+    <p><p>We've all seen this:</p>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
+<span class="nl">public:</span>
+  <span class="k">enum</span> <span class="n">FooType</span>
+  <span class="p">{</span>
+    <span class="n">FooTypeOne</span>    <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
+    <span class="n">FooTypeTwo</span>   <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">FooTypeThree</span> <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">FLAGS</span> <span class="o">=</span> <span class="n">ONE</span> <span class="o">|</span> <span class="n">TWO</span> <span class="o">|</span> <span class="n">THREE</span> <span class="o">|</span> <span class="n">FOUR</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</pre></div>
+<p>I needed to implement something similar in python. Before doing so, I
+check to see what the canonical way of doing so is (e.g. 'switch' vs ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="http://blog.jameskyle.org/2009/02/agile-project-setup-for-python" rel="bookmark" title="Permalink to Agile Project Setup for Python">Agile Project Setup for Python</a>
+    </h2>
+    <p><p>This is a quick summarization of the screen casts found at <a class="reference external" href="http://showmedo.com/videos/video?name=2910000&amp;fromSeriesID=291">ShowMeDo.</a>.
+It's a good quick reference for getting a project up and going with
+nosetests, easy_install, virtualenv, pastescript, and sphinx for
+documentation.</p>
+<p>This is notÂ&nbsp;intendedÂ&nbsp;to be a zero to go walk through or a cut/paste ...</p></p>
+  </div>
+</article>
+<div class="pagination">
+    Page 1 / 1
+</div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li ><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>

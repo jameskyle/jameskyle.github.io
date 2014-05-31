@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/tabs.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2009-02-20T15:01:00-08:00</updated><entry><title>Showing tabs in Vim</title><link href="http://blog.jameskyle.org/2009/02/showing-tabs-in-vim" rel="alternate"></link><updated>2009-02-20T15:01:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-02-20:2009/02/showing-tabs-in-vim</id><summary type="html">&lt;p&gt;Now that the lab has decided to use Python, I occasionally run into the
+dreaded &amp;quot;indentation error&amp;quot; that is darn near impossible to find by eye.
+This is often due to differences in text editor settings, diff'ing two
+files, etc.&lt;/p&gt;
+&lt;p&gt;I've looked for some easy solution on this, the most common retort is
+&amp;quot;use a decent editor&amp;quot;. Which by decent, they mean whatever you're not
+using right now and if you follow the suggestions you end up playing
+marry-go-round with all the most popular editors (emacs, vim, textmate,
+komodo, Wing, whatever).Â&lt;/p&gt;
+&lt;p&gt;Well, this is the best actual solution I've found when it rears its ugly
+head. In vim:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;syn&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; TAB_CHAR &lt;span class="s2"&gt;&amp;quot;\t&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;hi&lt;/span&gt; link TAB_CHAR &lt;span class="k"&gt;Error&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;After that, you'll see nice highlighted dots showing the indentation
+depth. Ugly, but then you can pick out the tabs. I'm sure all the other
+excellent editors above also have this ability. :)&lt;/p&gt;
+</summary><category term="editors"></category><category term="programming"></category><category term="tabs"></category><category term="vim"></category></entry></feed>

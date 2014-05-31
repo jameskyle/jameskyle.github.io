@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8"/>
+    <title>OSXFuse 2.6.2 Kext Fails to Load in Mavericks - miscellaneous</title>
+    <meta name="author" content="James A. Kyle">
+
+    <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
+    <link rel="stylesheet" href="http://blog.jameskyle.org/theme/css/main.css" type="text/css" />
+
+
+        <link href="http://blog.jameskyle.org/feeds/atom.xml" type="application/atom+xml" rel="alternate" title="miscellaneous Atom Feed" />
+</head>
+<body>
+    <div class="container">
+
+      <header role="banner">
+        <div class="feeds">
+            <a href="http://blog.jameskyle.org/feeds/atom.xml" rel="alternate"><img src="/theme/images/icons/rss_32.png" alt="rss feed"/></a>
+
+        </div>
+          <div class="pages">
+              <a href="http://blog.jameskyle.org/pages/about.html">About me</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/archives.html">Archives</a>
+            <span>-</span>
+            <a href="http://blog.jameskyle.org/tags.html">Tags</a>
+          </div>
+        <a href="http://blog.jameskyle.org" class="title">miscellaneous</a>
+      </header>
+
+      <div class="wrapper">
+
+          <div role="main" class="content">
+    <article class="full">
+            
+        <h1>OSXFuse 2.6.2 Kext Fails to Load in Mavericks</h1>
+        
+        <div class="section" id="the-problem">
+<h2>The Problem</h2>
+<p>Installing the most recent <a class="reference external" href="http://osxfuse.github.io">OSXFuse</a> from <a class="reference external" href="http://brew.sh">Homebrew</a> (or from the main site),
+fails to load the new kext. If you attempt to load the kext, you get errors
+in your logs like:</p>
+<pre class="code bash literal-block">
+Mar 19 11:34:30 metaverse.local com.apple.kextd<span class="o">[</span>29<span class="o">]</span>: WARNING - <span class="se">\
+</span>Invalid signature -67062 0xFFFFFFFFFFFEFA0A <span class="k">for</span> <span class="se">\
+</span>kext <span class="s2">&quot;/Library/Filesystems/osxfusefs.fs/Support/osxfusefs.kext&quot;</span>
+</pre>
+</div>
+<div class="section" id="the-fix">
+<h2>The Fix</h2>
+<p>The workaround is to sign the code yourself. To do so, you'll first need a
+signing certificate. The <a class="reference external" href="https://developer.apple.com/library/mac/documentation/security/conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW1">Apple Code Signing Guide</a> covers how to do so. If
+you don't have an applie account and have no interest in creating an
+developer certificate, jump to the section called
+&quot;To use the Certificate Assistant to create a self-signed signing identity&quot;.</p>
+<p>Once you have a certificate, you can sign the kext.</p>
+<pre class="code bash literal-block">
+sudo codesign -s <span class="s2">&quot;James Kyle&quot;</span> <span class="se">\
+</span>    -f /Library/Filesystems/osxfusefs.fs/Support/osxfusefs.kex
+</pre>
+<p>You should replace &quot;James Kyle&quot; with the name you gave the certificate.</p>
+<p>After that, all should be well with the world again.</p>
+</div>
+<div class="section" id="external-links">
+<h2>External Links</h2>
+<ul class="simple">
+<li><a class="reference external" href="http://osxfuse.github.io">OSXFuse</a></li>
+<li><a class="reference external" href="http://brew.sh">Homebrew</a></li>
+<li><a class="reference external" href="https://developer.apple.com/library/mac/documentation/security/conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW1">Apple Code Signing Guide</a></li>
+</ul>
+</div>
+   
+
+    </article>
+
+    <section>
+        <p id="post-share-links">
+            Share on:
+            <a href="http://twitter.com/home?status=OSXFuse%202.6.2%20Kext%20Fails%20to%20Load%20in%20Mavericks%20 http%3A//blog.jameskyle.org/2014/03/osxfuse-kext-fails-on-mavericks" target="_blank" title="Share on Twitter">Twitter</a>
+            ❄
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2014/03/osxfuse-kext-fails-on-mavericks&p[images][0]=&p[title]=OSXFuse%202.6.2%20Kext%20Fails%20to%20Load%20in%20Mavericks%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22the-problem%22%3E%0A%3Ch2%3EThe%20Problem%3C/h2%3E%0A%3Cp%3EInstalling%20the%20most%20recent%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//osxfuse.github.io%22%3EOSXFuse%3C/a%3E%20from%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//brew.sh%22%3EHomebrew%3C/a%3E%20%28or%20from%20the%20main%20site%29%2C%0Afails%20to%20load%20the%20new%20kext.%20If%20you%20attempt%20to%20load%20the%20kext%2C%20you%20get%20errors%0Ain%20your%20logs%20like%3A%3C/p%3E%0A%3Cpre%20class%3D%22code%20bash%20literal-block%22%3E%0AMar%2019%2011%3A34%3A30%20metaverse.local%20com.apple.kextd%3Cspan%20class%3D%22o%22%3E%5B%3C/span%3E29%3Cspan%20class%3D%22o%22%3E%5D%3C/span%3E%3A%20WARNING%20-%20%3Cspan%20class%3D%22se%22%3E%5C%0A%3C/span%3EInvalid%20signature%20-67062%200xFFFFFFFFFFFEFA0A%20...%3C/pre%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            ❄
+            <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2014/03/osxfuse-kext-fails-on-mavericks" target="_blank" title="Share on Google Plus">Google+</a>
+            ❄
+            <a href="mailto:?subject=OSXFuse%202.6.2%20Kext%20Fails%20to%20Load%20in%20Mavericks%20&body=http%3A//blog.jameskyle.org/2014/03/osxfuse-kext-fails-on-mavericks" target="_blank" title="Share via Email">Email</a>
+        </p>
+    </section>
+    <div class="comments">
+    <h2>Comments !</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+           var disqus_identifier = "2014/03/osxfuse-kext-fails-on-mavericks";
+           (function() {
+           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+           dsq.src = 'http://blog-jameskyle.disqus.com/embed.js';
+           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+    </div>
+
+          </div>
+
+          <div class="sidebar">
+
+            <div class="widget">
+              <h2>Categories</h2>
+              <ul>
+                  <li class="active"><a href="http://blog.jameskyle.org/category/administration.html">administration</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/apt.html">apt</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/cocoa.html">cocoa</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/debian.html">debian</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/devops.html">devops</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/docker.html">docker</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/linux.html">linux</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/miscellaneous.html">miscellaneous</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/multimedia.html">multimedia</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/opinion.html">opinion</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/osx.html">osx</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/programming.html">programming</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/reviews.html">reviews</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/utilities.html">utilities</a></li>
+                  <li ><a href="http://blog.jameskyle.org/category/zsh.html">zsh</a></li>
+              </ul>
+            </div>
+
+              <div class="widget">
+              <h2>Social</h2>
+                <ul class="social">
+                  <li><a href="http://github.com/jameskyle/">github</a><i></i></li>
+                  <li><a href="https://twitter.com/jameskyle75">twitter</a><i></i></li>
+                  <li><a href="https://bitbucket.org/jkyle">bitbucket</a><i></i></li>
+                  <li><a href="https://plus.google.com/+jameskyle75">google+</a><i></i></li>
+                  <li><a href="http://www.linkedin.com/in/jamesakyle">linkedin</a><i></i></li>
+                </ul>
+              </div>
+
+              <div class="widget blogroll">
+                <h2>Blogroll</h2>
+                <ul>
+                    <li><a href="http://docs.notmyidea.org/alexis/pelican/">Pelican</a></li>
+                    <li><a href="http://www.doughellmann.com">Doug Hellmann</a></li>
+                    <li><a href="http://www.openstack.org/blog/">Openstack</a></li>
+                </ul>
+              </div>
+
+          </div>
+
+      </div>
+
+      <footer>
+        <p role="contentinfo">
+          © 2013 James A. Kyle - Proudly powered by
+          <a href="http://alexis.notmyidea.org/pelican/">pelican</a>.
+          Theme <a href="https://github.com/fle/pelican-simplegrey">
+              pelican-simplegrey
+          </a>, modified.
+        </p>
+
+      </footer>
+
+    </div>
+
+      <script>
+        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script>
+
+</body>
+</html>
