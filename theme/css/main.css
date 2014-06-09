@@ -3,7 +3,7 @@
 @import url("pygment.css");
 
 
-/* Latout */
+/* Layout */
 
 article,
 figcaption,
@@ -21,6 +21,7 @@ html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
+
 body {
   font-family: 'Source Sans Pro', sans-serif;
   font-size: 16px;
@@ -182,6 +183,14 @@ hr {
   border-radius: 5px;
 }
 
+/* Information Boxes */
+.tip {
+    background: #F1F1F1;
+}
+
+.tip .first.admonition-title {
+    font-weight: bold;
+}
 
 /* Article */
 

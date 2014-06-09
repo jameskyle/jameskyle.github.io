@@ -20,6 +20,12 @@ api. But we're not going to use the docker-tcp.socket example as I was unable to
 get that to work with the docker cert options.&lt;/p&gt;
 &lt;div class="section" id="creating-certificates"&gt;
 &lt;h3&gt;Creating Certificates&lt;/h3&gt;
+&lt;div class="tip"&gt;
+&lt;p class="first admonition-title"&gt;Tip&lt;/p&gt;
+&lt;p class="last"&gt;I've updated &lt;a class="reference external" href="https://gist.github.com/jameskyle/5a530f80e5ab8e19013c"&gt;this script&lt;/a&gt;, making it more generalized, supporting
+multiple client cert generation, and using an &lt;a class="reference external" href="https://gist.github.com/jameskyle/8106d4d5c6dfa5395cef"&gt;openssl.cnf&lt;/a&gt; file that gets
+rid of those annoying questions.&lt;/p&gt;
+&lt;/div&gt;
 &lt;p&gt;Docker uses client/server certificates to grant access. So we need to create
 some private/public key pairs and a CA serial file. The example below creates
 one with a 10 year expiration.&lt;/p&gt;
