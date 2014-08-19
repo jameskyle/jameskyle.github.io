@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>miscellaneous</title><link>http://blog.jameskyle.org/</link><description></description><atom:link href="http://blog.jameskyle.org/feeds/rss.xml" rel="self"></atom:link><lastBuildDate>Fri, 23 May 2014 08:24:46 -0700</lastBuildDate><item><title>Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit</title><link>http://blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit</link><description>&lt;div class="section" id="motivation"&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>miscellaneous</title><link>http://blog.jameskyle.org/</link><description></description><atom:link href="http://blog.jameskyle.org/feeds/james-a-kyle.rss.xml" rel="self"></atom:link><lastBuildDate>Fri, 23 May 2014 08:24:46 -0700</lastBuildDate><item><title>Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit</title><link>http://blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit</link><description>&lt;div class="section" id="motivation"&gt;
 &lt;h2&gt;Motivation&lt;/h2&gt;
 &lt;p&gt;Most continuous integration platforms support the xunit/junit formats for test
 results. They allow a greater granularity of test management above a simple
