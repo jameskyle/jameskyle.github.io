@@ -1,5 +1,422 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/james-a-kyle.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-05-23T08:24:46-07:00</updated><entry><title>Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit</title><link href="http://blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" rel="alternate"></link><updated>2014-05-23T08:24:46-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-05-23:2014/05/pep8-pylint-tests-with-nose-xunit</id><summary type="html">&lt;div class="section" id="motivation"&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/james-a-kyle.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-08-20T10:42:34-07:00</updated><entry><title>Deploying a Bare Metal Kubernetes Cluster</title><link href="http://blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" rel="alternate"></link><updated>2014-08-20T10:42:34-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-08-20:2014/08/deploying-baremetal-kubernetes-cluster</id><summary type="html">&lt;div class="section" id="objectives"&gt;
+&lt;h2&gt;Objectives&lt;/h2&gt;
+&lt;p&gt;Seems my blog needs a few updates in the buzz department. I like taking the
+shotgun approach, so we're going to deploy a 5 node bare metal &lt;a class="reference external" href="https://www.docker.com"&gt;docker&lt;/a&gt; cluster
+using &lt;a class="reference external" href="http://www.ansible.com/home"&gt;ansible&lt;/a&gt; for host configuration and &lt;a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes"&gt;kubernetes&lt;/a&gt; for container management.&lt;/p&gt;
+&lt;p&gt;I wish I could have squeezed &lt;a class="reference external" href="http://mesos.apache.org"&gt;mesos&lt;/a&gt; into this story. But the &lt;a class="reference external" href="https://github.com/mesosphere/kubernetes-mesos"&gt;kubernetes-mesos&lt;/a&gt;
+project isn't ready for prime time yet. So that'll be a post for another day.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="requirements"&gt;
+&lt;h2&gt;Requirements&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;ansible&lt;/li&gt;
+&lt;li&gt;librarian-ansible&lt;/li&gt;
+&lt;li&gt;git&lt;/li&gt;
+&lt;li&gt;CentOS 7, RHEL 7, Fedora 20+...whatever&lt;/li&gt;
+&lt;li&gt;some servers&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="get-the-ansible-work-environment"&gt;
+&lt;h2&gt;Get the Ansible Work Environment&lt;/h2&gt;
+&lt;p&gt;I've thrown together some ansible scripts that automate the configuration of
+the clients. These aren't &amp;quot;production ready&amp;quot; by any means and almost certainly
+would require tweaking for a different target environment. However, I did make
+a first stab best effort to generalize them and make them moderately
+configurable. As such, they should serve more as a programmatic walk through
+then a turnkey solution. Also, if you deployed the playbook as is, you'll end
+up with my user and public key in your environment. While I always welcome new
+resources, you likely don't want that...so creating your own site.yml or
+removing my user module from the example might be prudent.&lt;/p&gt;
+&lt;p&gt;Caveats aside, they should simplify the deployment of the environment.&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+% git clone https://github.com/jameskyle/ansible-kubernetes.git
+% &lt;span class="nb"&gt;cd &lt;/span&gt;ansible-kubernetes
+% librarian-ansible install
+&lt;/pre&gt;
+&lt;p&gt;There's an inventory.example file included. You'll probably want to update the
+fqdn's to your local domain. The primary docker host is named 'dock1' by
+default. If you wish to change this, it's done in group_vars/dockers.yml.&lt;/p&gt;
+&lt;div class="section" id="hostnames-and-ansible"&gt;
+&lt;h3&gt;Hostnames and Ansible&lt;/h3&gt;
+&lt;p&gt;Ansible assumes it's capable of resolving the hostnames in your inventory &lt;em&gt;or&lt;/em&gt;
+the ansible_ssh_host argument is set in your inventory. For example, if you
+don't have a dns server set up you might want to edit your inventory to look
+something like&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[dockers]
+dock1.mydomain.com ansible_ssh_host=192.168.1.10
+&lt;/pre&gt;
+&lt;p&gt;Ansible general usage is beyond the scope of this walk through, so please see
+the upstream docs for any needed clarifications.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="configuring-the-bootstrap-node"&gt;
+&lt;h2&gt;Configuring the Bootstrap Node&lt;/h2&gt;
+&lt;p&gt;We're going to work from the assumption of a green field deployment. If the
+environment already has existing support services like PXE, dns, dhcp, file
+server, etc.  I trust you already know how to adapt that environment
+accordingly.&lt;/p&gt;
+&lt;div class="section" id="install"&gt;
+&lt;h3&gt;Install&lt;/h3&gt;
+&lt;p&gt;Initial install is manual. In my particular configuration, I have a root drive
+in a RAID 1 and a very large storage array. I installed the OS with the
+following disk configuration.&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;/dev/sda1 : /boot&lt;/li&gt;
+&lt;li&gt;/dev/sda2 : lvm volgroup main
+- swap
+- /&lt;/li&gt;
+&lt;li&gt;/dev/sdb : lvm volgroup data
+- /var/lib/docker, btrfs
+- /var/docker/registry, ext4&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Doesn't really matter. If you want to use the btrfs driver for docker (these
+scripts do), then you'll want to spin off a separate drive for mounting on
+/var/lib/docker.&lt;/p&gt;
+&lt;p&gt;This only needs to be done manually for the first host, our kickstart
+scripts will take care of the workers.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="configure-my-user-account"&gt;
+&lt;h3&gt;Configure My User Account&lt;/h3&gt;
+&lt;p&gt;I'd recommend hacking together your own user (or at least replacing my key),
+regardless it's really convenient to have a passwordless ssh and sudo.&lt;/p&gt;
+&lt;p&gt;I use my 'jkyle' role for this and put it in a separate playbook from the site
+example called jkyle.yml. The first time we run, I have to provide a password.&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+% ansible-playbook --limit dock1 &lt;span class="se"&gt;\
+&lt;/span&gt;                   -i inventory.example &lt;span class="se"&gt;\
+&lt;/span&gt;                   --ask-pass &lt;span class="se"&gt;\
+&lt;/span&gt;                   --ask-sudo &lt;span class="se"&gt;\
+&lt;/span&gt;                   jkyle.yml
+&lt;/pre&gt;
+&lt;p&gt;You might see something like this&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+PLAY [all]
+********************************************************************
+
+GATHERING FACTS
+***************************************************************
+ok: [dock1]
+
+TASK: [jkyle | Install YUM Packages]
+******************************************
+changed: [dock1] =&amp;gt;
+(item=bind-utils,zsh,git-core,lsof,tcpdump,vim)
+
+TASK: [jkyle | Install APT Packages]
+******************************************
+skipping: [dock1]
+
+TASK: [jkyle | Create James]
+**************************************************
+changed: [dock1]
+
+TASK: [jkyle | Configure jkyle sudoers]
+***************************************
+changed: [dock1]
+
+TASK: [jkyle | Deploy jkyle User Key]
+*****************************************
+changed: [dock1]
+
+TASK: [jkyle | Setup James Home Directory]
+************************************
+changed: [dock1]
+
+TASK: [jkyle | Link James configuration files]
+********************************
+changed: [dock1] =&amp;gt; (item=zlogin)
+changed: [dock1] =&amp;gt; (item=zlogout)
+changed: [dock1] =&amp;gt; (item=zpreztorc)
+changed: [dock1] =&amp;gt; (item=zprofile)
+changed: [dock1] =&amp;gt; (item=zshenv)
+changed: [dock1] =&amp;gt; (item=zshrc)
+
+PLAY RECAP
+********************************************************************
+dock1   : ok=7    changed=6    unreachable=0    failed=0
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="services-configuration-on-primary-host"&gt;
+&lt;h3&gt;Services Configuration On Primary Host&lt;/h3&gt;
+&lt;div class="section" id="common"&gt;
+&lt;h4&gt;Common&lt;/h4&gt;
+&lt;p&gt;The common role does some general configuration of networking, hostnames, etc.
+Make sure your inventory file includes the necessary group and host variables
+for your network. See the inventory.example file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="docker"&gt;
+&lt;h4&gt;Docker&lt;/h4&gt;
+&lt;p&gt;Our docker deployment provides both the local socket connection and a remote
+API with server/client certificates. Some example certificates are found in
+ansible-kubernetes/roles/docker/files. However, you should probably generate
+your own as these are obviously insecure...particuarly if the servers have
+public ports. I generated the certs using a script and an openssl template you
+found in my &lt;a class="reference external" href="https://github.com/jameskyle/CertGen"&gt;CertGen&lt;/a&gt; github repo.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% ansible-playbook --limit dock1 -i inventory.example site.example.yml
+&lt;/pre&gt;
+&lt;p&gt;You might see something like this&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+PLAY [dockers]
+****************************************************************
+
+GATHERING FACTS
+***************************************************************
+ok: [dock1]
+
+TASK: [common | sudoers]
+******************************************************
+ok: [dock1]
+
+TASK: [common | Yum Fastest Mirror]
+*******************************************
+ok: [dock1]
+
+TASK: [common | Update System]
+************************************************
+ok: [dock1]
+
+TASK: [common | Install Packages]
+*********************************************
+ok: [dock1] =&amp;gt; (item=bridge-utils,policycoreutils-python)
+
+TASK: [common | disalbe firewalld]
+********************************************
+ok: [dock1]
+
+TASK: [common | disable network.service]
+**************************************
+changed: [dock1]
+
+TASK: [common | Configure Management Interface]
+*******************************
+ok: [dock1]
+
+TASK: [common | config sshd_config]
+*******************************************
+ok: [dock1]
+
+TASK: [common | Base /etc/hosts Template]
+*************************************
+changed: [dock1]
+
+TASK: [common | Set Hostname]
+*************************************************
+ok: [dock1]
+
+TASK: [common | Build hosts file]
+*********************************************
+changed: [dock1] =&amp;gt; (item=dock1)
+skipping: [dock1] =&amp;gt; (item=dock2)
+skipping: [dock1] =&amp;gt; (item=dock3)
+skipping: [dock1] =&amp;gt; (item=dock4)
+skipping: [dock1] =&amp;gt; (item=dock5)
+
+TASK: [docker | disable selinux]
+**********************************************
+changed: [dock1]
+
+TASK: [docker | Install EPEL Repo]
+********************************************
+ok: [dock1]
+
+TASK: [docker | Install Packages]
+*********************************************
+ok: [dock1] =&amp;gt; (item=docker,btrfs-progs,bridge-utils)
+
+TASK: [docker | Install Packages]
+*********************************************
+skipping: [dock1]
+
+TASK: [docker | Deploy ca.crt]
+************************************************
+ok: [dock1]
+
+TASK: [docker | Deploy server.crt]
+********************************************
+ok: [dock1]
+
+TASK: [docker | Deploy server.key]
+********************************************
+ok: [dock1]
+
+TASK: [docker | Create docker.socket directory path]
+**************************
+changed: [dock1]
+
+TASK: [docker | Create docker.socket unit]
+************************************
+ok: [dock1]
+
+TASK: [docker | Link docker.socket to standard location]
+**********************
+skipping: [dock1]
+
+TASK: [docker | docker.service]
+***********************************************
+ok: [dock1]
+
+TASK: [docker | Add Docker Users to Docker Group]
+*****************************
+ok: [dock1] =&amp;gt; (item=docker_users)
+
+TASK: [docker | Enable &amp;amp; Start Services]
+**************************************
+ok: [dock1] =&amp;gt; (item=docker.socket)
+ok: [dock1] =&amp;gt; (item=docker.service)
+
+PLAY RECAP
+********************************************************************
+dock1                      : ok=23   changed=5    unreachable=0    failed=0
+&lt;/pre&gt;
+&lt;p&gt;After which, the following changes would have been applied:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;A sudoers file deployed that allows individual configs in /etc/sudoers.d
+and passwordless sudo for wheel group members.&lt;/li&gt;
+&lt;li&gt;Installation of the yum fastest mirror plugin&lt;/li&gt;
+&lt;li&gt;A full system update&lt;/li&gt;
+&lt;li&gt;installation of bridge-utils, policy core utils&lt;/li&gt;
+&lt;li&gt;The firewalld daemon disabled. &lt;a class="footnote-reference" href="#id6" id="id1"&gt;[*]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;NetworkManager disabled. &lt;a class="footnote-reference" href="#id7" id="id2"&gt;[†]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;selinux disabled. &lt;a class="footnote-reference" href="#id8" id="id3"&gt;[‡]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;configuration of the management interface...probably already done, but this
+enforces it&lt;/li&gt;
+&lt;li&gt;a common sshd_config file deployed&lt;/li&gt;
+&lt;li&gt;/etc/hosts populated with entries for all the docker hosts&lt;/li&gt;
+&lt;li&gt;the target hosts hostname&lt;/li&gt;
+&lt;li&gt;A fully functional docker server with server/client certificates.&lt;/li&gt;
+&lt;li&gt;A docker registry at &lt;a class="reference external" href="http://yourdomain.com:5000/"&gt;http://yourdomain.com:5000/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If you used the default certs, make sure to copy over the client certificate
+and certificate authorities to your ~/.docker directory.&lt;/p&gt;
+&lt;p&gt;You can interact with the docker server over tcp via&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+% &lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;DOCKER_HOST&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;tcp://dock1.yourdomain.com:2376
+% docker --tlsverify -i -t --rm ubuntu /bin/bash
+% docker --tlsverify images
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="pxe-services"&gt;
+&lt;h3&gt;PXE Services&lt;/h3&gt;
+&lt;p&gt;Next, we're going to deploy a container with pxe related services to bring up
+the worker hosts. I've created a project that builds a pxe server container
+given a specific environment context. You can use my &lt;a class="reference external" href="https://github.com/jameskyle/docker-pxe-server"&gt;docker-pxe-server&lt;/a&gt;
+project, or build your own...or even just install the services on the host
+itself.&lt;/p&gt;
+&lt;p&gt;The readme for the project should be sufficient to get going.&lt;/p&gt;
+&lt;p&gt;After pxe/dns/dhcp services are up for your environment, bounce the servers and
+bring them up. I typically do this with ipmitool. A script to do so might look
+something like&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="k"&gt;for &lt;/span&gt;i in 11 12 13 14;do
+    ipmitool -I lanplus &lt;span class="se"&gt;\
+&lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -U root chassis bootdev pxe
+    ipmitool -I lanplus &lt;span class="se"&gt;\
+&lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -U root chassis power cycle
+&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;
+&lt;p&gt;Of course, you'll need your actually ILO/iDrac/etc ip's. Make a cup of coffee,
+catch up on the news. Whatever.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="summary"&gt;
+&lt;h3&gt;Summary&lt;/h3&gt;
+&lt;p&gt;That completes the initial host configuration. You should have all the key
+services up such as an initial docker server &amp;amp; registry, PXE, DHCP, &amp;amp; DNS
+services, and your initial user account. Finally you should have a number of
+client hosts with fresh installs awaiting configuration.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="finalizing-the-cluster"&gt;
+&lt;h2&gt;Finalizing the Cluster.&lt;/h2&gt;
+&lt;p&gt;All that's left is configuring the client hosts and installing kubernetes.
+Assuming our inventory is correctly configured in, we can just skip to what's
+needed for kubernetes and then run ansible on all nodes.&lt;/p&gt;
+&lt;div class="section" id="kubernetes"&gt;
+&lt;h3&gt;Kubernetes&lt;/h3&gt;
+&lt;p&gt;The kubernetes role assumes the required binaries and etcd are located in the&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+roles/kubernetes/files
+&lt;/pre&gt;
+&lt;p&gt;directory. These aren't bundled and since we're deploying the bleeding edge,
+it's probably best to build a fresh set anyway. They both have their own build
+systems that are covered in the docs, so please refer to the upstream
+&lt;a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes"&gt;kubernetes&lt;/a&gt; and &lt;a class="reference external" href="https://github.com/coreos/etcd"&gt;etcd&lt;/a&gt; project for details.&lt;/p&gt;
+&lt;p&gt;A couple of hints though.&lt;/p&gt;
+&lt;p&gt;For Kubernetes, you'll want to read the README.md in kubernetes's ./build
+directory.&lt;/p&gt;
+&lt;p&gt;For etcd, you'll probably just want to run these commands&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+docker build -t coreos/etcd .
+docker run -d coreos/etcd
+docker cp &amp;lt;container_id&amp;gt;:/opt/etcd/bin/etcd .
+docker stop &amp;lt;container_id&amp;gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; docker rm &amp;lt;container_id&amp;gt;
+&lt;/pre&gt;
+&lt;p&gt;Then you have an amd64 etcd binary you can copy to roles/kubernetes/files.&lt;/p&gt;
+&lt;div class="section" id="installation"&gt;
+&lt;h4&gt;Installation&lt;/h4&gt;
+&lt;p&gt;No more configuration should be necessary. Assuming everything's gone well so
+far, the following should be sufficient&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ansible-playbook --ask-pass \
+                 --ask-sudo \
+                 -i inventory.example site.example.yml
+&lt;/pre&gt;
+&lt;p&gt;Notice we're no longer limiting to the dock1 host or passing specific tags to
+run. Once done, you should be able to query your kubernetes minions. You can do
+so from any host where kubecfg is installed. Which includes all your hosts at
+/usr/local/bin/kubecfg. For example&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+% kubecfg -h http://dock1.pao19.tfoundry.com:8080 list minions
+Minion identifier
+----------
+dock1
+dock2
+dock3
+dock4
+dock5
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="next-steps"&gt;
+&lt;h2&gt;Next Steps.&lt;/h2&gt;
+&lt;p&gt;Next up, you can deploy the &lt;a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/examples/guestbook"&gt;Kubernetes GuestBook&lt;/a&gt; example. Or build your
+own!&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="id6" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id1"&gt;[*]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;I had a hell of a time getting firewalld to work as advertised. Zones
+wouldn't persist, interfaces added to multiple zones, etc. Several
+upstream bugs were filed.Much easier to just write your own iptables
+rules.&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="id7" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id2"&gt;[†]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;The network.service &amp;amp; NetworkManager seem to be mortal enemies in this
+release.  You coudl tell NM manager to ignore a config, but it would
+happily still muck with it...such as adding it to the default zone if
+firewalld was enabled. In the end, leaving only NM running seemed to
+work best.&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="id8" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id3"&gt;[‡]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;As of the time of this tutorial, the btrfs driver for docker does not
+support selinux&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+</summary><category term="administration"></category><category term="devops"></category><category term="ansible"></category><category term="kubernetes"></category></entry><entry><title>Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit</title><link href="http://blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" rel="alternate"></link><updated>2014-05-23T08:24:46-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-05-23:2014/05/pep8-pylint-tests-with-nose-xunit</id><summary type="html">&lt;div class="section" id="motivation"&gt;
 &lt;h2&gt;Motivation&lt;/h2&gt;
 &lt;p&gt;Most continuous integration platforms support the xunit/junit formats for test
 results. They allow a greater granularity of test management above a simple

@@ -36,252 +36,436 @@
 
 
       <article>
-        <h1><a href="./2014/05/pep8-pylint-tests-with-nose-xunit">Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit</a></h1>
-        <div class="section" id="motivation">
-<h2>Motivation</h2>
-<p>Most continuous integration platforms support the xunit/junit formats for test
-results. They allow a greater granularity of test management above a simple
-pass/fail. <a class="reference external" href="https://nose.readthedocs.org/en/latest/">Nose</a> supports xunit reports by default, but <a class="reference external" href="http://pep8.readthedocs.org/en/latest/">PEP8</a> and <a class="reference external" href="http://www.pylint.org/">PyLint</a> do not.
-By integrating PEP8 &amp; PyLint into nose tests, we can include their results in
-our xunit reports. This allows easy tracking of lint and pep failures and
-linking them to issues.</p>
+        <h1><a href="./2014/08/deploying-baremetal-kubernetes-cluster">Deploying a Bare Metal Kubernetes Cluster</a></h1>
+        <div class="section" id="objectives">
+<h2>Objectives</h2>
+<p>Seems my blog needs a few updates in the buzz department. I like taking the
+shotgun approach, so we're going to deploy a 5 node bare metal <a class="reference external" href="https://www.docker.com">docker</a> cluster
+using <a class="reference external" href="http://www.ansible.com/home">ansible</a> for host configuration and <a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes">kubernetes</a> for container management.</p>
+<p>I wish I could have squeezed <a class="reference external" href="http://mesos.apache.org">mesos</a> into this story. But the <a class="reference external" href="https://github.com/mesosphere/kubernetes-mesos">kubernetes-mesos</a>
+project isn't ready for prime time yet. So that'll be a post for another day.</p>
 </div>
-<div class="section" id="technique-limitations">
-<h2>Technique &amp; Limitations</h2>
-<p>In both cases I used the technique of collecting results, then using a test
-<a class="reference external" href="http://nose.readthedocs.org/en/latest/writing_tests.html#test-generators">generator pattern</a> with the PEP or lint output as the error message. This has
-the benefit of easily integrating with nose's xunit output plugin. However, it
-does come with the disadvantage that tests do not persist across runs. This is
-due to the test only existing when it <em>fails</em> and disappearing when it does not.
-The consequence is that if your CI tracks 'fixed' bugs, it'll lose that metric
-since the test never technically succeeds ... it just disappears.</p>
-<p>Providing persistance would require a bit of footwork to track past failures
-and generate a test, with the same name, with a 'pass' flag in the xunit.</p>
-</div>
-<div class="section" id="pep8">
-<h2>PEP8</h2>
-<p>I couldn't find a method of extracting test data directly from the pep8
-reports. To work around that, I subclassed the StandardReport and overrode the
-get_file_results method so data is collected in an array of results.</p>
-<pre class="code python literal-block">
-<span class="k">class</span> <span class="nc">CustomReport</span><span class="p">(</span><span class="n">pep8</span><span class="o">.</span><span class="n">StandardReport</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;
-    Collect report into an array of results.
-    &quot;&quot;&quot;</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">def</span> <span class="nf">get_file_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                    <span class="s">'path'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
-                    <span class="s">'row'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_offset</span> <span class="o">+</span> <span class="n">line_number</span><span class="p">,</span>
-                    <span class="s">'col'</span><span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="s">'code'</span><span class="p">:</span> <span class="n">code</span><span class="p">,</span>
-                    <span class="s">'text'</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
-                <span class="p">})</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_errors</span>
-</pre>
-<p>Next, a generator requires a test method to yield a function and its args which
-in turn produces a test result. I created a small wrapper method to always fail.</p>
-<pre class="code python literal-block">
-<span class="k">def</span> <span class="nf">fail</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;
-    Fails with message.
-    &quot;&quot;&quot;</span>
-    <span class="n">assert_true</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-</pre>
-<p>Finally, I created a test method that programmatically calls pep8 on the
-project and generates a failure for each error found.</p>
-<pre class="code python literal-block">
-<span class="k">def</span> <span class="nf">test_pep8_conformance</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;
-    Test for pep8 conformance
-    &quot;&quot;&quot;</span>
-    <span class="c"># Here I'm matching the project path so I can remove the prefix path</span>
-    <span class="c"># in the output. This strips the often obtuse absolute paths in CI</span>
-    <span class="c"># environments. Yours will obviously differ.</span>
-    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r'.*(roadrage/roadrage.*\.py)'</span><span class="p">)</span>
-    <span class="n">pep8style</span> <span class="o">=</span> <span class="n">pep8</span><span class="o">.</span><span class="n">StyleGuide</span><span class="p">(</span><span class="n">reporter</span><span class="o">=</span><span class="n">CustomReport</span><span class="p">)</span>
-    <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
-    <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">'..'</span><span class="p">))</span>
-    <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">pyfile</span><span class="p">)</span> <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">pyfile</span> <span class="ow">in</span> <span class="n">files</span>
-        <span class="k">if</span> <span class="n">pyfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">'.py'</span><span class="p">)]</span>
-    <span class="n">report</span> <span class="o">=</span> <span class="n">pep8style</span><span class="o">.</span><span class="n">init_report</span><span class="p">()</span>
-    <span class="n">pep8style</span><span class="o">.</span><span class="n">check_files</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;{path}: {code} {row}, {col} - {text}&quot;</span>
-        <span class="n">match</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
-            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">]</span>
-
-        <span class="k">yield</span> <span class="n">fail</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">path</span><span class="o">=</span><span class="n">rel_path</span><span class="p">,</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'code'</span><span class="p">],</span>
-            <span class="n">row</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'row'</span><span class="p">],</span>
-            <span class="n">col</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'col'</span><span class="p">],</span>
-            <span class="n">text</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'text'</span><span class="p">]</span>
-        <span class="p">)</span>
-</pre>
-<p>These are placed where nose can find them, in my case tests/test_pep8.py.
-Here's the full source.</p>
-<pre class="code python literal-block">
-<span class="sd">&quot;&quot;&quot;
-Provides code conformance testing.
-
-We do it here so we can collect errors into the xunit report for CI
-integration.
-&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pep8</span>
-<span class="kn">import</span> <span class="nn">re</span>
-
-<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_true</span>  <span class="c"># pylint: disable=E0611</span>
-
-<span class="n">PROJ_ROOT</span> <span class="o">=</span> <span class="s">&quot;roadrage/roadrage&quot;</span>
-
-<span class="k">def</span> <span class="nf">fail</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;
-    Fails with message.
-    &quot;&quot;&quot;</span>
-    <span class="n">assert_true</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">CustomReport</span><span class="p">(</span><span class="n">pep8</span><span class="o">.</span><span class="n">StandardReport</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;
-    Collect report into an array of results.
-    &quot;&quot;&quot;</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">def</span> <span class="nf">get_file_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_print</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                    <span class="s">'path'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
-                    <span class="s">'row'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_offset</span> <span class="o">+</span> <span class="n">line_number</span><span class="p">,</span>
-                    <span class="s">'col'</span><span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="s">'code'</span><span class="p">:</span> <span class="n">code</span><span class="p">,</span>
-                    <span class="s">'text'</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
-                <span class="p">})</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_errors</span>
-
-
-<span class="k">def</span> <span class="nf">test_pep8_conformance</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;
-    Test for pep8 conformance
-    &quot;&quot;&quot;</span>
-    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r'.*({0}.*\.py)'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PROJ_ROOT</span><span class="p">)</span>
-    <span class="n">pep8style</span> <span class="o">=</span> <span class="n">pep8</span><span class="o">.</span><span class="n">StyleGuide</span><span class="p">(</span><span class="n">reporter</span><span class="o">=</span><span class="n">CustomReport</span><span class="p">)</span>
-    <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
-    <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">'..'</span><span class="p">))</span>
-    <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">pyfile</span><span class="p">)</span> <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">pyfile</span> <span class="ow">in</span> <span class="n">files</span>
-        <span class="k">if</span> <span class="n">pyfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">'.py'</span><span class="p">)]</span>
-    <span class="n">report</span> <span class="o">=</span> <span class="n">pep8style</span><span class="o">.</span><span class="n">init_report</span><span class="p">()</span>
-    <span class="n">pep8style</span><span class="o">.</span><span class="n">check_files</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;{path}: {code} {row}, {col} - {text}&quot;</span>
-        <span class="n">match</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
-            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">error</span><span class="p">[</span><span class="s">'path'</span><span class="p">]</span>
-
-        <span class="k">yield</span> <span class="n">fail</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">path</span><span class="o">=</span><span class="n">rel_path</span><span class="p">,</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'code'</span><span class="p">],</span>
-            <span class="n">row</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'row'</span><span class="p">],</span>
-            <span class="n">col</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'col'</span><span class="p">],</span>
-            <span class="n">text</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="s">'text'</span><span class="p">]</span>
-        <span class="p">)</span>
-</pre>
-</div>
-<div class="section" id="pylint">
-<h2>PyLint</h2>
-<p>I used a very similar method with PyLint, with one exception. I couldn't figure
-out how to do it purely programmatically. The failure was primarily due to a
-bug in the current version where the py_run method ignored the pylintrc options
-passed to it. I seriously can't find the bug report now, but it was being
-tracked. My workaround involved configuring a custom output template, shelling
-out, and capturing then parsing the output.</p>
-<p>The method requires pylintrc settings for the msg template that separates
-each field by a '|' and disabling of the verbose reporting options.</p>
-<pre class="code ini literal-block">
-<span class="na">msg-template</span><span class="o">=</span><span class="s">{path}|{msg_id}|{line},{column}|{msg}</span>
-<span class="na">reports</span><span class="o">=</span><span class="s">no</span>
-</pre>
-<pre class="code python literal-block">
-<span class="sd">&quot;&quot;&quot;
-Provides lint testing for the roadrage project.
-&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-
-<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">PIPE</span>
-<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_true</span>  <span class="c"># pylint: disable=E0611</span>
-
-
-<span class="k">def</span> <span class="nf">fail</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;
-    Fails with message.
-    &quot;&quot;&quot;</span>
-    <span class="n">assert_true</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">test_lint_conformance</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;
-    Collects all lint tests and creates nose errors.
-    &quot;&quot;&quot;</span>
-    <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
-    <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s">'..'</span><span class="p">,</span> <span class="s">'..'</span><span class="p">))</span>
-    <span class="n">rcfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">'.pylintrc'</span><span class="p">)</span>
-    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s">'pylint'</span><span class="p">,</span> <span class="s">'roadrage'</span><span class="p">,</span> <span class="s">'--rcfile={0}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rcfile</span><span class="p">)]</span>
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
-    <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
-
-    <span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span>
-              <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-              <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">'*'</span><span class="p">)]</span>
-
-    <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
-        <span class="n">fields</span> <span class="o">=</span> <span class="n">err</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">'|'</span><span class="p">)</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;{path}: {code} ({position}) - {msg}&quot;</span>
-        <span class="k">yield</span> <span class="n">fail</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">path</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-            <span class="n">position</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-            <span class="n">msg</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="p">)</span>
-</pre>
-</div>
-<div class="section" id="external-links">
-<h2>External Links</h2>
+<div class="section" id="requirements">
+<h2>Requirements</h2>
 <ul class="simple">
-<li><a class="reference external" href="http://pep8.readthedocs.org/en/latest/">PEP8</a></li>
-<li><a class="reference external" href="http://www.pylint.org/">PyLint</a></li>
-<li><a class="reference external" href="https://nose.readthedocs.org/en/latest/">Nose</a></li>
+<li>ansible</li>
+<li>librarian-ansible</li>
+<li>git</li>
+<li>CentOS 7, RHEL 7, Fedora 20+...whatever</li>
+<li>some servers</li>
 </ul>
+</div>
+<div class="section" id="get-the-ansible-work-environment">
+<h2>Get the Ansible Work Environment</h2>
+<p>I've thrown together some ansible scripts that automate the configuration of
+the clients. These aren't &quot;production ready&quot; by any means and almost certainly
+would require tweaking for a different target environment. However, I did make
+a first stab best effort to generalize them and make them moderately
+configurable. As such, they should serve more as a programmatic walk through
+then a turnkey solution. Also, if you deployed the playbook as is, you'll end
+up with my user and public key in your environment. While I always welcome new
+resources, you likely don't want that...so creating your own site.yml or
+removing my user module from the example might be prudent.</p>
+<p>Caveats aside, they should simplify the deployment of the environment.</p>
+<pre class="code bash literal-block">
+% git clone https://github.com/jameskyle/ansible-kubernetes.git
+% <span class="nb">cd </span>ansible-kubernetes
+% librarian-ansible install
+</pre>
+<p>There's an inventory.example file included. You'll probably want to update the
+fqdn's to your local domain. The primary docker host is named 'dock1' by
+default. If you wish to change this, it's done in group_vars/dockers.yml.</p>
+<div class="section" id="hostnames-and-ansible">
+<h3>Hostnames and Ansible</h3>
+<p>Ansible assumes it's capable of resolving the hostnames in your inventory <em>or</em>
+the ansible_ssh_host argument is set in your inventory. For example, if you
+don't have a dns server set up you might want to edit your inventory to look
+something like</p>
+<pre class="literal-block">
+[dockers]
+dock1.mydomain.com ansible_ssh_host=192.168.1.10
+</pre>
+<p>Ansible general usage is beyond the scope of this walk through, so please see
+the upstream docs for any needed clarifications.</p>
+</div>
+</div>
+<div class="section" id="configuring-the-bootstrap-node">
+<h2>Configuring the Bootstrap Node</h2>
+<p>We're going to work from the assumption of a green field deployment. If the
+environment already has existing support services like PXE, dns, dhcp, file
+server, etc.  I trust you already know how to adapt that environment
+accordingly.</p>
+<div class="section" id="install">
+<h3>Install</h3>
+<p>Initial install is manual. In my particular configuration, I have a root drive
+in a RAID 1 and a very large storage array. I installed the OS with the
+following disk configuration.</p>
+<ul class="simple">
+<li>/dev/sda1 : /boot</li>
+<li>/dev/sda2 : lvm volgroup main
+- swap
+- /</li>
+<li>/dev/sdb : lvm volgroup data
+- /var/lib/docker, btrfs
+- /var/docker/registry, ext4</li>
+</ul>
+<p>Doesn't really matter. If you want to use the btrfs driver for docker (these
+scripts do), then you'll want to spin off a separate drive for mounting on
+/var/lib/docker.</p>
+<p>This only needs to be done manually for the first host, our kickstart
+scripts will take care of the workers.</p>
+</div>
+<div class="section" id="configure-my-user-account">
+<h3>Configure My User Account</h3>
+<p>I'd recommend hacking together your own user (or at least replacing my key),
+regardless it's really convenient to have a passwordless ssh and sudo.</p>
+<p>I use my 'jkyle' role for this and put it in a separate playbook from the site
+example called jkyle.yml. The first time we run, I have to provide a password.</p>
+<pre class="code bash literal-block">
+% ansible-playbook --limit dock1 <span class="se">\
+</span>                   -i inventory.example <span class="se">\
+</span>                   --ask-pass <span class="se">\
+</span>                   --ask-sudo <span class="se">\
+</span>                   jkyle.yml
+</pre>
+<p>You might see something like this</p>
+<pre class="literal-block">
+PLAY [all]
+********************************************************************
+
+GATHERING FACTS
+***************************************************************
+ok: [dock1]
+
+TASK: [jkyle | Install YUM Packages]
+******************************************
+changed: [dock1] =&gt;
+(item=bind-utils,zsh,git-core,lsof,tcpdump,vim)
+
+TASK: [jkyle | Install APT Packages]
+******************************************
+skipping: [dock1]
+
+TASK: [jkyle | Create James]
+**************************************************
+changed: [dock1]
+
+TASK: [jkyle | Configure jkyle sudoers]
+***************************************
+changed: [dock1]
+
+TASK: [jkyle | Deploy jkyle User Key]
+*****************************************
+changed: [dock1]
+
+TASK: [jkyle | Setup James Home Directory]
+************************************
+changed: [dock1]
+
+TASK: [jkyle | Link James configuration files]
+********************************
+changed: [dock1] =&gt; (item=zlogin)
+changed: [dock1] =&gt; (item=zlogout)
+changed: [dock1] =&gt; (item=zpreztorc)
+changed: [dock1] =&gt; (item=zprofile)
+changed: [dock1] =&gt; (item=zshenv)
+changed: [dock1] =&gt; (item=zshrc)
+
+PLAY RECAP
+********************************************************************
+dock1   : ok=7    changed=6    unreachable=0    failed=0
+</pre>
+</div>
+<div class="section" id="services-configuration-on-primary-host">
+<h3>Services Configuration On Primary Host</h3>
+<div class="section" id="common">
+<h4>Common</h4>
+<p>The common role does some general configuration of networking, hostnames, etc.
+Make sure your inventory file includes the necessary group and host variables
+for your network. See the inventory.example file.</p>
+</div>
+<div class="section" id="docker">
+<h4>Docker</h4>
+<p>Our docker deployment provides both the local socket connection and a remote
+API with server/client certificates. Some example certificates are found in
+ansible-kubernetes/roles/docker/files. However, you should probably generate
+your own as these are obviously insecure...particuarly if the servers have
+public ports. I generated the certs using a script and an openssl template you
+found in my <a class="reference external" href="https://github.com/jameskyle/CertGen">CertGen</a> github repo.</p>
+<pre class="literal-block">
+% ansible-playbook --limit dock1 -i inventory.example site.example.yml
+</pre>
+<p>You might see something like this</p>
+<pre class="literal-block">
+PLAY [dockers]
+****************************************************************
+
+GATHERING FACTS
+***************************************************************
+ok: [dock1]
+
+TASK: [common | sudoers]
+******************************************************
+ok: [dock1]
+
+TASK: [common | Yum Fastest Mirror]
+*******************************************
+ok: [dock1]
+
+TASK: [common | Update System]
+************************************************
+ok: [dock1]
+
+TASK: [common | Install Packages]
+*********************************************
+ok: [dock1] =&gt; (item=bridge-utils,policycoreutils-python)
+
+TASK: [common | disalbe firewalld]
+********************************************
+ok: [dock1]
+
+TASK: [common | disable network.service]
+**************************************
+changed: [dock1]
+
+TASK: [common | Configure Management Interface]
+*******************************
+ok: [dock1]
+
+TASK: [common | config sshd_config]
+*******************************************
+ok: [dock1]
+
+TASK: [common | Base /etc/hosts Template]
+*************************************
+changed: [dock1]
+
+TASK: [common | Set Hostname]
+*************************************************
+ok: [dock1]
+
+TASK: [common | Build hosts file]
+*********************************************
+changed: [dock1] =&gt; (item=dock1)
+skipping: [dock1] =&gt; (item=dock2)
+skipping: [dock1] =&gt; (item=dock3)
+skipping: [dock1] =&gt; (item=dock4)
+skipping: [dock1] =&gt; (item=dock5)
+
+TASK: [docker | disable selinux]
+**********************************************
+changed: [dock1]
+
+TASK: [docker | Install EPEL Repo]
+********************************************
+ok: [dock1]
+
+TASK: [docker | Install Packages]
+*********************************************
+ok: [dock1] =&gt; (item=docker,btrfs-progs,bridge-utils)
+
+TASK: [docker | Install Packages]
+*********************************************
+skipping: [dock1]
+
+TASK: [docker | Deploy ca.crt]
+************************************************
+ok: [dock1]
+
+TASK: [docker | Deploy server.crt]
+********************************************
+ok: [dock1]
+
+TASK: [docker | Deploy server.key]
+********************************************
+ok: [dock1]
+
+TASK: [docker | Create docker.socket directory path]
+**************************
+changed: [dock1]
+
+TASK: [docker | Create docker.socket unit]
+************************************
+ok: [dock1]
+
+TASK: [docker | Link docker.socket to standard location]
+**********************
+skipping: [dock1]
+
+TASK: [docker | docker.service]
+***********************************************
+ok: [dock1]
+
+TASK: [docker | Add Docker Users to Docker Group]
+*****************************
+ok: [dock1] =&gt; (item=docker_users)
+
+TASK: [docker | Enable &amp; Start Services]
+**************************************
+ok: [dock1] =&gt; (item=docker.socket)
+ok: [dock1] =&gt; (item=docker.service)
+
+PLAY RECAP
+********************************************************************
+dock1                      : ok=23   changed=5    unreachable=0    failed=0
+</pre>
+<p>After which, the following changes would have been applied:</p>
+<ul class="simple">
+<li>A sudoers file deployed that allows individual configs in /etc/sudoers.d
+and passwordless sudo for wheel group members.</li>
+<li>Installation of the yum fastest mirror plugin</li>
+<li>A full system update</li>
+<li>installation of bridge-utils, policy core utils</li>
+<li>The firewalld daemon disabled. <a class="footnote-reference" href="#id6" id="id1">[*]</a></li>
+<li>NetworkManager disabled. <a class="footnote-reference" href="#id7" id="id2">[†]</a></li>
+<li>selinux disabled. <a class="footnote-reference" href="#id8" id="id3">[‡]</a></li>
+<li>configuration of the management interface...probably already done, but this
+enforces it</li>
+<li>a common sshd_config file deployed</li>
+<li>/etc/hosts populated with entries for all the docker hosts</li>
+<li>the target hosts hostname</li>
+<li>A fully functional docker server with server/client certificates.</li>
+<li>A docker registry at <a class="reference external" href="http://yourdomain.com:5000/">http://yourdomain.com:5000/</a></li>
+</ul>
+<p>If you used the default certs, make sure to copy over the client certificate
+and certificate authorities to your ~/.docker directory.</p>
+<p>You can interact with the docker server over tcp via</p>
+<pre class="code bash literal-block">
+% <span class="nb">export </span><span class="nv">DOCKER_HOST</span><span class="o">=</span>tcp://dock1.yourdomain.com:2376
+% docker --tlsverify -i -t --rm ubuntu /bin/bash
+% docker --tlsverify images
+</pre>
+</div>
+</div>
+<div class="section" id="pxe-services">
+<h3>PXE Services</h3>
+<p>Next, we're going to deploy a container with pxe related services to bring up
+the worker hosts. I've created a project that builds a pxe server container
+given a specific environment context. You can use my <a class="reference external" href="https://github.com/jameskyle/docker-pxe-server">docker-pxe-server</a>
+project, or build your own...or even just install the services on the host
+itself.</p>
+<p>The readme for the project should be sufficient to get going.</p>
+<p>After pxe/dns/dhcp services are up for your environment, bounce the servers and
+bring them up. I typically do this with ipmitool. A script to do so might look
+something like</p>
+<pre class="code bash literal-block">
+<span class="k">for </span>i in 11 12 13 14;do
+    ipmitool -I lanplus <span class="se">\
+</span>             -f ~/.racpasswd <span class="se">\
+</span>             -H 192.168.19.<span class="k">${</span><span class="nv">i</span><span class="k">}</span> <span class="se">\
+</span>             -U root chassis bootdev pxe
+    ipmitool -I lanplus <span class="se">\
+</span>             -f ~/.racpasswd <span class="se">\
+</span>             -H 192.168.19.<span class="k">${</span><span class="nv">i</span><span class="k">}</span> <span class="se">\
+</span>             -U root chassis power cycle
+<span class="k">done</span>
+</pre>
+<p>Of course, you'll need your actually ILO/iDrac/etc ip's. Make a cup of coffee,
+catch up on the news. Whatever.</p>
+</div>
+<div class="section" id="summary">
+<h3>Summary</h3>
+<p>That completes the initial host configuration. You should have all the key
+services up such as an initial docker server &amp; registry, PXE, DHCP, &amp; DNS
+services, and your initial user account. Finally you should have a number of
+client hosts with fresh installs awaiting configuration.</p>
+</div>
+</div>
+<div class="section" id="finalizing-the-cluster">
+<h2>Finalizing the Cluster.</h2>
+<p>All that's left is configuring the client hosts and installing kubernetes.
+Assuming our inventory is correctly configured in, we can just skip to what's
+needed for kubernetes and then run ansible on all nodes.</p>
+<div class="section" id="kubernetes">
+<h3>Kubernetes</h3>
+<p>The kubernetes role assumes the required binaries and etcd are located in the</p>
+<pre class="literal-block">
+roles/kubernetes/files
+</pre>
+<p>directory. These aren't bundled and since we're deploying the bleeding edge,
+it's probably best to build a fresh set anyway. They both have their own build
+systems that are covered in the docs, so please refer to the upstream
+<a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes">kubernetes</a> and <a class="reference external" href="https://github.com/coreos/etcd">etcd</a> project for details.</p>
+<p>A couple of hints though.</p>
+<p>For Kubernetes, you'll want to read the README.md in kubernetes's ./build
+directory.</p>
+<p>For etcd, you'll probably just want to run these commands</p>
+<pre class="code bash literal-block">
+docker build -t coreos/etcd .
+docker run -d coreos/etcd
+docker cp &lt;container_id&gt;:/opt/etcd/bin/etcd .
+docker stop &lt;container_id&gt; <span class="o">&amp;&amp;</span> docker rm &lt;container_id&gt;
+</pre>
+<p>Then you have an amd64 etcd binary you can copy to roles/kubernetes/files.</p>
+<div class="section" id="installation">
+<h4>Installation</h4>
+<p>No more configuration should be necessary. Assuming everything's gone well so
+far, the following should be sufficient</p>
+<pre class="literal-block">
+ansible-playbook --ask-pass \
+                 --ask-sudo \
+                 -i inventory.example site.example.yml
+</pre>
+<p>Notice we're no longer limiting to the dock1 host or passing specific tags to
+run. Once done, you should be able to query your kubernetes minions. You can do
+so from any host where kubecfg is installed. Which includes all your hosts at
+/usr/local/bin/kubecfg. For example</p>
+<pre class="literal-block">
+% kubecfg -h http://dock1.pao19.tfoundry.com:8080 list minions
+Minion identifier
+----------
+dock1
+dock2
+dock3
+dock4
+dock5
+</pre>
+</div>
+</div>
+</div>
+<div class="section" id="next-steps">
+<h2>Next Steps.</h2>
+<p>Next up, you can deploy the <a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/examples/guestbook">Kubernetes GuestBook</a> example. Or build your
+own!</p>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[*]</a></td><td>I had a hell of a time getting firewalld to work as advertised. Zones
+wouldn't persist, interfaces added to multiple zones, etc. Several
+upstream bugs were filed.Much easier to just write your own iptables
+rules.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[†]</a></td><td>The network.service &amp; NetworkManager seem to be mortal enemies in this
+release.  You coudl tell NM manager to ignore a config, but it would
+happily still muck with it...such as adding it to the default zone if
+firewalld was enabled. In the end, leaving only NM running seemed to
+work best.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[‡]</a></td><td>As of the time of this tutorial, the btrfs driver for docker does not
+support selinux</td></tr>
+</tbody>
+</table>
 </div>
 
       </article>
       <section>
           <p id="post-share-links">
               Share on:
-              <a href="http://twitter.com/home?status=Integrating%20PEP8%20%26amp%3B%20PyLint%20Tests%20with%20Nose%20%26amp%3B%20Xunit%20 http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" target="_blank" title="Share on Twitter">Twitter</a>
+              <a href="http://twitter.com/home?status=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20 http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Twitter">Twitter</a>
               ❄
-              <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit&p[images][0]=&p[title]=Integrating%20PEP8%20%26amp%3B%20PyLint%20Tests%20with%20Nose%20%26amp%3B%20Xunit%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22motivation%22%3E%0A%3Ch2%3EMotivation%3C/h2%3E%0A%3Cp%3EMost%20continuous%20integration%20platforms%20support%20the%20xunit/junit%20formats%20for%20test%0Aresults.%20They%20allow%20a%20greater%20granularity%20of%20test%20management%20above%20a%20simple%0Apass/fail.%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//nose.readthedocs.org/en/latest/%22%3ENose%3C/a%3E%20supports%20xunit%20reports%20by%20default%2C%20but%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//pep8.readthedocs.org/en/latest/%22%3EPEP8%3C/a%3E%20and%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.pylint.org/%22%3EPyLint%3C/a%3E%20do%20not.%0ABy%20integrating%20PEP8%20%26amp%3B%20PyLint%20into%20nose%20tests%2C%20we%20can%20include%20their%20results%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+              <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster&p[images][0]=&p[title]=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22objectives%22%3E%0A%3Ch2%3EObjectives%3C/h2%3E%0A%3Cp%3ESeems%20my%20blog%20needs%20a%20few%20updates%20in%20the%20buzz%20department.%20I%20like%20taking%20the%0Ashotgun%20approach%2C%20so%20we%27re%20going%20to%20deploy%20a%205%20node%20bare%20metal%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//www.docker.com%22%3Edocker%3C/a%3E%20cluster%0Ausing%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.ansible.com/home%22%3Eansible%3C/a%3E%20for%20host%20configuration%20and%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//github.com/GoogleCloudPlatform/kubernetes%22%3Ekubernetes%3C/a%3E%20for%20container%20management.%3C/p%3E%0A%3Cp%3EI%20wish%20I%20could%20have%20squeezed%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//mesos.apache.org%22%3Emesos%3C/a%3E%20into%20this%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
               ❄
-              <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" target="_blank" title="Share on Google Plus">Google+</a>
+              <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Google Plus">Google+</a>
               ❄
-              <a href="mailto:?subject=Integrating%20PEP8%20%26amp%3B%20PyLint%20Tests%20with%20Nose%20%26amp%3B%20Xunit%20&body=http%3A//blog.jameskyle.org/2014/05/pep8-pylint-tests-with-nose-xunit" target="_blank" title="Share via Email">Email</a>
+              <a href="mailto:?subject=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20&body=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share via Email">Email</a>
           </p>
       </section>
       <hr />
@@ -290,6 +474,12 @@ Provides lint testing for the roadrage project.
           <h3>Last posts</h3>
           <ol class="archive">
     
+
+
+      <li>
+<a href="./2014/05/pep8-pylint-tests-with-nose-xunit" rel="bookmark" title="Permalink to Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit">Integrating PEP8 &amp; PyLint Tests with Nose &amp; Xunit</a>
+  <time datetime="2014-05-23T08:24:46" pubdate>Fri 23 May 2014</time>
+<p class="tags">tags: <a href="./tag/python programming">python programming</a></p></a>      </li>
 
 
       <li>
@@ -316,10 +506,6 @@ Provides lint testing for the roadrage project.
 <p class="tags">tags: <a href="./tag/charybdis puppet">charybdis puppet</a></p></a>      </li>
 
 
-      <li>
-<a href="./2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" rel="bookmark" title="Permalink to Zsh Script to Create VMware Fusion 5 Vagrant Box">Zsh Script to Create VMware Fusion 5 Vagrant Box</a>
-  <time datetime="2013-05-25T09:03:50" pubdate>Sat 25 May 2013</time>
-<p class="tags">tags: <a href="./tag/vmware">vmware</a><a href="./tag/vagrant">vagrant</a><a href="./tag/scripts">scripts</a></p></a>      </li>
 
 
 
