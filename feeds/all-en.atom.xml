@@ -19,15 +19,15 @@ project isn't ready for prime time yet. So that'll be a post for another day.&lt
 &lt;/div&gt;
 &lt;div class="section" id="get-the-ansible-work-environment"&gt;
 &lt;h2&gt;Get the Ansible Work Environment&lt;/h2&gt;
-&lt;p&gt;I've thrown together some ansible scripts that automate the configuration of
-the clients. These aren't &amp;quot;production ready&amp;quot; by any means and almost certainly
-would require tweaking for a different target environment. However, I did make
-a first stab best effort to generalize them and make them moderately
-configurable. As such, they should serve more as a programmatic walk through
-then a turnkey solution. Also, if you deployed the playbook as is, you'll end
-up with my user and public key in your environment. While I always welcome new
-resources, you likely don't want that...so creating your own site.yml or
-removing my user module from the example might be prudent.&lt;/p&gt;
+&lt;p&gt;I've thrown together an &lt;a class="reference external" href="https://github.com/jameskyle/ansible-kubernetes"&gt;ansible-kubernetes&lt;/a&gt; project to automate the
+configuration of the clients. These aren't &amp;quot;production ready&amp;quot; by any means and
+almost certainly would require tweaking for a different target environment.
+However, I did make a first stab best effort to generalize them and make them
+moderately configurable. As such, they should serve more as a programmatic walk
+through then a turnkey solution. Also, if you deployed the playbook as is,
+you'll end up with my user and public key in your environment. While I always
+welcome new resources, you likely don't want that...so creating your own
+site.yml or removing my user module from the example might be prudent.&lt;/p&gt;
 &lt;p&gt;Caveats aside, they should simplify the deployment of the environment.&lt;/p&gt;
 &lt;pre class="code bash literal-block"&gt;
 % git clone https://github.com/jameskyle/ansible-kubernetes.git
