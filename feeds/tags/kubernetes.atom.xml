@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/kubernetes.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-08-20T10:42:34-07:00</updated><entry><title>Deploying a Bare Metal Kubernetes Cluster</title><link href="http://blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" rel="alternate"></link><updated>2014-08-20T10:42:34-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-08-20:2014/08/deploying-baremetal-kubernetes-cluster</id><summary type="html">&lt;div class="section" id="objectives"&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/kubernetes.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-08-26T10:42:00-07:00</updated><entry><title>Deploying a Bare Metal Kubernetes Cluster</title><link href="http://blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" rel="alternate"></link><updated>2014-08-26T10:42:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-08-20:2014/08/deploying-baremetal-kubernetes-cluster</id><summary type="html">&lt;div class="section" id="objectives"&gt;
 &lt;h2&gt;Objectives&lt;/h2&gt;
 &lt;p&gt;Seems my blog needs a few updates in the buzz department. I like taking the
 shotgun approach, so we're going to deploy a 5 node bare metal &lt;a class="reference external" href="https://www.docker.com"&gt;docker&lt;/a&gt; cluster
@@ -276,7 +276,7 @@ dock1                      : ok=23   changed=5    unreachable=0    failed=0
 and passwordless sudo for wheel group members.&lt;/li&gt;
 &lt;li&gt;Installation of the yum fastest mirror plugin&lt;/li&gt;
 &lt;li&gt;A full system update&lt;/li&gt;
-&lt;li&gt;installation of bridge-utils, policy core utils&lt;/li&gt;
+&lt;li&gt;installation of bridge-utils, policycore utils&lt;/li&gt;
 &lt;li&gt;The firewalld daemon disabled. &lt;a class="footnote-reference" href="#id4" id="id1"&gt;[*]&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;NetworkManager disabled. &lt;a class="footnote-reference" href="#id5" id="id2"&gt;[†]&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;selinux disabled. &lt;a class="footnote-reference" href="#id6" id="id3"&gt;[‡]&lt;/a&gt;&lt;/li&gt;
@@ -286,7 +286,6 @@ enforces it&lt;/li&gt;
 &lt;li&gt;/etc/hosts populated with entries for all the docker hosts&lt;/li&gt;
 &lt;li&gt;the target hosts hostname&lt;/li&gt;
 &lt;li&gt;A fully functional docker server with server/client certificates.&lt;/li&gt;
-&lt;li&gt;A docker registry at &lt;a class="reference external" href="http://yourdomain.com:5000/"&gt;http://yourdomain.com:5000/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;If you used the default certs, make sure to copy over the client certificate
 and certificate authorities to your ~/.docker directory.&lt;/p&gt;
