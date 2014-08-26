@@ -19,19 +19,16 @@ project isn't ready for prime time yet. So that'll be a post for another day.&lt
 &lt;/div&gt;
 &lt;div class="section" id="get-the-ansible-work-environment"&gt;
 &lt;h2&gt;Get the Ansible Work Environment&lt;/h2&gt;
-&lt;p&gt;I've thrown together an &lt;a class="reference external" href="https://github.com/jameskyle/ansible-kubernetes"&gt;ansible-kubernetes&lt;/a&gt; project to automate the
+&lt;p&gt;I've thrown together an &lt;a class="reference external" href="https://github.com/jameskyle/ansible-sandbox"&gt;ansible-sandbox&lt;/a&gt; project to automate the
 configuration of the clients. These aren't &amp;quot;production ready&amp;quot; by any means and
 almost certainly would require tweaking for a different target environment.
 However, I did make a first stab best effort to generalize them and make them
 moderately configurable. As such, they should serve more as a programmatic walk
-through then a turnkey solution. Also, if you deployed the playbook as is,
-you'll end up with my user and public key in your environment. While I always
-welcome new resources, you likely don't want that...so creating your own
-site.yml or removing my user module from the example might be prudent.&lt;/p&gt;
+through then a turnkey solution.&lt;/p&gt;
 &lt;p&gt;Caveats aside, they should simplify the deployment of the environment.&lt;/p&gt;
 &lt;pre class="code bash literal-block"&gt;
-% git clone https://github.com/jameskyle/ansible-kubernetes.git
-% &lt;span class="nb"&gt;cd &lt;/span&gt;ansible-kubernetes
+% git clone https://github.com/jameskyle/ansible-sandbox.git
+% &lt;span class="nb"&gt;cd &lt;/span&gt;ansible-sandbox
 % librarian-ansible install
 &lt;/pre&gt;
 &lt;p&gt;There's an inventory.example file included. You'll probably want to update the
@@ -85,10 +82,10 @@ regardless it's really convenient to have a passwordless ssh and sudo.&lt;/p&gt;
 example called jkyle.yml. The first time we run, I have to provide a password.&lt;/p&gt;
 &lt;pre class="code bash literal-block"&gt;
 % ansible-playbook --limit dock1 &lt;span class="se"&gt;\
-&lt;/span&gt;                   -i inventory.example &lt;span class="se"&gt;\
+&lt;/span&gt;                   -i inventories/inventory.example &lt;span class="se"&gt;\
 &lt;/span&gt;                   --ask-pass &lt;span class="se"&gt;\
 &lt;/span&gt;                   --ask-sudo &lt;span class="se"&gt;\
-&lt;/span&gt;                   jkyle.yml
+&lt;/span&gt;                   playbooks/jkyle.yml
 &lt;/pre&gt;
 &lt;p&gt;You might see something like this&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
@@ -150,12 +147,14 @@ for your network. See the inventory.example file.&lt;/p&gt;
 &lt;h4&gt;Docker&lt;/h4&gt;
 &lt;p&gt;Our docker deployment provides both the local socket connection and a remote
 API with server/client certificates. Some example certificates are found in
-ansible-kubernetes/roles/docker/files. However, you should probably generate
-your own as these are obviously insecure...particuarly if the servers have
+ansible-sandbox/librarian_roles/docker/files. However, you should probably
+generate your own as these are obviously insecure...particuarly if the servers have
 public ports. I generated the certs using a script and an openssl template you
 found in my &lt;a class="reference external" href="https://github.com/jameskyle/CertGen"&gt;CertGen&lt;/a&gt; github repo.&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
-% ansible-playbook --limit dock1 -i inventory.example site.example.yml
+% ansible-playbook --limit dock1 \
+                   -i inventories/inventory.example
+                   playbooks/kubernetes.yml
 &lt;/pre&gt;
 &lt;p&gt;You might see something like this&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
@@ -278,9 +277,9 @@ and passwordless sudo for wheel group members.&lt;/li&gt;
 &lt;li&gt;Installation of the yum fastest mirror plugin&lt;/li&gt;
 &lt;li&gt;A full system update&lt;/li&gt;
 &lt;li&gt;installation of bridge-utils, policy core utils&lt;/li&gt;
-&lt;li&gt;The firewalld daemon disabled. &lt;a class="footnote-reference" href="#id6" id="id1"&gt;[*]&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;NetworkManager disabled. &lt;a class="footnote-reference" href="#id7" id="id2"&gt;[†]&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;selinux disabled. &lt;a class="footnote-reference" href="#id8" id="id3"&gt;[‡]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;The firewalld daemon disabled. &lt;a class="footnote-reference" href="#id4" id="id1"&gt;[*]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;NetworkManager disabled. &lt;a class="footnote-reference" href="#id5" id="id2"&gt;[†]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;selinux disabled. &lt;a class="footnote-reference" href="#id6" id="id3"&gt;[‡]&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;configuration of the management interface...probably already done, but this
 enforces it&lt;/li&gt;
 &lt;li&gt;a common sshd_config file deployed&lt;/li&gt;
@@ -366,7 +365,8 @@ far, the following should be sufficient&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 ansible-playbook --ask-pass \
                  --ask-sudo \
-                 -i inventory.example site.example.yml
+                 -i inventories/inventory.example \
+                 playbooks/kubernetes.yml
 &lt;/pre&gt;
 &lt;p&gt;Notice we're no longer limiting to the dock1 host or passing specific tags to
 run. Once done, you should be able to query your kubernetes minions. You can do
@@ -389,7 +389,10 @@ dock5
 &lt;h2&gt;Next Steps.&lt;/h2&gt;
 &lt;p&gt;Next up, you can deploy the &lt;a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/examples/guestbook"&gt;Kubernetes GuestBook&lt;/a&gt; example. Or build your
 own!&lt;/p&gt;
-&lt;table class="docutils footnote" frame="void" id="id6" rules="none"&gt;
+&lt;/div&gt;
+&lt;div class="section" id="footnotes"&gt;
+&lt;h2&gt;Footnotes&lt;/h2&gt;
+&lt;table class="docutils footnote" frame="void" id="id4" rules="none"&gt;
 &lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
 &lt;tbody valign="top"&gt;
 &lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id1"&gt;[*]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;I had a hell of a time getting firewalld to work as advertised. Zones
@@ -398,7 +401,7 @@ upstream bugs were filed.Much easier to just write your own iptables
 rules.&lt;/td&gt;&lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;table class="docutils footnote" frame="void" id="id7" rules="none"&gt;
+&lt;table class="docutils footnote" frame="void" id="id5" rules="none"&gt;
 &lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
 &lt;tbody valign="top"&gt;
 &lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id2"&gt;[†]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;The network.service &amp;amp; NetworkManager seem to be mortal enemies in this
@@ -408,7 +411,7 @@ firewalld was enabled. In the end, leaving only NM running seemed to
 work best.&lt;/td&gt;&lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;table class="docutils footnote" frame="void" id="id8" rules="none"&gt;
+&lt;table class="docutils footnote" frame="void" id="id6" rules="none"&gt;
 &lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
 &lt;tbody valign="top"&gt;
 &lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id3"&gt;[‡]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;As of the time of this tutorial, the btrfs driver for docker does not

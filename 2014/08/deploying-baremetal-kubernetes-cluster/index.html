@@ -56,19 +56,16 @@ project isn't ready for prime time yet. So that'll be a post for another day.</p
 </div>
 <div class="section" id="get-the-ansible-work-environment">
 <h2>Get the Ansible Work Environment</h2>
-<p>I've thrown together an <a class="reference external" href="https://github.com/jameskyle/ansible-kubernetes">ansible-kubernetes</a> project to automate the
+<p>I've thrown together an <a class="reference external" href="https://github.com/jameskyle/ansible-sandbox">ansible-sandbox</a> project to automate the
 configuration of the clients. These aren't &quot;production ready&quot; by any means and
 almost certainly would require tweaking for a different target environment.
 However, I did make a first stab best effort to generalize them and make them
 moderately configurable. As such, they should serve more as a programmatic walk
-through then a turnkey solution. Also, if you deployed the playbook as is,
-you'll end up with my user and public key in your environment. While I always
-welcome new resources, you likely don't want that...so creating your own
-site.yml or removing my user module from the example might be prudent.</p>
+through then a turnkey solution.</p>
 <p>Caveats aside, they should simplify the deployment of the environment.</p>
 <pre class="code bash literal-block">
-% git clone https://github.com/jameskyle/ansible-kubernetes.git
-% <span class="nb">cd </span>ansible-kubernetes
+% git clone https://github.com/jameskyle/ansible-sandbox.git
+% <span class="nb">cd </span>ansible-sandbox
 % librarian-ansible install
 </pre>
 <p>There's an inventory.example file included. You'll probably want to update the
@@ -122,10 +119,10 @@ regardless it's really convenient to have a passwordless ssh and sudo.</p>
 example called jkyle.yml. The first time we run, I have to provide a password.</p>
 <pre class="code bash literal-block">
 % ansible-playbook --limit dock1 <span class="se">\
-</span>                   -i inventory.example <span class="se">\
+</span>                   -i inventories/inventory.example <span class="se">\
 </span>                   --ask-pass <span class="se">\
 </span>                   --ask-sudo <span class="se">\
-</span>                   jkyle.yml
+</span>                   playbooks/jkyle.yml
 </pre>
 <p>You might see something like this</p>
 <pre class="literal-block">
@@ -187,12 +184,14 @@ for your network. See the inventory.example file.</p>
 <h4>Docker</h4>
 <p>Our docker deployment provides both the local socket connection and a remote
 API with server/client certificates. Some example certificates are found in
-ansible-kubernetes/roles/docker/files. However, you should probably generate
-your own as these are obviously insecure...particuarly if the servers have
+ansible-sandbox/librarian_roles/docker/files. However, you should probably
+generate your own as these are obviously insecure...particuarly if the servers have
 public ports. I generated the certs using a script and an openssl template you
 found in my <a class="reference external" href="https://github.com/jameskyle/CertGen">CertGen</a> github repo.</p>
 <pre class="literal-block">
-% ansible-playbook --limit dock1 -i inventory.example site.example.yml
+% ansible-playbook --limit dock1 \
+                   -i inventories/inventory.example
+                   playbooks/kubernetes.yml
 </pre>
 <p>You might see something like this</p>
 <pre class="literal-block">
@@ -315,9 +314,9 @@ and passwordless sudo for wheel group members.</li>
 <li>Installation of the yum fastest mirror plugin</li>
 <li>A full system update</li>
 <li>installation of bridge-utils, policy core utils</li>
-<li>The firewalld daemon disabled. <a class="footnote-reference" href="#id6" id="id1">[*]</a></li>
-<li>NetworkManager disabled. <a class="footnote-reference" href="#id7" id="id2">[†]</a></li>
-<li>selinux disabled. <a class="footnote-reference" href="#id8" id="id3">[‡]</a></li>
+<li>The firewalld daemon disabled. <a class="footnote-reference" href="#id4" id="id1">[*]</a></li>
+<li>NetworkManager disabled. <a class="footnote-reference" href="#id5" id="id2">[†]</a></li>
+<li>selinux disabled. <a class="footnote-reference" href="#id6" id="id3">[‡]</a></li>
 <li>configuration of the management interface...probably already done, but this
 enforces it</li>
 <li>a common sshd_config file deployed</li>
@@ -403,7 +402,8 @@ far, the following should be sufficient</p>
 <pre class="literal-block">
 ansible-playbook --ask-pass \
                  --ask-sudo \
-                 -i inventory.example site.example.yml
+                 -i inventories/inventory.example \
+                 playbooks/kubernetes.yml
 </pre>
 <p>Notice we're no longer limiting to the dock1 host or passing specific tags to
 run. Once done, you should be able to query your kubernetes minions. You can do
@@ -426,7 +426,10 @@ dock5
 <h2>Next Steps.</h2>
 <p>Next up, you can deploy the <a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/examples/guestbook">Kubernetes GuestBook</a> example. Or build your
 own!</p>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+</div>
+<div class="section" id="footnotes">
+<h2>Footnotes</h2>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id1">[*]</a></td><td>I had a hell of a time getting firewalld to work as advertised. Zones
@@ -435,7 +438,7 @@ upstream bugs were filed.Much easier to just write your own iptables
 rules.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id7" rules="none">
+<table class="docutils footnote" frame="void" id="id5" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id2">[†]</a></td><td>The network.service &amp; NetworkManager seem to be mortal enemies in this
@@ -445,7 +448,7 @@ firewalld was enabled. In the end, leaving only NM running seemed to
 work best.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id8" rules="none">
+<table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id3">[‡]</a></td><td>As of the time of this tutorial, the btrfs driver for docker does not
