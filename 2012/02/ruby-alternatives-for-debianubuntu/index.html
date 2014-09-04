@@ -45,7 +45,8 @@ mode.</p>
 % update-alternatives --config ruby
 </pre>
 <div class="highlight"><pre><span class="c">#!/bin/bash</span>
-<span class="nv">RUBY_VERSION</span><span class="o">=</span>1.9.1update-alternatives <span class="se">\</span>
+<span class="nv">RUBY_VERSION</span><span class="o">=</span>1.9.1
+update-alternatives <span class="se">\</span>
    --install /usr/bin/ruby ruby /usr/bin/ruby<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span> 500 <span class="se">\</span>
    --slave /usr/bin/erb erb /usr/bin/erb<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span> <span class="se">\</span>
    --slave /usr/bin/rake rake /usr/bin/rake<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span> <span class="se">\</span>
@@ -67,7 +68,10 @@ mode.</p>
        /usr/share/man/man1/gem<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>.1.gz <span class="se">\</span>
    --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz <span class="se">\</span>
            /usr/share/man/man1/ruby<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>.1.gz <span class="se">\</span>
-   --slave /usr/share/menu/ruby ruby_menu /usr/share/menu/ruby<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span> <span class="nv">RUBY_VERSION</span><span class="o">=</span>1.8update-alternatives <span class="se">\</span>
+   --slave /usr/share/menu/ruby ruby_menu /usr/share/menu/ruby<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>
+
+   <span class="nv">RUBY_VERSION</span><span class="o">=</span>1.8
+   update-alternatives <span class="se">\</span>
    --install /usr/bin/ruby ruby /usr/bin/ruby<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span> 400 <span class="se">\</span>
    --slave /usr/bin/erb erb /usr/bin/erb<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span> <span class="se">\</span>
    --slave /usr/bin/irb irb /usr/bin/irb<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span> <span class="se">\</span>

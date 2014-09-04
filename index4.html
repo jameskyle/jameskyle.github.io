@@ -36,438 +36,151 @@
 
 
       <article>
-        <h1><a href="./2014/08/deploying-baremetal-kubernetes-cluster">Deploying a Bare Metal Kubernetes Cluster</a></h1>
+        <h1><a href="./2014/08/automated-stage3-gentoo-install-using-ansible">Automated Stage3 Gentoo Install Using Ansible</a></h1>
         <div class="section" id="objectives">
 <h2>Objectives</h2>
-<p>Seems my blog needs a few updates in the buzz department. I like taking the
-shotgun approach, so we're going to deploy a 5 node bare metal <a class="reference external" href="https://www.docker.com">docker</a> cluster
-using <a class="reference external" href="http://www.ansible.com/home">ansible</a> for host configuration and <a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes">kubernetes</a> for container management.</p>
-<p>I wish I could have squeezed <a class="reference external" href="http://mesos.apache.org">mesos</a> into this story. But the <a class="reference external" href="https://github.com/mesosphere/kubernetes-mesos">kubernetes-mesos</a>
-project isn't ready for prime time yet. So that'll be a post for another day.</p>
+<p>The objective is to, as far as possible, fully automate a stage3 Gentoo build.
+While we're at it, we'd like to add some flexibility in building different
+kernel configurations or passing in different parameters like the initial
+username, passwords, etc.</p>
+<p><a class="reference external" href="http://www.ansible.com/home">Ansible</a> fits the bill for this task nicely.</p>
+<p>As a bonus, Ansible is capable of performing this taks on N number of targets
+asynchronously. So taking this method and extending it to an environment where
+10, 15, or 100 minimal iso's are deployed over pxe and then concurrently
+bootstrapping a new Gentoo install should be trivial!</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">Gentoo is obviously a tweakers OS. This is not meant to be the One True
+Way (TM) to configure Gentoo. It's rather a demonstration on how you can use
+ansible to configure Gentoo <em>your way</em>, automated, and repeatable.</p>
 </div>
-<div class="section" id="requirements">
-<h2>Requirements</h2>
-<ul class="simple">
-<li>ansible</li>
-<li>librarian-ansible</li>
-<li>git</li>
-<li>CentOS 7, RHEL 7, Fedora 20+...whatever</li>
-<li>some servers</li>
-</ul>
 </div>
-<div class="section" id="get-the-ansible-work-environment">
-<h2>Get the Ansible Work Environment</h2>
-<p>I've thrown together an <a class="reference external" href="https://github.com/jameskyle/ansible-sandbox">ansible-sandbox</a> project to automate the
-configuration of the clients. These aren't &quot;production ready&quot; by any means and
-almost certainly would require tweaking for a different target environment.
-However, I did make a first stab best effort to generalize them and make them
-moderately configurable. As such, they should serve more as a programmatic walk
-through then a turnkey solution.</p>
-<p>Caveats aside, they should simplify the deployment of the environment.</p>
+<div class="section" id="getting-the-roles">
+<h2>Getting the Roles</h2>
+<p>First, we'll need to grab the <a class="reference external" href="https://github.com/jameskyle/ansible-sandbox">ansible-sandbox</a> project that includes an example
+playbook using the <a class="reference external" href="https://github.com/jameskyle/ansible-gentoo">ansible-gentoo</a> role.</p>
 <pre class="code bash literal-block">
 % git clone https://github.com/jameskyle/ansible-sandbox.git
-% <span class="nb">cd </span>ansible-sandbox
 % librarian-ansible install
 </pre>
-<p>There's an inventory.example file included. You'll probably want to update the
-fqdn's to your local domain. The primary docker host is named 'dock1' by
-default. If you wish to change this, it's done in group_vars/dockers.yml.</p>
-<div class="section" id="hostnames-and-ansible">
-<h3>Hostnames and Ansible</h3>
-<p>Ansible assumes it's capable of resolving the hostnames in your inventory <em>or</em>
-the ansible_ssh_host argument is set in your inventory. For example, if you
-don't have a dns server set up you might want to edit your inventory to look
-something like</p>
-<pre class="literal-block">
-[dockers]
-dock1.mydomain.com ansible_ssh_host=192.168.1.10
-</pre>
-<p>Ansible general usage is beyond the scope of this walk through, so please see
-the upstream docs for any needed clarifications.</p>
 </div>
+<div class="section" id="preparing-the-target-environment">
+<h2>Preparing the target environment.</h2>
+<p>Next, the target environment needs to be prepared. This entails booting to a
+Gentoo minimal disk, ensuring that there's networking available, setting a root
+password, and enabling ssh. For this tutorial, we'll assume you have a dhcp
+server running. If you don't, you'll need to configure networking manually.</p>
+<div class="warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">When booting in vmware, I found the minimal Gentoo CD often had issues
+getting an ip address on boot.</p>
 </div>
-<div class="section" id="configuring-the-bootstrap-node">
-<h2>Configuring the Bootstrap Node</h2>
-<p>We're going to work from the assumption of a green field deployment. If the
-environment already has existing support services like PXE, dns, dhcp, file
-server, etc.  I trust you already know how to adapt that environment
-accordingly.</p>
-<div class="section" id="install">
-<h3>Install</h3>
-<p>Initial install is manual. In my particular configuration, I have a root drive
-in a RAID 1 and a very large storage array. I installed the OS with the
-following disk configuration.</p>
-<ul class="simple">
-<li>/dev/sda1 : /boot</li>
-<li>/dev/sda2 : lvm volgroup main
-- swap
-- /</li>
-<li>/dev/sdb : lvm volgroup data
-- /var/lib/docker, btrfs
-- /var/docker/registry, ext4</li>
-</ul>
-<p>Doesn't really matter. If you want to use the btrfs driver for docker (these
-scripts do), then you'll want to spin off a separate drive for mounting on
-/var/lib/docker.</p>
-<p>This only needs to be done manually for the first host, our kickstart
-scripts will take care of the workers.</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">The target system can be bare metal or a virtual machine. The kernel
+included in the <a class="reference external" href="https://github.com/jameskyle/ansible-gentoo">ansible-gentoo</a> role as the default includes support for
+VMWare Fusion/Workstation/Desktop v6.</p>
 </div>
-<div class="section" id="configure-my-user-account">
-<h3>Configure My User Account</h3>
-<p>I'd recommend hacking together your own user (or at least replacing my key),
-regardless it's really convenient to have a passwordless ssh and sudo.</p>
-<p>I use my 'jkyle' role for this and put it in a separate playbook from the site
-example called jkyle.yml. The first time we run, I have to provide a password.</p>
+<p>It also had issues restarting the dhcpcd daemon with /etc/init.d/dhcpcd restart.
+I worked around this by issuing the following commands</p>
 <pre class="code bash literal-block">
-% ansible-playbook --limit dock1 <span class="se">\
-</span>                   -i inventories/inventory.example <span class="se">\
+<span class="c"># kill `ps aux | grep dhcpcd | grep -v grep | awk '{print $2}'`
+# /etc/init.d/dhcpcd restart
+</span>* Stopping DHCP Client Daemon ...
+* Starting DHCP Client Daemon ...
+</pre>
+<div class="section" id="setting-a-root-password">
+<h3>Setting a root password</h3>
+<p>As with any *nix, once your logged into the machine it would look something
+like this</p>
+<pre class="code bash literal-block">
+<span class="c"># passwd
+</span>New password:
+Retype new password:
+passwd: password updated successfully
+</pre>
+</div>
+<div class="section" id="enable-sshd">
+<h3>Enable sshd</h3>
+<pre class="code bash literal-block">
+<span class="c"># /etc/init.d/sshd start
+</span>ssh-keygen: generating new host keys: RSA1 RSA DSA ED25519
+* Starting sshd ...
+</pre>
+</div>
+<div class="section" id="wipe-any-previous-configurations">
+<h3>Wipe Any Previous Configurations</h3>
+<p>Ansible doesn't perform operations that have already completed. While normally a
+good thing, if you had a previous system setup on the target ansible has no way
+of knowing if the configurations were from older installs.</p>
+<p>I found issues sometimes arose if the partition tables on the main disks had
+been wiped, but some lvm volume labels were still lurking around. Wiping
+everything ensures a clean build. The main partitions created by these scripts
+are</p>
+<dl class="docutils">
+<dt>/dev/sda1</dt>
+<dd>primary 'boot' partition.</dd>
+<dt>/dev/sda2</dt>
+<dd>primary main partition for volume group</dd>
+<dt>main</dt>
+<dd>volume group which includes the /dev/sda2 physical volume</dd>
+<dt>/dev/mapper/main-swap</dt>
+<dd>swap logical volume</dd>
+<dt>/dev/mapper/main-root</dt>
+<dd>root logical volume</dd>
+</dl>
+<pre class="code bash literal-block">
+<span class="c"># parted /dev/sda -s -- mklabel gpt
+# lvremove root
+# lvremove  swap
+# vgremove main</span>
+</pre>
+</div>
+</div>
+<div class="section" id="building-out-gentoo">
+<h2>Building Out Gentoo</h2>
+<p>The rest is short and sweet. As automation should be. You'll find an example
+inventory in inventories/Gentoo. Couple of notes,</p>
+<ul class="simple">
+<li>the new system will get its hostname  from the inventory_hostname.
+In the example this is 'too1'.</li>
+<li>The Gentoo install cd has python 3 as the default, but ansible needs 2.7. So
+make sure your ansible_python_interpretor path is set in your inventory.</li>
+</ul>
+<pre class="code bash literal-block">
+% ansible-playbook -i inventories/gentoo <span class="se">\
+</span>                   -u root <span class="se">\
 </span>                   --ask-pass <span class="se">\
-</span>                   --ask-sudo <span class="se">\
-</span>                   playbooks/jkyle.yml
-</pre>
-<p>You might see something like this</p>
-<pre class="literal-block">
-PLAY [all]
-********************************************************************
-
-GATHERING FACTS
-***************************************************************
-ok: [dock1]
-
-TASK: [jkyle | Install YUM Packages]
-******************************************
-changed: [dock1] =&gt;
-(item=bind-utils,zsh,git-core,lsof,tcpdump,vim)
-
-TASK: [jkyle | Install APT Packages]
-******************************************
-skipping: [dock1]
-
-TASK: [jkyle | Create James]
-**************************************************
-changed: [dock1]
-
-TASK: [jkyle | Configure jkyle sudoers]
-***************************************
-changed: [dock1]
-
-TASK: [jkyle | Deploy jkyle User Key]
-*****************************************
-changed: [dock1]
-
-TASK: [jkyle | Setup James Home Directory]
-************************************
-changed: [dock1]
-
-TASK: [jkyle | Link James configuration files]
-********************************
-changed: [dock1] =&gt; (item=zlogin)
-changed: [dock1] =&gt; (item=zlogout)
-changed: [dock1] =&gt; (item=zpreztorc)
-changed: [dock1] =&gt; (item=zprofile)
-changed: [dock1] =&gt; (item=zshenv)
-changed: [dock1] =&gt; (item=zshrc)
-
-PLAY RECAP
-********************************************************************
-dock1   : ok=7    changed=6    unreachable=0    failed=0
+</span>                   playbooks/gentoo.yml
 </pre>
 </div>
-<div class="section" id="services-configuration-on-primary-host">
-<h3>Services Configuration On Primary Host</h3>
-<div class="section" id="common">
-<h4>Common</h4>
-<p>The common role does some general configuration of networking, hostnames, etc.
-Make sure your inventory file includes the necessary group and host variables
-for your network. See the inventory.example file.</p>
+<div class="section" id="i-don-t-like-the-way-you-configured-gentoo">
+<h2>I Don't Like the Way You Configured Gentoo</h2>
+<p>There's a good chance you don't want Gentoo configured the way the role does.
+The individual tasks are broken down into components for easy tweaking of each
+individual stage of the deploy. You can also drop in your own kernel
+configuration or templates, etc. Think of this as a PoC and tweak away!</p>
 </div>
-<div class="section" id="docker">
-<h4>Docker</h4>
-<p>Our docker deployment provides both the local socket connection and a remote
-API with server/client certificates. Some example certificates are found in
-ansible-sandbox/librarian_roles/docker/files. However, you should probably
-generate your own as these are obviously insecure...particuarly if the servers have
-public ports. I generated the certs using a script and an openssl template you
-found in my <a class="reference external" href="https://github.com/jameskyle/CertGen">CertGen</a> github repo.</p>
-<pre class="literal-block">
-% ansible-playbook --limit dock1 \
-                   -i inventories/inventory.example
-                   playbooks/kubernetes.yml
-</pre>
-<p>You might see something like this</p>
-<pre class="literal-block">
-PLAY [dockers]
-****************************************************************
-
-GATHERING FACTS
-***************************************************************
-ok: [dock1]
-
-TASK: [common | sudoers]
-******************************************************
-ok: [dock1]
-
-TASK: [common | Yum Fastest Mirror]
-*******************************************
-ok: [dock1]
-
-TASK: [common | Update System]
-************************************************
-ok: [dock1]
-
-TASK: [common | Install Packages]
-*********************************************
-ok: [dock1] =&gt; (item=bridge-utils,policycoreutils-python)
-
-TASK: [common | disalbe firewalld]
-********************************************
-ok: [dock1]
-
-TASK: [common | disable network.service]
-**************************************
-changed: [dock1]
-
-TASK: [common | Configure Management Interface]
-*******************************
-ok: [dock1]
-
-TASK: [common | config sshd_config]
-*******************************************
-ok: [dock1]
-
-TASK: [common | Base /etc/hosts Template]
-*************************************
-changed: [dock1]
-
-TASK: [common | Set Hostname]
-*************************************************
-ok: [dock1]
-
-TASK: [common | Build hosts file]
-*********************************************
-changed: [dock1] =&gt; (item=dock1)
-skipping: [dock1] =&gt; (item=dock2)
-skipping: [dock1] =&gt; (item=dock3)
-skipping: [dock1] =&gt; (item=dock4)
-skipping: [dock1] =&gt; (item=dock5)
-
-TASK: [docker | disable selinux]
-**********************************************
-changed: [dock1]
-
-TASK: [docker | Install EPEL Repo]
-********************************************
-ok: [dock1]
-
-TASK: [docker | Install Packages]
-*********************************************
-ok: [dock1] =&gt; (item=docker,btrfs-progs,bridge-utils)
-
-TASK: [docker | Install Packages]
-*********************************************
-skipping: [dock1]
-
-TASK: [docker | Deploy ca.crt]
-************************************************
-ok: [dock1]
-
-TASK: [docker | Deploy server.crt]
-********************************************
-ok: [dock1]
-
-TASK: [docker | Deploy server.key]
-********************************************
-ok: [dock1]
-
-TASK: [docker | Create docker.socket directory path]
-**************************
-changed: [dock1]
-
-TASK: [docker | Create docker.socket unit]
-************************************
-ok: [dock1]
-
-TASK: [docker | Link docker.socket to standard location]
-**********************
-skipping: [dock1]
-
-TASK: [docker | docker.service]
-***********************************************
-ok: [dock1]
-
-TASK: [docker | Add Docker Users to Docker Group]
-*****************************
-ok: [dock1] =&gt; (item=docker_users)
-
-TASK: [docker | Enable &amp; Start Services]
-**************************************
-ok: [dock1] =&gt; (item=docker.socket)
-ok: [dock1] =&gt; (item=docker.service)
-
-PLAY RECAP
-********************************************************************
-dock1                      : ok=23   changed=5    unreachable=0    failed=0
-</pre>
-<p>After which, the following changes would have been applied:</p>
+<div class="section" id="external-links">
+<h2>External Links</h2>
 <ul class="simple">
-<li>A sudoers file deployed that allows individual configs in /etc/sudoers.d
-and passwordless sudo for wheel group members.</li>
-<li>Installation of the yum fastest mirror plugin</li>
-<li>A full system update</li>
-<li>installation of bridge-utils, policycore utils</li>
-<li>The firewalld daemon disabled. <a class="footnote-reference" href="#id4" id="id1">[*]</a></li>
-<li>NetworkManager disabled. <a class="footnote-reference" href="#id5" id="id2">[†]</a></li>
-<li>selinux disabled. <a class="footnote-reference" href="#id6" id="id3">[‡]</a></li>
-<li>configuration of the management interface...probably already done, but this
-enforces it</li>
-<li>a common sshd_config file deployed</li>
-<li>/etc/hosts populated with entries for all the docker hosts</li>
-<li>the target hosts hostname</li>
-<li>A fully functional docker server with server/client certificates.</li>
+<li><a class="reference external" href="http://www.ansible.com/home">Ansible</a></li>
+<li><a class="reference external" href="https://github.com/jameskyle/ansible-sandbox">ansible-sandbox</a></li>
+<li><a class="reference external" href="https://github.com/jameskyle/ansible-gentoo">ansible-gentoo</a></li>
 </ul>
-<p>If you used the default certs, make sure to copy over the client certificate
-and certificate authorities to your ~/.docker directory.</p>
-<p>You can interact with the docker server over tcp via</p>
-<pre class="code bash literal-block">
-% <span class="nb">export </span><span class="nv">DOCKER_HOST</span><span class="o">=</span>tcp://dock1.yourdomain.com:2376
-% docker --tlsverify -i -t --rm ubuntu /bin/bash
-% docker --tlsverify images
-</pre>
-</div>
-</div>
-<div class="section" id="pxe-services">
-<h3>PXE Services</h3>
-<p>Next, we're going to deploy a container with pxe related services to bring up
-the worker hosts. I've created a project that builds a pxe server container
-given a specific environment context. You can use my <a class="reference external" href="https://github.com/jameskyle/docker-pxe-server">docker-pxe-server</a>
-project, or build your own...or even just install the services on the host
-itself.</p>
-<p>The readme for the project should be sufficient to get going.</p>
-<p>After pxe/dns/dhcp services are up for your environment, bounce the servers and
-bring them up. I typically do this with ipmitool. A script to do so might look
-something like</p>
-<pre class="code bash literal-block">
-<span class="k">for </span>i in 11 12 13 14;do
-    ipmitool -I lanplus <span class="se">\
-</span>             -f ~/.racpasswd <span class="se">\
-</span>             -H 192.168.19.<span class="k">${</span><span class="nv">i</span><span class="k">}</span> <span class="se">\
-</span>             -U root chassis bootdev pxe
-    ipmitool -I lanplus <span class="se">\
-</span>             -f ~/.racpasswd <span class="se">\
-</span>             -H 192.168.19.<span class="k">${</span><span class="nv">i</span><span class="k">}</span> <span class="se">\
-</span>             -U root chassis power cycle
-<span class="k">done</span>
-</pre>
-<p>Of course, you'll need your actually ILO/iDrac/etc ip's. Make a cup of coffee,
-catch up on the news. Whatever.</p>
-</div>
-<div class="section" id="summary">
-<h3>Summary</h3>
-<p>That completes the initial host configuration. You should have all the key
-services up such as an initial docker server &amp; registry, PXE, DHCP, &amp; DNS
-services, and your initial user account. Finally you should have a number of
-client hosts with fresh installs awaiting configuration.</p>
-</div>
-</div>
-<div class="section" id="finalizing-the-cluster">
-<h2>Finalizing the Cluster.</h2>
-<p>All that's left is configuring the client hosts and installing kubernetes.
-Assuming our inventory is correctly configured in, we can just skip to what's
-needed for kubernetes and then run ansible on all nodes.</p>
-<div class="section" id="kubernetes">
-<h3>Kubernetes</h3>
-<p>The kubernetes role assumes the required binaries and etcd are located in the</p>
-<pre class="literal-block">
-roles/kubernetes/files
-</pre>
-<p>directory. These aren't bundled and since we're deploying the bleeding edge,
-it's probably best to build a fresh set anyway. They both have their own build
-systems that are covered in the docs, so please refer to the upstream
-<a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes">kubernetes</a> and <a class="reference external" href="https://github.com/coreos/etcd">etcd</a> project for details.</p>
-<p>A couple of hints though.</p>
-<p>For Kubernetes, you'll want to read the README.md in kubernetes's ./build
-directory.</p>
-<p>For etcd, you'll probably just want to run these commands</p>
-<pre class="code bash literal-block">
-docker build -t coreos/etcd .
-docker run -d coreos/etcd
-docker cp &lt;container_id&gt;:/opt/etcd/bin/etcd .
-docker stop &lt;container_id&gt; <span class="o">&amp;&amp;</span> docker rm &lt;container_id&gt;
-</pre>
-<p>Then you have an amd64 etcd binary you can copy to roles/kubernetes/files.</p>
-<div class="section" id="installation">
-<h4>Installation</h4>
-<p>No more configuration should be necessary. Assuming everything's gone well so
-far, the following should be sufficient</p>
-<pre class="literal-block">
-ansible-playbook --ask-pass \
-                 --ask-sudo \
-                 -i inventories/inventory.example \
-                 playbooks/kubernetes.yml
-</pre>
-<p>Notice we're no longer limiting to the dock1 host or passing specific tags to
-run. Once done, you should be able to query your kubernetes minions. You can do
-so from any host where kubecfg is installed. Which includes all your hosts at
-/usr/local/bin/kubecfg. For example</p>
-<pre class="literal-block">
-% kubecfg -h http://dock1.pao19.tfoundry.com:8080 list minions
-Minion identifier
-----------
-dock1
-dock2
-dock3
-dock4
-dock5
-</pre>
-</div>
-</div>
-</div>
-<div class="section" id="next-steps">
-<h2>Next Steps.</h2>
-<p>Next up, you can deploy the <a class="reference external" href="https://github.com/GoogleCloudPlatform/kubernetes/tree/master/examples/guestbook">Kubernetes GuestBook</a> example. Or build your
-own!</p>
-</div>
-<div class="section" id="footnotes">
-<h2>Footnotes</h2>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[*]</a></td><td>I had a hell of a time getting firewalld to work as advertised. Zones
-wouldn't persist, interfaces added to multiple zones, etc. Several
-upstream bugs were filed.Much easier to just write your own iptables
-rules.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[†]</a></td><td>The network.service &amp; NetworkManager seem to be mortal enemies in this
-release.  You coudl tell NM manager to ignore a config, but it would
-happily still muck with it...such as adding it to the default zone if
-firewalld was enabled. In the end, leaving only NM running seemed to
-work best.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[‡]</a></td><td>As of the time of this tutorial, the btrfs driver for docker does not
-support selinux</td></tr>
-</tbody>
-</table>
 </div>
 
       </article>
       <section>
           <p id="post-share-links">
               Share on:
-              <a href="http://twitter.com/home?status=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20 http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Twitter">Twitter</a>
+              <a href="http://twitter.com/home?status=Automated%20Stage3%20Gentoo%20Install%20Using%20Ansible%20 http%3A//blog.jameskyle.org/2014/08/automated-stage3-gentoo-install-using-ansible" target="_blank" title="Share on Twitter">Twitter</a>
               ❄
-              <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster&p[images][0]=&p[title]=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22objectives%22%3E%0A%3Ch2%3EObjectives%3C/h2%3E%0A%3Cp%3ESeems%20my%20blog%20needs%20a%20few%20updates%20in%20the%20buzz%20department.%20I%20like%20taking%20the%0Ashotgun%20approach%2C%20so%20we%27re%20going%20to%20deploy%20a%205%20node%20bare%20metal%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//www.docker.com%22%3Edocker%3C/a%3E%20cluster%0Ausing%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.ansible.com/home%22%3Eansible%3C/a%3E%20for%20host%20configuration%20and%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//github.com/GoogleCloudPlatform/kubernetes%22%3Ekubernetes%3C/a%3E%20for%20container%20management.%3C/p%3E%0A%3Cp%3EI%20wish%20I%20could%20have%20squeezed%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//mesos.apache.org%22%3Emesos%3C/a%3E%20into%20this%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+              <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2014/08/automated-stage3-gentoo-install-using-ansible&p[images][0]=&p[title]=Automated%20Stage3%20Gentoo%20Install%20Using%20Ansible%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22objectives%22%3E%0A%3Ch2%3EObjectives%3C/h2%3E%0A%3Cp%3EThe%20objective%20is%20to%2C%20as%20far%20as%20possible%2C%20fully%20automate%20a%20stage3%20Gentoo%20build.%0AWhile%20we%27re%20at%20it%2C%20we%27d%20like%20to%20add%20some%20flexibility%20in%20building%20different%0Akernel%20configurations%20or%20passing%20in%20different%20parameters%20like%20the%20initial%0Ausername%2C%20passwords%2C%20etc.%3C/p%3E%0A%3Cp%3E%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.ansible.com/home%22%3EAnsible%3C/a%3E%20fits%20the%20bill%20for%20this%20task%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
               ❄
-              <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Google Plus">Google+</a>
+              <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2014/08/automated-stage3-gentoo-install-using-ansible" target="_blank" title="Share on Google Plus">Google+</a>
               ❄
-              <a href="mailto:?subject=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20&body=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share via Email">Email</a>
+              <a href="mailto:?subject=Automated%20Stage3%20Gentoo%20Install%20Using%20Ansible%20&body=http%3A//blog.jameskyle.org/2014/08/automated-stage3-gentoo-install-using-ansible" target="_blank" title="Share via Email">Email</a>
           </p>
       </section>
       <hr />
@@ -476,6 +189,12 @@ support selinux</td></tr>
           <h3>Last posts</h3>
           <ol class="archive">
     
+
+
+      <li>
+<a href="./2014/08/deploying-baremetal-kubernetes-cluster" rel="bookmark" title="Permalink to Deploying a Bare Metal Kubernetes Cluster">Deploying a Bare Metal Kubernetes Cluster</a>
+  <time datetime="2014-08-20T10:42:34" pubdate>Wed 20 August 2014</time>
+<p class="tags">tags: <a href="./tag/administration">administration</a><a href="./tag/devops">devops</a><a href="./tag/ansible">ansible</a><a href="./tag/kubernetes">kubernetes</a></p></a>      </li>
 
 
       <li>
@@ -502,10 +221,6 @@ support selinux</td></tr>
 <p class="tags">tags: <a href="./tag/debian sysadmin apt">debian sysadmin apt</a></p></a>      </li>
 
 
-      <li>
-<a href="./2013/08/charybdis-with-puppet" rel="bookmark" title="Permalink to Title">Title</a>
-  <time datetime="2013-08-17T12:04:49" pubdate>Sat 17 August 2013</time>
-<p class="tags">tags: <a href="./tag/charybdis puppet">charybdis puppet</a></p></a>      </li>
 
 
 

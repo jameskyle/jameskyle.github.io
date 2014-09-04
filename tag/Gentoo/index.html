@@ -2,7 +2,7 @@
 <html lang="">
 <head>
     <meta charset="utf-8"/>
-    <title>linux - miscellaneous</title>
+    <title>Gentoo - miscellaneous</title>
     <meta name="author" content="James A. Kyle">
 
     <link rel="top" href="#" /><link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic|Source+Code+Pro' rel='stylesheet' type='text/css'></link>
@@ -33,61 +33,20 @@
 
           <div role="main" class="content">
 
-<h1>Post tagged: linux</h1>
+<h1>Post tagged: Gentoo</h1>
 
 <article class="summary">
   <div>
     <h2>
-      <a href="../../2012/07/puppet-boilerplate" rel="bookmark" title="Permalink to A Boilerplate Comparison: Puppet">A Boilerplate Comparison: Puppet</a>
+      <a href="../../2014/08/automated-stage3-gentoo-install-using-ansible" rel="bookmark" title="Permalink to Automated Stage3 Gentoo Install Using Ansible">Automated Stage3 Gentoo Install Using Ansible</a>
     </h2>
-    <p><div class="section" id="introduction">
-<h2>Introduction</h2>
-<p>Here we cover the steps for deploying a package to a puppet agent/node.
-Like with chef, we assume a working installation.</p>
-<p>Though I must take the opportunity to comment that the installation
-process for puppet was ridiculously easy.</p>
-</div>
-<div class="section" id="the-ridiculously-easy-way">
-<h2>The ridiculously easy way</h2>
-<p>Package installation can be performed completely ...</p></div></p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
-      <a href="../../2012/07/infrastructure-automation-a-boilerplate-comparison" rel="bookmark" title="Permalink to Infrastructure Automation: A Boilerplate Comparison">Infrastructure Automation: A Boilerplate Comparison</a>
-    </h2>
-    <p><div class="section" id="introduction">
-<h2>Introduction</h2>
-<p>We've been using <a class="reference external" href="http://opscode.com">Chef</a> to deploy our infrastructure for a while now.
-One of the main sticking points we've run into is the barrier to entry
-for develoepers as a result of the boiler plate required to perform a
-simple deployment task. Our ideal framework would be ...</p></div></p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
-      <a href="../../2012/02/chef-alternatives-for-debian-ubuntu" rel="bookmark" title="Permalink to Chef Alternatives for Debian/Ubuntu">Chef Alternatives for Debian/Ubuntu</a>
-    </h2>
-    <p><p>An update-alternatives script for chef. Currently only sets up a version
-installed in the 1.9.1 gems directory, but extendable to any version
-easily enough.</p>
-<div class="highlight"><pre><span class="c">#!/bin/bash</span>
-<span class="nv">RUBY_VERSION</span><span class="o">=</span>1.9.1
-<span class="nv">CHEF_VERSION</span><span class="o">=</span>0.10.8
-<span class="nv">GEM_ROOT</span><span class="o">=</span>/var/lib/gems/<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>/gems/chef-<span class="k">${</span><span class="nv">CHEF_VERSION</span><span class="k">}</span>
-update-alternatives <span class="se">\</span>
-   --install /usr/bin/chef-client chef ...</pre></div></p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
-      <a href="../../2012/02/ruby-alternatives-for-debianubuntu" rel="bookmark" title="Permalink to Ruby Alternatives for Debian/Ubuntu">Ruby Alternatives for Debian/Ubuntu</a>
-    </h2>
-    <p><p>A quick update-alternatives script for ruby versions on debian based
-systems. It only includes the ruby binaries, man pages, etc. included in
-the ruby1.8 and ruby1.9.1 debs. It's defaults to '1.9' when in auto
-mode.</p>
-<p>After running the script, you can switch between ruby version ...</p></p>
+    <p><div class="section" id="objectives">
+<h2>Objectives</h2>
+<p>The objective is to, as far as possible, fully automate a stage3 Gentoo build.
+While we're at it, we'd like to add some flexibility in building different
+kernel configurations or passing in different parameters like the initial
+username, passwords, etc.</p>
+<p><a class="reference external" href="http://www.ansible.com/home">Ansible</a> fits the bill for this task ...</p></div></p>
   </div>
 </article>
 <div class="pagination">

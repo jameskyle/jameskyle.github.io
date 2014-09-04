@@ -38,6 +38,25 @@
 <article class="summary">
   <div>
     <h2>
+      <a href="../2012/07/configuring-openswan-ipsec-server" rel="bookmark" title="Permalink to Configuring OpenSwan IPSec Server">Configuring OpenSwan IPSec Server</a>
+    </h2>
+    <p><div class="section" id="introduction">
+<h2>Introduction</h2>
+<p>The intent of this article is to walk through the installation,
+configuration, and general debugging of OpenSwan based IPSec tunnels.
+Though primarily focused on Ubuntu &amp; Debian systems, non-package
+management portions should apply generally.</p>
+</div>
+<div class="section" id="installation-initial-configuration">
+<h2>Installation &amp; Initial Configuration</h2>
+<p>We install using apt-get or aptitude.</p>
+<div class="highlight"><pre>% apt-get install openswan
+</pre></div>
+<p>For a basic PSK ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
       <a href="../2012/07/puppet-boilerplate" rel="bookmark" title="Permalink to A Boilerplate Comparison: Puppet">A Boilerplate Comparison: Puppet</a>
     </h2>
     <p><div class="section" id="introduction">
@@ -74,7 +93,8 @@ easily enough.</p>
 <div class="highlight"><pre><span class="c">#!/bin/bash</span>
 <span class="nv">RUBY_VERSION</span><span class="o">=</span>1.9.1
 <span class="nv">CHEF_VERSION</span><span class="o">=</span>0.10.8
-<span class="nv">GEM_ROOT</span><span class="o">=</span>/var/lib/gems/<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>/gems/chef-<span class="k">${</span><span class="nv">CHEF_VERSION</span><span class="k">}</span>update-alternatives <span class="se">\</span>
+<span class="nv">GEM_ROOT</span><span class="o">=</span>/var/lib/gems/<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>/gems/chef-<span class="k">${</span><span class="nv">CHEF_VERSION</span><span class="k">}</span>
+update-alternatives <span class="se">\</span>
    --install /usr/bin/chef-client chef ...</pre></div></p>
   </div>
 </article><article class="summary">
@@ -160,17 +180,6 @@ directory, I began getting several errors when opening files. They were
 all of the same type.</p>
 <pre class="literal-block">
 E172 ...</pre></p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
-      <a href="../2011/02/autocreate-django-user-profiles" rel="bookmark" title="Permalink to Automatically create django User Profiles as needed.">Automatically create django User Profiles as needed.</a>
-    </h2>
-    <p><p>Ran across a very nice, brief run down of creating user profiles for
-django on <a class="reference external" href="http://www.turnkeylinux.org/blog/django-profile">Turnkey Linux</a>.</p>
-<p>I was particularly pleased of this &quot;ism&quot; that creates user profiles on
-the fly on an as needed basis. As a bonus, it provides access to the
-profiles through a user.profile property ...</p></p>
   </div>
 </article>
 <div class="pagination">

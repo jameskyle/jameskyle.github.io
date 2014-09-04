@@ -38,6 +38,19 @@
 <article class="summary">
   <div>
     <h2>
+      <a href="../2008/09/leopard-server-encrypted-tls-fix" rel="bookmark" title="Permalink to Leopard Server Postfix TLS Error: cannot get private key from file /etc/certificates/mycert.key">Leopard Server Postfix TLS Error: cannot get private key from file /etc/certificates/mycert.key</a>
+    </h2>
+    <p><p>The problem here is that postfix is failing on encrypted TLS certs and
+OSX ServerAdmin created certs are encrypted. The fix is, as should be
+expected, to unencrypt the cert:</p>
+<div class="highlight"><pre><span class="nb">cd</span> /etc/certificates
+cp mycert.key mycert.key.saved
+openssl rsa -in mycert.key -out mycert.key.out
+cp -p ...</pre></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
       <a href="../2008/09/creating-postfix-aliases" rel="bookmark" title="Permalink to Creating postfix aliases">Creating postfix aliases</a>
     </h2>
     <p><p>Just&nbsp;a&nbsp;reminder&nbsp;of&nbsp;the&nbsp;postfix&nbsp;alias&nbsp;flow.&nbsp;I&nbsp;don't&nbsp;do&nbsp;it&nbsp;enough&nbsp;to&nbsp;remember

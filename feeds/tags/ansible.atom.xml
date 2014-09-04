@@ -1,5 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/ansible.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-08-26T10:42:00-07:00</updated><entry><title>Deploying a Bare Metal Kubernetes Cluster</title><link href="http://blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" rel="alternate"></link><updated>2014-08-26T10:42:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-08-20:2014/08/deploying-baremetal-kubernetes-cluster</id><summary type="html">&lt;div class="section" id="objectives"&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/ansible.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-08-26T11:58:52-07:00</updated><entry><title>Automated Stage3 Gentoo Install Using Ansible</title><link href="http://blog.jameskyle.org/2014/08/automated-stage3-gentoo-install-using-ansible" rel="alternate"></link><updated>2014-08-26T11:58:52-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-08-26:2014/08/automated-stage3-gentoo-install-using-ansible</id><summary type="html">&lt;div class="section" id="objectives"&gt;
+&lt;h2&gt;Objectives&lt;/h2&gt;
+&lt;p&gt;The objective is to, as far as possible, fully automate a stage3 Gentoo build.
+While we're at it, we'd like to add some flexibility in building different
+kernel configurations or passing in different parameters like the initial
+username, passwords, etc.&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="http://www.ansible.com/home"&gt;Ansible&lt;/a&gt; fits the bill for this task nicely.&lt;/p&gt;
+&lt;p&gt;As a bonus, Ansible is capable of performing this taks on N number of targets
+asynchronously. So taking this method and extending it to an environment where
+10, 15, or 100 minimal iso's are deployed over pxe and then concurrently
+bootstrapping a new Gentoo install should be trivial!&lt;/p&gt;
+&lt;div class="note"&gt;
+&lt;p class="first admonition-title"&gt;Note&lt;/p&gt;
+&lt;p class="last"&gt;Gentoo is obviously a tweakers OS. This is not meant to be the One True
+Way (TM) to configure Gentoo. It's rather a demonstration on how you can use
+ansible to configure Gentoo &lt;em&gt;your way&lt;/em&gt;, automated, and repeatable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="getting-the-roles"&gt;
+&lt;h2&gt;Getting the Roles&lt;/h2&gt;
+&lt;p&gt;First, we'll need to grab the &lt;a class="reference external" href="https://github.com/jameskyle/ansible-sandbox"&gt;ansible-sandbox&lt;/a&gt; project that includes an example
+playbook using the &lt;a class="reference external" href="https://github.com/jameskyle/ansible-gentoo"&gt;ansible-gentoo&lt;/a&gt; role.&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+% git clone https://github.com/jameskyle/ansible-sandbox.git
+% librarian-ansible install
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="preparing-the-target-environment"&gt;
+&lt;h2&gt;Preparing the target environment.&lt;/h2&gt;
+&lt;p&gt;Next, the target environment needs to be prepared. This entails booting to a
+Gentoo minimal disk, ensuring that there's networking available, setting a root
+password, and enabling ssh. For this tutorial, we'll assume you have a dhcp
+server running. If you don't, you'll need to configure networking manually.&lt;/p&gt;
+&lt;div class="warning"&gt;
+&lt;p class="first admonition-title"&gt;Warning&lt;/p&gt;
+&lt;p class="last"&gt;When booting in vmware, I found the minimal Gentoo CD often had issues
+getting an ip address on boot.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="note"&gt;
+&lt;p class="first admonition-title"&gt;Note&lt;/p&gt;
+&lt;p class="last"&gt;The target system can be bare metal or a virtual machine. The kernel
+included in the &lt;a class="reference external" href="https://github.com/jameskyle/ansible-gentoo"&gt;ansible-gentoo&lt;/a&gt; role as the default includes support for
+VMWare Fusion/Workstation/Desktop v6.&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;It also had issues restarting the dhcpcd daemon with /etc/init.d/dhcpcd restart.
+I worked around this by issuing the following commands&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="c"&gt;# kill `ps aux | grep dhcpcd | grep -v grep | awk '{print $2}'`
+# /etc/init.d/dhcpcd restart
+&lt;/span&gt;* Stopping DHCP Client Daemon ...
+* Starting DHCP Client Daemon ...
+&lt;/pre&gt;
+&lt;div class="section" id="setting-a-root-password"&gt;
+&lt;h3&gt;Setting a root password&lt;/h3&gt;
+&lt;p&gt;As with any *nix, once your logged into the machine it would look something
+like this&lt;/p&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="c"&gt;# passwd
+&lt;/span&gt;New password:
+Retype new password:
+passwd: password updated successfully
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="enable-sshd"&gt;
+&lt;h3&gt;Enable sshd&lt;/h3&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="c"&gt;# /etc/init.d/sshd start
+&lt;/span&gt;ssh-keygen: generating new host keys: RSA1 RSA DSA ED25519
+* Starting sshd ...
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="wipe-any-previous-configurations"&gt;
+&lt;h3&gt;Wipe Any Previous Configurations&lt;/h3&gt;
+&lt;p&gt;Ansible doesn't perform operations that have already completed. While normally a
+good thing, if you had a previous system setup on the target ansible has no way
+of knowing if the configurations were from older installs.&lt;/p&gt;
+&lt;p&gt;I found issues sometimes arose if the partition tables on the main disks had
+been wiped, but some lvm volume labels were still lurking around. Wiping
+everything ensures a clean build. The main partitions created by these scripts
+are&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;/dev/sda1&lt;/dt&gt;
+&lt;dd&gt;primary 'boot' partition.&lt;/dd&gt;
+&lt;dt&gt;/dev/sda2&lt;/dt&gt;
+&lt;dd&gt;primary main partition for volume group&lt;/dd&gt;
+&lt;dt&gt;main&lt;/dt&gt;
+&lt;dd&gt;volume group which includes the /dev/sda2 physical volume&lt;/dd&gt;
+&lt;dt&gt;/dev/mapper/main-swap&lt;/dt&gt;
+&lt;dd&gt;swap logical volume&lt;/dd&gt;
+&lt;dt&gt;/dev/mapper/main-root&lt;/dt&gt;
+&lt;dd&gt;root logical volume&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;pre class="code bash literal-block"&gt;
+&lt;span class="c"&gt;# parted /dev/sda -s -- mklabel gpt
+# lvremove root
+# lvremove  swap
+# vgremove main&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="building-out-gentoo"&gt;
+&lt;h2&gt;Building Out Gentoo&lt;/h2&gt;
+&lt;p&gt;The rest is short and sweet. As automation should be. You'll find an example
+inventory in inventories/Gentoo. Couple of notes,&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;the new system will get its hostname  from the inventory_hostname.
+In the example this is 'too1'.&lt;/li&gt;
+&lt;li&gt;The Gentoo install cd has python 3 as the default, but ansible needs 2.7. So
+make sure your ansible_python_interpretor path is set in your inventory.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="code bash literal-block"&gt;
+% ansible-playbook -i inventories/gentoo &lt;span class="se"&gt;\
+&lt;/span&gt;                   -u root &lt;span class="se"&gt;\
+&lt;/span&gt;                   --ask-pass &lt;span class="se"&gt;\
+&lt;/span&gt;                   playbooks/gentoo.yml
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="i-don-t-like-the-way-you-configured-gentoo"&gt;
+&lt;h2&gt;I Don't Like the Way You Configured Gentoo&lt;/h2&gt;
+&lt;p&gt;There's a good chance you don't want Gentoo configured the way the role does.
+The individual tasks are broken down into components for easy tweaking of each
+individual stage of the deploy. You can also drop in your own kernel
+configuration or templates, etc. Think of this as a PoC and tweak away!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="external-links"&gt;
+&lt;h2&gt;External Links&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://www.ansible.com/home"&gt;Ansible&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://github.com/jameskyle/ansible-sandbox"&gt;ansible-sandbox&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://github.com/jameskyle/ansible-gentoo"&gt;ansible-gentoo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="Gentoo"></category><category term="administration"></category><category term="ansible"></category></entry><entry><title>Deploying a Bare Metal Kubernetes Cluster</title><link href="http://blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" rel="alternate"></link><updated>2014-08-26T10:42:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-08-20:2014/08/deploying-baremetal-kubernetes-cluster</id><summary type="html">&lt;div class="section" id="objectives"&gt;
 &lt;h2&gt;Objectives&lt;/h2&gt;
 &lt;p&gt;Seems my blog needs a few updates in the buzz department. I like taking the
 shotgun approach, so we're going to deploy a 5 node bare metal &lt;a class="reference external" href="https://www.docker.com"&gt;docker&lt;/a&gt; cluster

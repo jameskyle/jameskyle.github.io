@@ -38,6 +38,19 @@
 <article class="summary">
   <div>
     <h2>
+      <a href="../2014/08/automated-stage3-gentoo-install-using-ansible" rel="bookmark" title="Permalink to Automated Stage3 Gentoo Install Using Ansible">Automated Stage3 Gentoo Install Using Ansible</a>
+    </h2>
+    <p><div class="section" id="objectives">
+<h2>Objectives</h2>
+<p>The objective is to, as far as possible, fully automate a stage3 Gentoo build.
+While we're at it, we'd like to add some flexibility in building different
+kernel configurations or passing in different parameters like the initial
+username, passwords, etc.</p>
+<p><a class="reference external" href="http://www.ansible.com/home">Ansible</a> fits the bill for this task ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
       <a href="../2014/03/osxfuse-kext-fails-on-mavericks" rel="bookmark" title="Permalink to OSXFuse 2.6.2 Kext Fails to Load in Mavericks">OSXFuse 2.6.2 Kext Fails to Load in Mavericks</a>
     </h2>
     <p><div class="section" id="the-problem">
@@ -155,19 +168,6 @@ Server Admin were showing up as stale links in my clients. Though not
 deal breaking, it was annoying as it indicating some sort of corruption
 in my ldap configuration.</p>
 <p>After digging around, I found that the records ...</p></p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
-      <a href="../2008/09/leopard-server-encrypted-tls-fix" rel="bookmark" title="Permalink to Leopard Server Postfix TLS Error: cannot get private key from file /etc/certificates/mycert.key">Leopard Server Postfix TLS Error: cannot get private key from file /etc/certificates/mycert.key</a>
-    </h2>
-    <p><p>The problem here is that postfix is failing on encrypted TLS certs and
-OSX ServerAdmin created certs are encrypted. The fix is, as should be
-expected, to unencrypt the cert:</p>
-<div class="highlight"><pre><span class="nb">cd</span> /etc/certificates
-cp mycert.key mycert.key.saved
-openssl rsa -in mycert.key -out mycert.key.out
-cp -p ...</pre></div></p>
   </div>
 </article>
 <div class="pagination">

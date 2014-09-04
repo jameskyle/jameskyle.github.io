@@ -5,7 +5,8 @@ easily enough.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
 &lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0.10.8
-&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
    --install /usr/bin/chef-client chef &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-client 500 &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/bin/chef-solo chef-solo &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/bin/knife knife &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;

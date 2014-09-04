@@ -38,6 +38,19 @@
 <article class="summary">
   <div>
     <h2>
+      <a href="../../2014/08/automated-stage3-gentoo-install-using-ansible" rel="bookmark" title="Permalink to Automated Stage3 Gentoo Install Using Ansible">Automated Stage3 Gentoo Install Using Ansible</a>
+    </h2>
+    <p><div class="section" id="objectives">
+<h2>Objectives</h2>
+<p>The objective is to, as far as possible, fully automate a stage3 Gentoo build.
+While we're at it, we'd like to add some flexibility in building different
+kernel configurations or passing in different parameters like the initial
+username, passwords, etc.</p>
+<p><a class="reference external" href="http://www.ansible.com/home">Ansible</a> fits the bill for this task ...</p></div></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
       <a href="../../2014/08/deploying-baremetal-kubernetes-cluster" rel="bookmark" title="Permalink to Deploying a Bare Metal Kubernetes Cluster">Deploying a Bare Metal Kubernetes Cluster</a>
     </h2>
     <p><div class="section" id="objectives">
@@ -118,7 +131,8 @@ easily enough.</p>
 <div class="highlight"><pre><span class="c">#!/bin/bash</span>
 <span class="nv">RUBY_VERSION</span><span class="o">=</span>1.9.1
 <span class="nv">CHEF_VERSION</span><span class="o">=</span>0.10.8
-<span class="nv">GEM_ROOT</span><span class="o">=</span>/var/lib/gems/<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>/gems/chef-<span class="k">${</span><span class="nv">CHEF_VERSION</span><span class="k">}</span>update-alternatives <span class="se">\</span>
+<span class="nv">GEM_ROOT</span><span class="o">=</span>/var/lib/gems/<span class="k">${</span><span class="nv">RUBY_VERSION</span><span class="k">}</span>/gems/chef-<span class="k">${</span><span class="nv">CHEF_VERSION</span><span class="k">}</span>
+update-alternatives <span class="se">\</span>
    --install /usr/bin/chef-client chef ...</pre></div></p>
   </div>
 </article><article class="summary">
@@ -170,17 +184,6 @@ defaults write com.apple.Safari WebKitInitialTimedLayoutDelay 0.25
 <li><p class="first">Increase animation speed of sheets</p>
 <pre class="literal-block">
 defaults write NSGlobalDomain NSWindowResizeTime ...</pre></li></ul></p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
-      <a href="../../2010/06/postfix-virtual-domain-redmine-filter" rel="bookmark" title="Permalink to Creating a redmine email filter for postfix with virtual domains">Creating a redmine email filter for postfix with virtual domains</a>
-    </h2>
-    <p><p>This is adapted from the postfix virtual redme for <a class="reference external" href="http://www.postfix.org/VIRTUAL_README.html#autoreplies">autoreply
-transports</a>. As such, I basically copy/paste that tutorial and edited
-it accordingly.</p>
-<p>This assumes that you have set up redmine at its own subdomain as well
-as a postfix virtual domain, e.g. redmine.yourdomain.com and wish to ...</p></p>
   </div>
 </article>
 <div class="pagination">
