@@ -3684,7 +3684,7 @@ head. In vim:&lt;/p&gt;
 &lt;p&gt;After that, you'll see nice highlighted dots showing the indentation
 depth. Ugly, but then you can pick out the tabs. I'm sure all the other
 excellent editors above also have this ability. :)&lt;/p&gt;
-</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">James A. Kyle</dc:creator><pubDate>Fri, 20 Feb 2009 15:01:00 -0800</pubDate><guid>tag:blog.jameskyle.org,2009-02-20:2009/02/showing-tabs-in-vim</guid><category>editors</category><category>programming</category><category>tabs</category><category>vim</category></item><item><title>Agile Project Setup for Python</title><link>http://blog.jameskyle.org/2009/02/agile-project-setup-for-python</link><description>&lt;p&gt;This is a quick summarization of the screen casts found at &lt;a class="reference external" href="http://showmedo.com/videos/video?name=2910000&amp;amp;fromSeriesID=291"&gt;ShowMeDo.&lt;/a&gt;.
+</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">James A. Kyle</dc:creator><pubDate>Fri, 20 Feb 2009 15:01:00 -0800</pubDate><guid>tag:blog.jameskyle.org,2009-02-20:2009/02/showing-tabs-in-vim</guid><category>editors</category><category>programming</category><category>vim</category></item><item><title>Agile Project Setup for Python</title><link>http://blog.jameskyle.org/2009/02/agile-project-setup-for-python</link><description>&lt;p&gt;This is a quick summarization of the screen casts found at &lt;a class="reference external" href="http://showmedo.com/videos/video?name=2910000&amp;amp;fromSeriesID=291"&gt;ShowMeDo.&lt;/a&gt;.
 It's a good quick reference for getting a project up and going with
 nosetests, easy_install, virtualenv, pastescript, and sphinx for
 documentation.&lt;/p&gt;

@@ -2,7 +2,6 @@
 
 @import url("pygment.css");
 
-
 /* Layout */
 
 article,
@@ -19,7 +18,6 @@ time {
 html {
   font-size: 100%;
   -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -330,7 +328,7 @@ li.tag-4 { font-size: 110%; margin: 0 1em; }
   }
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1280px) and not (max-device-width: 320px) {
   body {
     margin: 0 12%;
   }
@@ -341,4 +339,3 @@ li.tag-4 { font-size: 110%; margin: 0 1em; }
     margin: 0 4%;
   }
 }
-

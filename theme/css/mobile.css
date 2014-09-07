@@ -1,0 +1,14 @@
+@media only screen and (max-device-width: 320px) {
+  body {
+    font-family: Helvetica;
+    font-size: 32px;
+  }
+
+  .sidebar {
+    display: none;
+    width: 25%;
+    border-right: 1px solid #d6d6d6;
+    padding: 0 20px 1em 20px;
+  }
+
+}
