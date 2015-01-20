@@ -12,7 +12,7 @@ komodo, Wing, whatever).Â&lt;/p&gt;
 head. In vim:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;syn&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; TAB_CHAR &lt;span class="s2"&gt;&amp;quot;\t&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;hi&lt;/span&gt; link TAB_CHAR &lt;span class="k"&gt;Error&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;hi&lt;/span&gt; link TAB_CHAR Error
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;After that, you'll see nice highlighted dots showing the indentation
 depth. Ugly, but then you can pick out the tabs. I'm sure all the other

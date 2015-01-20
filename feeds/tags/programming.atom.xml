@@ -542,7 +542,8 @@ examples.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;A&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Some Value&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;return_true&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Truedef&lt;/span&gt; &lt;span class="n"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;raise_exc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;KeyError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -846,7 +847,7 @@ komodo, Wing, whatever).Â&lt;/p&gt;
 head. In vim:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;syn&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; TAB_CHAR &lt;span class="s2"&gt;&amp;quot;\t&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;hi&lt;/span&gt; link TAB_CHAR &lt;span class="k"&gt;Error&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;hi&lt;/span&gt; link TAB_CHAR Error
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;After that, you'll see nice highlighted dots showing the indentation
 depth. Ugly, but then you can pick out the tabs. I'm sure all the other

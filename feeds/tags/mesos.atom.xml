@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/mesos.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2014-08-25T10:46:46-07:00</updated><entry><title>Manage Docker with Containerized Mesos &amp; Marathon Using Ansible</title><link href="http://blog.jameskyle.org/2014/08/manage-docker-with-containerized-mesos-marathon-using-ansible" rel="alternate"></link><updated>2014-08-25T10:46:46-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2014-08-25:2014/08/manage-docker-with-containerized-mesos-marathon-using-ansible</id><summary type="html">&lt;div class="section" id="objectives"&gt;
+&lt;h2&gt;Objectives&lt;/h2&gt;
+&lt;p&gt;To round out my quest for a blog adequately dense in tech hipster jargon, this
+article covers the deployment of a &lt;a class="reference external" href="https://www.docker.co://www.docker.com"&gt;Docker&lt;/a&gt; cluster on bare metal that uses
+&lt;a class="reference external" href="http://mesos.apache.org"&gt;Mesos&lt;/a&gt; &amp;amp; &lt;a class="reference external" href="https://github.com/mesosphere/marathon"&gt;Marathon&lt;/a&gt; for scheduling. Oh and we'll use &lt;a class="reference external" href="http://www.ansible.com/home"&gt;Ansible&lt;/a&gt; to do it. The
+incentive of running Mesos in a container  is portability of the deployment
+method. It reduces the requirements of the underlying host to &amp;quot;any system that
+can run docker&amp;quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="section-ii"&gt;
+&lt;h2&gt;Section II&lt;/h2&gt;
+&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+when an unknown printer took a galley of type and scrambled it to make a type
+specimen book.&lt;/p&gt;
+&lt;div class="section" id="subsection"&gt;
+&lt;h3&gt;Subsection&lt;/h3&gt;
+&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+when an unknown printer took a galley of type and scrambled it to make a type
+specimen book.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="subsection-ii"&gt;
+&lt;h3&gt;SubSection II&lt;/h3&gt;
+&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+when an unknown printer took a galley of type and scrambled it to make a type
+specimen book.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="external-links"&gt;
+&lt;h2&gt;External Links&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://www.docker.co://www.docker.com"&gt;Docker&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://mesos.apache.org"&gt;Mesos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://github.com/mesosphere/marathon"&gt;Marathon&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://www.ansible.com/home"&gt;Ansible&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</summary><category term="administration"></category><category term="devops"></category><category term="mesos"></category><category term="docker"></category><category term="ansible"></category></entry></feed>
