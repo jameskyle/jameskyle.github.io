@@ -53,14 +53,14 @@ setopt extendedglob
 vmrun stop *.vmx
 
 <span class="c"># verify we&#39;re in a vmware vm directory</span>
-<span class="nb">pwd</span> | grep vmwarevm &gt; /dev/null 2&gt;&amp;1
+<span class="nb">pwd</span> <span class="p">|</span> grep vmwarevm &gt; /dev/null 2&gt;<span class="p">&amp;</span>1
 
 <span class="c"># just another check, make sure the files in this directory look like vmware</span>
 <span class="c"># virtual machine files</span>
-ls -d *.<span class="o">(</span>vmxf|nvram|vmsd|vmx|vmdk<span class="o">)</span> &gt; /dev/null 2&gt;&amp;1
+ls -d *.<span class="o">(</span>vmxf<span class="p">|</span>nvram<span class="p">|</span>vmsd<span class="p">|</span>vmx<span class="p">|</span>vmdk<span class="o">)</span> &gt; /dev/null 2&gt;<span class="p">&amp;</span>1
 
 <span class="c"># remove all files that are not essential for a vagrant box</span>
-rm -f <span class="k">$(</span>ls -d *~*.<span class="o">(</span>vmxf|nvram|vmsd|vmx|vmdk<span class="k">)</span><span class="o">)</span>
+rm -f <span class="k">$(</span>ls -d *~*.<span class="o">(</span>vmxf<span class="p">|</span>nvram<span class="p">|</span>vmsd<span class="p">|</span>vmx<span class="p">|</span>vmdk<span class="k">)</span><span class="o">)</span>
 
 <span class="c"># defragment and shrink the main vmware disk</span>
 vmware-vdiskmanager -d <span class="s2">&quot;Virtual Disk.vmdk&quot;</span>
@@ -74,8 +74,8 @@ cat <span class="s">&lt;&lt;EOF &gt; metadata.json</span>
 <span class="s">EOF</span>
 
 <span class="c"># box it up using the virtual machine name as the box name.</span>
-<span class="nv">box_name</span><span class="o">=</span><span class="k">$(</span>basename <span class="s2">&quot;${PWD}&quot;</span> .vmwarevm<span class="k">)</span>
-tar cvzf <span class="s2">&quot;${box_name}.box&quot;</span> ./*
+<span class="nv">box_name</span><span class="o">=</span><span class="k">$(</span>basename <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span><span class="s2">&quot;</span> .vmwarevm<span class="k">)</span>
+tar cvzf <span class="s2">&quot;</span><span class="si">${</span><span class="nv">box_name</span><span class="si">}</span><span class="s2">.box&quot;</span> ./*
 </pre></div>
    
 
@@ -84,13 +84,13 @@ tar cvzf <span class="s2">&quot;${box_name}.box&quot;</span> ./*
     <section>
         <p id="post-share-links">
             Share on:
-            <a href="http://twitter.com/home?status=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box%20 http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share on Twitter">Twitter</a>
+            <a href="http://twitter.com/home?status=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box%20http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share on Twitter">Twitter</a>
             ❄
-            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box&p[images][0]=&p[title]=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box%20&p[summary]=%3Cp%3EI%27m%20sure%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.vagrantup.com/%22%3Evagrant%3C/a%3E%20package%20will%20soon%20support%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.vmware.com/products/fusion/overview.html%22%3Evmware%20fusion%3C/a%3E%20too%2C%20but%20as%20of%20this%20article%0Ait%20does%20not.%20So%20I%20wrote%20a%20little%20script%20that%27ll%20clean%20up%2C%20shrink%2C%20and%20package%20a%0Avmware%20virtualmachine%20directory%20into%20a%20vagrant%20box.%3C/p%3E%0A%3Cp%3EIt%27s%20should%20be%20run%20from%20the%20directory%20of%20the%20...%3C/p%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&amp;p%5Burl%5D=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share on Facebook">Facebook</a>
             ❄
             <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share on Google Plus">Google+</a>
             ❄
-            <a href="mailto:?subject=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box%20&body=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share via Email">Email</a>
+            <a href="mailto:?subject=Zsh%20Script%20to%20Create%20VMware%20Fusion%205%20Vagrant%20Box&amp;body=http%3A//blog.jameskyle.org/2013/05/zsh-script-to-create-vmware-fusion-5-vagrant-box" target="_blank" title="Share via Email">Email</a>
         </p>
     </section>
     <div class="comments">
@@ -114,7 +114,6 @@ tar cvzf <span class="s2">&quot;${box_name}.box&quot;</span> ./*
               <h2>Categories</h2>
               <ul>
                   <li ><a href="../../../category/administration.html">administration</a></li>
-                  <li ><a href="../../../category/apt.html">apt</a></li>
                   <li ><a href="../../../category/cocoa.html">cocoa</a></li>
                   <li ><a href="../../../category/debian.html">debian</a></li>
                   <li ><a href="../../../category/devops.html">devops</a></li>
@@ -168,12 +167,6 @@ tar cvzf <span class="s2">&quot;${box_name}.box&quot;</span> ./*
 
     </div>
 
-      <script>
-        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
-        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-        s.parentNode.insertBefore(g,s)}(document,'script'));
-      </script>
 
 </body>
 </html>

@@ -14,7 +14,7 @@ sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
 &lt;p&gt;They basically update configuration values in the
 /Library/Preferences/VMware Fusion/networking file.&lt;/p&gt;
 &lt;p&gt;Then restart vmware. You can verify the dhcpd service is no longer running by&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;ps aux | grep -i dhcpd | grep vmnet
+&lt;div class="highlight"&gt;&lt;pre&gt;ps aux &lt;span class="p"&gt;|&lt;/span&gt; grep -i dhcpd &lt;span class="p"&gt;|&lt;/span&gt; grep vmnet
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Zero results means no dhcpd running on VMware's virtual nets.&lt;/p&gt;
 </summary><category term="vmware"></category><category term="virtualization"></category><category term="dhcp"></category></entry></feed>

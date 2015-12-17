@@ -347,14 +347,14 @@ itself.</p>
 bring them up. I typically do this with ipmitool. A script to do so might look
 something like</p>
 <pre class="code bash literal-block">
-<span class="k">for </span>i in 11 12 13 14;do
+<span class="k">for</span> i in <span class="m">11</span> <span class="m">12</span> <span class="m">13</span> 14<span class="p">;</span><span class="k">do</span>
     ipmitool -I lanplus <span class="se">\
 </span>             -f ~/.racpasswd <span class="se">\
-</span>             -H 192.168.19.<span class="k">${</span><span class="nv">i</span><span class="k">}</span> <span class="se">\
+</span>             -H 192.168.19.<span class="si">${</span><span class="nv">i</span><span class="si">}</span> <span class="se">\
 </span>             -U root chassis bootdev pxe
     ipmitool -I lanplus <span class="se">\
 </span>             -f ~/.racpasswd <span class="se">\
-</span>             -H 192.168.19.<span class="k">${</span><span class="nv">i</span><span class="k">}</span> <span class="se">\
+</span>             -H 192.168.19.<span class="si">${</span><span class="nv">i</span><span class="si">}</span> <span class="se">\
 </span>             -U root chassis power cycle
 <span class="k">done</span>
 </pre>
@@ -463,13 +463,13 @@ support selinux</td></tr>
     <section>
         <p id="post-share-links">
             Share on:
-            <a href="http://twitter.com/home?status=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20 http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Twitter">Twitter</a>
+            <a href="http://twitter.com/home?status=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Twitter">Twitter</a>
             ❄
-            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster&p[images][0]=&p[title]=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20&p[summary]=%3Cdiv%20class%3D%22section%22%20id%3D%22objectives%22%3E%0A%3Ch2%3EObjectives%3C/h2%3E%0A%3Cp%3ESeems%20my%20blog%20needs%20a%20few%20updates%20in%20the%20buzz%20department.%20I%20like%20taking%20the%0Ashotgun%20approach%2C%20so%20we%27re%20going%20to%20deploy%20a%205%20node%20bare%20metal%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//www.docker.com%22%3Edocker%3C/a%3E%20cluster%0Ausing%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//www.ansible.com/home%22%3Eansible%3C/a%3E%20for%20host%20configuration%20and%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22https%3A//github.com/GoogleCloudPlatform/kubernetes%22%3Ekubernetes%3C/a%3E%20for%20container%20management.%3C/p%3E%0A%3Cp%3EI%20wish%20I%20could%20have%20squeezed%20%3Ca%20class%3D%22reference%20external%22%20href%3D%22http%3A//mesos.apache.org%22%3Emesos%3C/a%3E%20into%20this%20...%3C/p%3E%3C/div%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&amp;p%5Burl%5D=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Facebook">Facebook</a>
             ❄
             <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share on Google Plus">Google+</a>
             ❄
-            <a href="mailto:?subject=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster%20&body=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share via Email">Email</a>
+            <a href="mailto:?subject=Deploying%20a%20Bare%20Metal%20Kubernetes%20Cluster&amp;body=http%3A//blog.jameskyle.org/2014/08/deploying-baremetal-kubernetes-cluster" target="_blank" title="Share via Email">Email</a>
         </p>
     </section>
     <div class="comments">
@@ -493,7 +493,6 @@ support selinux</td></tr>
               <h2>Categories</h2>
               <ul>
                   <li ><a href="../../../category/administration.html">administration</a></li>
-                  <li ><a href="../../../category/apt.html">apt</a></li>
                   <li ><a href="../../../category/cocoa.html">cocoa</a></li>
                   <li ><a href="../../../category/debian.html">debian</a></li>
                   <li class="active"><a href="../../../category/devops.html">devops</a></li>
@@ -547,12 +546,6 @@ support selinux</td></tr>
 
     </div>
 
-      <script>
-        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
-        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-        s.parentNode.insertBefore(g,s)}(document,'script'));
-      </script>
 
 </body>
 </html>

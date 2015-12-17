@@ -137,7 +137,7 @@ configuration or templates, etc. Think of this as a PoC and tweak away!&lt;/p&gt
 fails to load the new kext. If you attempt to load the kext, you get errors
 in your logs like:&lt;/p&gt;
 &lt;pre class="code bash literal-block"&gt;
-Mar 19 11:34:30 metaverse.local com.apple.kextd&lt;span class="o"&gt;[&lt;/span&gt;29&lt;span class="o"&gt;]&lt;/span&gt;: WARNING - &lt;span class="se"&gt;\
+Mar &lt;span class="m"&gt;19&lt;/span&gt; 11:34:30 metaverse.local com.apple.kextd&lt;span class="o"&gt;[&lt;/span&gt;29&lt;span class="o"&gt;]&lt;/span&gt;: WARNING - &lt;span class="se"&gt;\
 &lt;/span&gt;Invalid signature -67062 0xFFFFFFFFFFFEFA0A &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="se"&gt;\
 &lt;/span&gt;kext &lt;span class="s2"&gt;&amp;quot;/Library/Filesystems/osxfusefs.fs/Support/osxfusefs.kext&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;
@@ -684,7 +684,7 @@ object file: No such file or directory&lt;/li&gt;
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 
-/etc/init.d/dataeng stop ; modprobe mptctl ; /etc/init.d/dataeng start
+/etc/init.d/dataeng stop &lt;span class="p"&gt;;&lt;/span&gt; modprobe mptctl &lt;span class="p"&gt;;&lt;/span&gt; /etc/init.d/dataeng start
 
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d

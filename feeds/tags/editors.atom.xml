@@ -7,7 +7,7 @@ files, etc.&lt;/p&gt;
 &amp;quot;use a decent editor&amp;quot;. Which by decent, they mean whatever you're not
 using right now and if you follow the suggestions you end up playing
 marry-go-round with all the most popular editors (emacs, vim, textmate,
-komodo, Wing, whatever).Â&lt;/p&gt;
+komodo, Wing, whatever).&lt;/p&gt;
 &lt;p&gt;Well, this is the best actual solution I've found when it rears its ugly
 head. In vim:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;syn&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; TAB_CHAR &lt;span class="s2"&gt;&amp;quot;\t&amp;quot;&lt;/span&gt;

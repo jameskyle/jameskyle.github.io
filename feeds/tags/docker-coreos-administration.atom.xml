@@ -34,19 +34,19 @@ one with a 10 year expiration.&lt;/p&gt;
 &lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt; -ex
 mkdir certs &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;cd &lt;/span&gt;certs
 &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Creating server keys...&amp;quot;&lt;/span&gt;
-&lt;span class="nb"&gt;echo &lt;/span&gt;01 &amp;gt; ca.srl
+&lt;span class="nb"&gt;echo &lt;/span&gt;&lt;span class="m"&gt;01&lt;/span&gt; &amp;gt; ca.srl
 openssl genrsa -des3 -out ca-key.pem
-openssl req -new -x509 -days 3650 -key ca-key.pem -out ca.pem
+openssl req -new -x509 -days &lt;span class="m"&gt;3650&lt;/span&gt; -key ca-key.pem -out ca.pem
 openssl genrsa -des3 -out server-key.pem
 openssl req -new -key server-key.pem -out server.csr
-openssl x509 -req -days 365 -in server.csr -CA ca.pem -CAkey ca-key.pem &lt;span class="se"&gt;\
+openssl x509 -req -days &lt;span class="m"&gt;365&lt;/span&gt; -in server.csr -CA ca.pem -CAkey ca-key.pem &lt;span class="se"&gt;\
 &lt;/span&gt;    -out server-cert.pem
 
 &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Creating client keys...&amp;quot;&lt;/span&gt;
 openssl genrsa -des3 -out client-key.pem
 openssl req -new -key client-key.pem -out client.csr
 &lt;span class="nb"&gt;echo &lt;/span&gt;&lt;span class="nv"&gt;extendedKeyUsage&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; clientAuth &amp;gt; extfile.cnf
-openssl x509 -req -days 365 -in client.csr -CA ca.pem -CAkey ca-key.pem &lt;span class="se"&gt;\
+openssl x509 -req -days &lt;span class="m"&gt;365&lt;/span&gt; -in client.csr -CA ca.pem -CAkey ca-key.pem &lt;span class="se"&gt;\
 &lt;/span&gt;    -out client-cert.pem -extfile extfile.cnf
 
 &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Stripping passwords from keys...&amp;quot;&lt;/span&gt;

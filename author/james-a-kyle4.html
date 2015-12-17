@@ -39,27 +39,6 @@
 <article class="summary">
   <div>
     <h2>
-      <a href="../2010/06/migrated-old-posts" rel="bookmark" title="Permalink to Migrated old Posts">Migrated old Posts</a>
-    </h2>
-    <p><p>I migrated my old blog posts from <a class="reference external" href="http://ccn.ucla.edu/users/jkyle">CCN</a> into this one via rss. It looks
-like it mostly worked, formatting is a little off so my apologies for
-that. I'll try to touch them up &quot;as needed&quot;.</p>
-</p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
-      <a href="../2010/05/xcode-qt4-data-formatter" rel="bookmark" title="Permalink to Qt4DataFormatter (custom Xcode data formatters for Qt4 objects)">Qt4DataFormatter (custom Xcode data formatters for Qt4 objects)</a>
-    </h2>
-    <p><p>I do most of my development on OS X, including Qt4 projects. Qt4 objects
-are particularly averse to inspection in the Xcode debugger.
-Fortunately, Xcode has a <a class="reference external" href="http://developer.apple.com/mac/library/documentation/DeveloperTools/Conceptual/XcodeDebugging/220-Viewing_Variables_and_Memory/variables_and_memory.html">data formatter plugin API</a> for displaying
-summaries of &nbsp;user defined objects. Unfortunately, the documentation
-isn't as complete as one would hope. The ...</p></p>
-  </div>
-</article><article class="summary">
-  <div>
-    <h2>
       <a href="../2010/05/customized-qt4-generated-xcode-projects" rel="bookmark" title="Permalink to Customized Qt4 Generated Xcode Projects">Customized Qt4 Generated Xcode Projects</a>
     </h2>
     <p><p>One of the very nice features of Qt's qmake is the ability to generate
@@ -129,7 +108,8 @@ files, etc.</p>
 It's a good quick reference for getting a project up and going with
 nosetests, easy_install, virtualenv, pastescript, and sphinx for
 documentation.</p>
-<p>This is notÂ&nbsp;intendedÂ&nbsp;to be a zero to go walk through or a cut/paste ...</p></p>
+<p>This is notintendedto be a zero to go walk through or a cut/paste
+example. Depending ...</p></p>
   </div>
 </article><article class="summary">
   <div>
@@ -149,6 +129,30 @@ RewriteRule .* - [F]
 </pre></div>
 <p>To this ...</p></p>
   </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="../2009/02/auto-configure-osx-clients-for-backuppc" rel="bookmark" title="Permalink to Auto-Configure OSX clients for BackupPC">Auto-Configure OSX clients for BackupPC</a>
+    </h2>
+    <p><p>This script auto-configures osx 10.4-10.5 clients for backup via
+<a class="reference external" href="http://backuppc.sourceforge.net/">BackupPC.</a>&nbsp;It creates a hidden backuppc user with standard
+permissions. Limits that users sudo permissions to rsync, sets up
+public/private key authentication, fliters all incoming ssh connections
+using that key to only allow rsync commands.</p>
+<p>The project also ...</p></p>
+  </div>
+</article><article class="summary">
+  <div>
+    <h2>
+      <a href="../2009/02/handbrakecli-presets" rel="bookmark" title="Permalink to HandBrakeCLI Presets">HandBrakeCLI Presets</a>
+    </h2>
+    <p><p>Found this over at snipplr, thought I'd duplicate here for my own
+reference: AppleTV</p>
+<div class="highlight"><pre>./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 <span class="se">\</span>
+  -B <span class="m">160</span> -R <span class="m">48</span> -E AAC -e x264 -f MP4 <span class="se">\</span>
+  -m -p -b <span class="m">2500</span> <span class="se">\</span>
+  -x <span class="nv">bframes</span><span class="o">=</span>3:ref<span class="o">=</span>1:subme<span class="o">=</span>5:me<span class="o">=</span>umh:no-fast-pskip<span class="o">=</span>1:no-dct-decimate<span class="o">=</span>1:trellis ...</pre></div></p>
+  </div>
 </article>
 <div class="pagination">
             <a href="../author/james-a-kyle3.html">&laquo;</a>
@@ -164,7 +168,6 @@ RewriteRule .* - [F]
               <h2>Categories</h2>
               <ul>
                   <li ><a href="../category/administration.html">administration</a></li>
-                  <li ><a href="../category/apt.html">apt</a></li>
                   <li ><a href="../category/cocoa.html">cocoa</a></li>
                   <li ><a href="../category/debian.html">debian</a></li>
                   <li ><a href="../category/devops.html">devops</a></li>
@@ -218,12 +221,6 @@ RewriteRule .* - [F]
 
     </div>
 
-      <script>
-        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
-        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-        s.parentNode.insertBefore(g,s)}(document,'script'));
-      </script>
 
 </body>
 </html>

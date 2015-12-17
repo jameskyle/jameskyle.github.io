@@ -15,14 +15,14 @@ setopt extendedglob
 vmrun stop *.vmx
 
 &lt;span class="c"&gt;# verify we&amp;#39;re in a vmware vm directory&lt;/span&gt;
-&lt;span class="nb"&gt;pwd&lt;/span&gt; | grep vmwarevm &amp;gt; /dev/null 2&amp;gt;&amp;amp;1
+&lt;span class="nb"&gt;pwd&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; grep vmwarevm &amp;gt; /dev/null 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;1
 
 &lt;span class="c"&gt;# just another check, make sure the files in this directory look like vmware&lt;/span&gt;
 &lt;span class="c"&gt;# virtual machine files&lt;/span&gt;
-ls -d *.&lt;span class="o"&gt;(&lt;/span&gt;vmxf|nvram|vmsd|vmx|vmdk&lt;span class="o"&gt;)&lt;/span&gt; &amp;gt; /dev/null 2&amp;gt;&amp;amp;1
+ls -d *.&lt;span class="o"&gt;(&lt;/span&gt;vmxf&lt;span class="p"&gt;|&lt;/span&gt;nvram&lt;span class="p"&gt;|&lt;/span&gt;vmsd&lt;span class="p"&gt;|&lt;/span&gt;vmx&lt;span class="p"&gt;|&lt;/span&gt;vmdk&lt;span class="o"&gt;)&lt;/span&gt; &amp;gt; /dev/null 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;1
 
 &lt;span class="c"&gt;# remove all files that are not essential for a vagrant box&lt;/span&gt;
-rm -f &lt;span class="k"&gt;$(&lt;/span&gt;ls -d *~*.&lt;span class="o"&gt;(&lt;/span&gt;vmxf|nvram|vmsd|vmx|vmdk&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+rm -f &lt;span class="k"&gt;$(&lt;/span&gt;ls -d *~*.&lt;span class="o"&gt;(&lt;/span&gt;vmxf&lt;span class="p"&gt;|&lt;/span&gt;nvram&lt;span class="p"&gt;|&lt;/span&gt;vmsd&lt;span class="p"&gt;|&lt;/span&gt;vmx&lt;span class="p"&gt;|&lt;/span&gt;vmdk&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
 
 &lt;span class="c"&gt;# defragment and shrink the main vmware disk&lt;/span&gt;
 vmware-vdiskmanager -d &lt;span class="s2"&gt;&amp;quot;Virtual Disk.vmdk&amp;quot;&lt;/span&gt;
@@ -36,8 +36,8 @@ cat &lt;span class="s"&gt;&amp;lt;&amp;lt;EOF &amp;gt; metadata.json&lt;/span&gt
 &lt;span class="s"&gt;EOF&lt;/span&gt;
 
 &lt;span class="c"&gt;# box it up using the virtual machine name as the box name.&lt;/span&gt;
-&lt;span class="nv"&gt;box_name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;basename &lt;span class="s2"&gt;&amp;quot;${PWD}&amp;quot;&lt;/span&gt; .vmwarevm&lt;span class="k"&gt;)&lt;/span&gt;
-tar cvzf &lt;span class="s2"&gt;&amp;quot;${box_name}.box&amp;quot;&lt;/span&gt; ./*
+&lt;span class="nv"&gt;box_name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;basename &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;PWD&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; .vmwarevm&lt;span class="k"&gt;)&lt;/span&gt;
+tar cvzf &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;box_name&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.box&amp;quot;&lt;/span&gt; ./*
 &lt;/pre&gt;&lt;/div&gt;
 </summary><category term="vmware"></category><category term="vagrant"></category><category term="scripts"></category></entry><entry><title>Disable DHCP Daemon on Default Virtual Nets in VMware Fusion 5</title><link href="http://blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" rel="alternate"></link><updated>2013-05-16T21:21:18-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2013-05-16:2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5</id><summary type="html">&lt;p&gt;Fusion 5 is a bit different than previous versions. It adds a lot of network
 configuration missing in previous versions. There are two interfaces that
@@ -54,7 +54,7 @@ sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
 &lt;p&gt;They basically update configuration values in the
 /Library/Preferences/VMware Fusion/networking file.&lt;/p&gt;
 &lt;p&gt;Then restart vmware. You can verify the dhcpd service is no longer running by&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;ps aux | grep -i dhcpd | grep vmnet
+&lt;div class="highlight"&gt;&lt;pre&gt;ps aux &lt;span class="p"&gt;|&lt;/span&gt; grep -i dhcpd &lt;span class="p"&gt;|&lt;/span&gt; grep vmnet
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Zero results means no dhcpd running on VMware's virtual nets.&lt;/p&gt;
 </summary><category term="vmware"></category><category term="virtualization"></category><category term="dhcp"></category></entry></feed>

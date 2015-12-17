@@ -52,7 +52,7 @@ sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
 <p>They basically update configuration values in the
 /Library/Preferences/VMware Fusion/networking file.</p>
 <p>Then restart vmware. You can verify the dhcpd service is no longer running by</p>
-<div class="highlight"><pre>ps aux | grep -i dhcpd | grep vmnet
+<div class="highlight"><pre>ps aux <span class="p">|</span> grep -i dhcpd <span class="p">|</span> grep vmnet
 </pre></div>
 <p>Zero results means no dhcpd running on VMware's virtual nets.</p>
    
@@ -62,13 +62,13 @@ sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
     <section>
         <p id="post-share-links">
             Share on:
-            <a href="http://twitter.com/home?status=Disable%20DHCP%20Daemon%20on%20Default%20Virtual%20Nets%20in%20VMware%20Fusion%205%20 http%3A//blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" target="_blank" title="Share on Twitter">Twitter</a>
+            <a href="http://twitter.com/home?status=Disable%20DHCP%20Daemon%20on%20Default%20Virtual%20Nets%20in%20VMware%20Fusion%205%20http%3A//blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" target="_blank" title="Share on Twitter">Twitter</a>
             ❄
-            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5&p[images][0]=&p[title]=Disable%20DHCP%20Daemon%20on%20Default%20Virtual%20Nets%20in%20VMware%20Fusion%205%20&p[summary]=%3Cp%3EFusion%205%20is%20a%20bit%20different%20than%20previous%20versions.%20It%20adds%20a%20lot%20of%20network%0Aconfiguration%20missing%20in%20previous%20versions.%20There%20are%20two%20interfaces%20that%0Aaren%27t%20modifiable%20in%20the%20gui%3B%20vmnet1%20and%20vmnet8.%3C/p%3E%0A%3Cp%3EThese%20are%20default%20networks%20created%20by%20VMware.%20vmnet1%20is%20VMware%27s%20default%0Ahostonly%20net%20and%20vmnet8%20...%3C/p%3E" target="_blank" title="Share on Facebook">Facebook</a>
+            <a href="http://www.facebook.com/sharer/sharer.php?s=100&amp;p%5Burl%5D=http%3A//blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" target="_blank" title="Share on Facebook">Facebook</a>
             ❄
             <a href="https://plus.google.com/share?url=http%3A//blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" target="_blank" title="Share on Google Plus">Google+</a>
             ❄
-            <a href="mailto:?subject=Disable%20DHCP%20Daemon%20on%20Default%20Virtual%20Nets%20in%20VMware%20Fusion%205%20&body=http%3A//blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" target="_blank" title="Share via Email">Email</a>
+            <a href="mailto:?subject=Disable%20DHCP%20Daemon%20on%20Default%20Virtual%20Nets%20in%20VMware%20Fusion%205&amp;body=http%3A//blog.jameskyle.org/2013/05/disable-dhcp-daemon-on-default-vmnets-in-vmware-fusion-5" target="_blank" title="Share via Email">Email</a>
         </p>
     </section>
     <div class="comments">
@@ -92,7 +92,6 @@ sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
               <h2>Categories</h2>
               <ul>
                   <li ><a href="../../../category/administration.html">administration</a></li>
-                  <li ><a href="../../../category/apt.html">apt</a></li>
                   <li ><a href="../../../category/cocoa.html">cocoa</a></li>
                   <li ><a href="../../../category/debian.html">debian</a></li>
                   <li ><a href="../../../category/devops.html">devops</a></li>
@@ -146,12 +145,6 @@ sudo vmnet-cfgcli vnetcfgadd VNET_8_DHCP no
 
     </div>
 
-      <script>
-        var _gaq=[['_setAccount','UA-23876265-2'],['_trackPageview']];
-        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-        s.parentNode.insertBefore(g,s)}(document,'script'));
-      </script>
 
 </body>
 </html>

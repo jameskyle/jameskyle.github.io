@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/masks.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2010-09-01T13:44:00-07:00</updated><entry><title>enum masks idiom in python</title><link href="http://blog.jameskyle.org/2010/09/enum-masks-idiom-in-python" rel="alternate"></link><updated>2010-09-01T13:44:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-09-01:2010/09/enum-masks-idiom-in-python</id><summary type="html">&lt;p&gt;We've all seen this:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Foo&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-&lt;span class="nl"&gt;public:&lt;/span&gt;
+&lt;span class="k"&gt;public&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
   &lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="n"&gt;FooType&lt;/span&gt;
   &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="n"&gt;FooTypeOne&lt;/span&gt;    &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0x1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;

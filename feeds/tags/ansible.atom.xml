@@ -441,14 +441,14 @@ itself.&lt;/p&gt;
 bring them up. I typically do this with ipmitool. A script to do so might look
 something like&lt;/p&gt;
 &lt;pre class="code bash literal-block"&gt;
-&lt;span class="k"&gt;for &lt;/span&gt;i in 11 12 13 14;do
+&lt;span class="k"&gt;for&lt;/span&gt; i in &lt;span class="m"&gt;11&lt;/span&gt; &lt;span class="m"&gt;12&lt;/span&gt; &lt;span class="m"&gt;13&lt;/span&gt; 14&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;
     ipmitool -I lanplus &lt;span class="se"&gt;\
 &lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
-&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
 &lt;/span&gt;             -U root chassis bootdev pxe
     ipmitool -I lanplus &lt;span class="se"&gt;\
 &lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
-&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
 &lt;/span&gt;             -U root chassis power cycle
 &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/pre&gt;

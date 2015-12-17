@@ -5,12 +5,12 @@ easily enough.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
 &lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0.10.8
-&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
 update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
-   --install /usr/bin/chef-client chef &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-client 500 &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/chef-solo chef-solo &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/knife knife &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/shef shef  &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/shef
+   --install /usr/bin/chef-client chef &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/chef-client &lt;span class="m"&gt;500&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/chef-solo chef-solo &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/knife knife &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/shef shef  &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/shef
 &lt;/pre&gt;&lt;/div&gt;
 </summary><category term="administration"></category><category term="debian"></category><category term="linux"></category><category term="ubuntu"></category></entry><entry><title>Dell Perc 5i on Ubuntu 64</title><link href="http://blog.jameskyle.org/2010/01/dell-perc-5i-on-ubuntu-64" rel="alternate"></link><updated>2010-01-19T08:38:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-01-19:2010/01/dell-perc-5i-on-ubuntu-64</id><summary type="html">&lt;p&gt;I've been setting up an Ubuntu server on a Dell with a 29xx series with
 a Perc 5i SAS/SATA RAID controller. It took a bit of digging around and
@@ -81,7 +81,7 @@ object file: No such file or directory&lt;/li&gt;
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 
-/etc/init.d/dataeng stop ; modprobe mptctl ; /etc/init.d/dataeng start
+/etc/init.d/dataeng stop &lt;span class="p"&gt;;&lt;/span&gt; modprobe mptctl &lt;span class="p"&gt;;&lt;/span&gt; /etc/init.d/dataeng start
 
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d

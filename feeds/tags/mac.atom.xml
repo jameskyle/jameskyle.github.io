@@ -111,11 +111,11 @@ x86_64 i686) universal arch and by extension, compile all subsequent
 modules with the same:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;SDK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/Developer/SDKs/MacOSX10.5.sdk/
 ./Configure -Accflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch x86_64 -arch ppc64 \&lt;/span&gt;
-&lt;span class="s2"&gt;  -fPIC -nostdinc -B$SDK/usr/include/gcc \&lt;/span&gt;
-&lt;span class="s2"&gt;  -B$SDK/usr/lib/gcc -isystem$SDK/usr/include \&lt;/span&gt;
-&lt;span class="s2"&gt;  -F$SDK/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="s2"&gt;  -fPIC -nostdinc -B&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/include/gcc \&lt;/span&gt;
+&lt;span class="s2"&gt;  -B&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/lib/gcc -isystem&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/include \&lt;/span&gt;
+&lt;span class="s2"&gt;  -F&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
   -Aldflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch ppc64 -arch x86_64 \&lt;/span&gt;
-&lt;span class="s2"&gt;  -Wl,-syslibroot,$SDK&amp;quot;&lt;/span&gt; -de
+&lt;span class="s2"&gt;  -Wl,-syslibroot,&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -de
 
 make
 &lt;/pre&gt;&lt;/div&gt;

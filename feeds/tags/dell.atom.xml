@@ -68,7 +68,7 @@ object file: No such file or directory&lt;/li&gt;
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 
-/etc/init.d/dataeng stop ; modprobe mptctl ; /etc/init.d/dataeng start
+/etc/init.d/dataeng stop &lt;span class="p"&gt;;&lt;/span&gt; modprobe mptctl &lt;span class="p"&gt;;&lt;/span&gt; /etc/init.d/dataeng start
 
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d

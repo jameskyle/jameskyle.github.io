@@ -441,14 +441,14 @@ itself.&lt;/p&gt;
 bring them up. I typically do this with ipmitool. A script to do so might look
 something like&lt;/p&gt;
 &lt;pre class="code bash literal-block"&gt;
-&lt;span class="k"&gt;for &lt;/span&gt;i in 11 12 13 14;do
+&lt;span class="k"&gt;for&lt;/span&gt; i in &lt;span class="m"&gt;11&lt;/span&gt; &lt;span class="m"&gt;12&lt;/span&gt; &lt;span class="m"&gt;13&lt;/span&gt; 14&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;
     ipmitool -I lanplus &lt;span class="se"&gt;\
 &lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
-&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
 &lt;/span&gt;             -U root chassis bootdev pxe
     ipmitool -I lanplus &lt;span class="se"&gt;\
 &lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
-&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
 &lt;/span&gt;             -U root chassis power cycle
 &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/pre&gt;
@@ -1203,7 +1203,7 @@ retrieve the status of all auto configured connections, you execute&lt;/p&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;When debugging, I find it very useful to poll the output of this command
 in one second intervales. For example,&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;% &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;((&lt;/span&gt; ;; &lt;span class="o"&gt;))&lt;/span&gt;;&lt;span class="k"&gt;do &lt;/span&gt;ipsec auto --status; sleep 1; &lt;span class="k"&gt;done&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;((&lt;/span&gt; &lt;span class="p"&gt;;;&lt;/span&gt; &lt;span class="o"&gt;))&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt; ipsec auto --status&lt;span class="p"&gt;;&lt;/span&gt; sleep 1&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The astute may notice the 'watch' command was made for this. I
 experienced glitches on some systems with ipsec status and the watch
@@ -1477,12 +1477,12 @@ easily enough.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
 &lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0.10.8
-&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
 update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
-   --install /usr/bin/chef-client chef &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-client 500 &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/chef-solo chef-solo &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/knife knife &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/shef shef  &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/shef
+   --install /usr/bin/chef-client chef &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/chef-client &lt;span class="m"&gt;500&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/chef-solo chef-solo &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/knife knife &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/shef shef  &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/shef
 &lt;/pre&gt;&lt;/div&gt;
 </summary><category term="administration"></category><category term="debian"></category><category term="linux"></category><category term="ubuntu"></category></entry><entry><title>Ruby Alternatives for Debian/Ubuntu</title><link href="http://blog.jameskyle.org/2012/02/ruby-alternatives-for-debianubuntu" rel="alternate"></link><updated>2012-02-05T10:14:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-02-05:2012/02/ruby-alternatives-for-debianubuntu</id><summary type="html">&lt;p&gt;A quick update-alternatives script for ruby versions on debian based
 systems. It only includes the ruby binaries, man pages, etc. included in
@@ -1495,48 +1495,48 @@ mode.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
 update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
-   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; 500 &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/rake rake /usr/bin/rake&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/gem gem /usr/bin/gem&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="m"&gt;500&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/rake rake /usr/bin/rake&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/gem gem /usr/bin/gem&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/rdoc.1.gz rdoc.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/testrb.1.gz testrb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/rake.1.gz rake.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/rake&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/rake&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/irb.1.gz irb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/erb.1.gz erb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/gem.1.gz gem.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/gem&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/gem&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-           /usr/share/man/man1/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/share/menu/ruby ruby_menu /usr/share/menu/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+           /usr/share/man/man1/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/share/menu/ruby ruby_menu /usr/share/menu/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
 
    &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.8
    update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
-   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; 400 &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="m"&gt;400&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/rdoc.1.gz rdoc.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/testrb.1.gz testrb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/irb.1.gz irb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/erb.1.gz erb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/menu/ruby ruby_menu &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/menu/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+       /usr/share/menu/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 </summary><category term="administration"></category><category term="debian"></category><category term="linux"></category></entry><entry><title>Fixing repetitive software firewall prompts in OSX</title><link href="http://blog.jameskyle.org/2010/09/fix-firewall-prompts-osx" rel="alternate"></link><updated>2010-09-07T07:47:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-09-07:2010/09/fix-firewall-prompts-osx</id><summary type="html">&lt;p&gt;Sometimes the OS X software firewall gets stuck in a loop and will
 continuously prompt to allow network access for an application.&lt;/p&gt;
@@ -1770,7 +1770,7 @@ object file: No such file or directory&lt;/li&gt;
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 /opt/dell/srvadmin/iws/bin/linux/dsm_om_connsvc start
 
-/etc/init.d/dataeng stop ; modprobe mptctl ; /etc/init.d/dataeng start
+/etc/init.d/dataeng stop &lt;span class="p"&gt;;&lt;/span&gt; modprobe mptctl &lt;span class="p"&gt;;&lt;/span&gt; /etc/init.d/dataeng start
 
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_datamgr32d
 /opt/dell/srvadmin/dataeng/bin/dsm_sa_eventmgr32d
@@ -1892,11 +1892,11 @@ x86_64 i686) universal arch and by extension, compile all subsequent
 modules with the same:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;SDK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/Developer/SDKs/MacOSX10.5.sdk/
 ./Configure -Accflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch x86_64 -arch ppc64 \&lt;/span&gt;
-&lt;span class="s2"&gt;  -fPIC -nostdinc -B$SDK/usr/include/gcc \&lt;/span&gt;
-&lt;span class="s2"&gt;  -B$SDK/usr/lib/gcc -isystem$SDK/usr/include \&lt;/span&gt;
-&lt;span class="s2"&gt;  -F$SDK/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="s2"&gt;  -fPIC -nostdinc -B&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/include/gcc \&lt;/span&gt;
+&lt;span class="s2"&gt;  -B&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/lib/gcc -isystem&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/include \&lt;/span&gt;
+&lt;span class="s2"&gt;  -F&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
   -Aldflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch ppc64 -arch x86_64 \&lt;/span&gt;
-&lt;span class="s2"&gt;  -Wl,-syslibroot,$SDK&amp;quot;&lt;/span&gt; -de
+&lt;span class="s2"&gt;  -Wl,-syslibroot,&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -de
 
 make
 &lt;/pre&gt;&lt;/div&gt;

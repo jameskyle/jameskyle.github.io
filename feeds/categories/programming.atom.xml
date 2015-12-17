@@ -390,7 +390,7 @@ Ran 4 tests in 0.006sOK
 &lt;/div&gt;
 </summary><category term="programming"></category><category term="python"></category><category term="unit testing"></category><category term="utilities"></category></entry><entry><title>enum masks idiom in python</title><link href="http://blog.jameskyle.org/2010/09/enum-masks-idiom-in-python" rel="alternate"></link><updated>2010-09-01T13:44:00-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2010-09-01:2010/09/enum-masks-idiom-in-python</id><summary type="html">&lt;p&gt;We've all seen this:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Foo&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-&lt;span class="nl"&gt;public:&lt;/span&gt;
+&lt;span class="k"&gt;public&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
   &lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="n"&gt;FooType&lt;/span&gt;
   &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="n"&gt;FooTypeOne&lt;/span&gt;    &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0x1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
@@ -509,11 +509,11 @@ x86_64 i686) universal arch and by extension, compile all subsequent
 modules with the same:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;export &lt;/span&gt;&lt;span class="nv"&gt;SDK&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/Developer/SDKs/MacOSX10.5.sdk/
 ./Configure -Accflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch x86_64 -arch ppc64 \&lt;/span&gt;
-&lt;span class="s2"&gt;  -fPIC -nostdinc -B$SDK/usr/include/gcc \&lt;/span&gt;
-&lt;span class="s2"&gt;  -B$SDK/usr/lib/gcc -isystem$SDK/usr/include \&lt;/span&gt;
-&lt;span class="s2"&gt;  -F$SDK/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="s2"&gt;  -fPIC -nostdinc -B&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/include/gcc \&lt;/span&gt;
+&lt;span class="s2"&gt;  -B&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/lib/gcc -isystem&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/usr/include \&lt;/span&gt;
+&lt;span class="s2"&gt;  -F&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;/System/Library/Frameworks&amp;quot;&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
   -Aldflags&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-arch i686 -arch ppc -arch ppc64 -arch x86_64 \&lt;/span&gt;
-&lt;span class="s2"&gt;  -Wl,-syslibroot,$SDK&amp;quot;&lt;/span&gt; -de
+&lt;span class="s2"&gt;  -Wl,-syslibroot,&lt;/span&gt;&lt;span class="nv"&gt;$SDK&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -de
 
 make
 &lt;/pre&gt;&lt;/div&gt;
@@ -564,7 +564,7 @@ files, etc.&lt;/p&gt;
 &amp;quot;use a decent editor&amp;quot;. Which by decent, they mean whatever you're not
 using right now and if you follow the suggestions you end up playing
 marry-go-round with all the most popular editors (emacs, vim, textmate,
-komodo, Wing, whatever).Â&lt;/p&gt;
+komodo, Wing, whatever).&lt;/p&gt;
 &lt;p&gt;Well, this is the best actual solution I've found when it rears its ugly
 head. In vim:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="k"&gt;syn&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; TAB_CHAR &lt;span class="s2"&gt;&amp;quot;\t&amp;quot;&lt;/span&gt;
@@ -578,7 +578,7 @@ excellent editors above also have this ability. :)&lt;/p&gt;
 It's a good quick reference for getting a project up and going with
 nosetests, easy_install, virtualenv, pastescript, and sphinx for
 documentation.&lt;/p&gt;
-&lt;p&gt;This is notÂ&amp;nbsp;intendedÂ&amp;nbsp;to be a zero to go walk through or a cut/paste
+&lt;p&gt;This is notintendedto be a zero to go walk through or a cut/paste
 example. Depending on particular setup, you may need to install various
 modules before hand etc. For information on doing so, refer to beginner
 python tutorials and the respective package sites.&lt;/p&gt;

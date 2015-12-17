@@ -2,20 +2,20 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>miscellaneous</title><link href="http://blog.jameskyle.org/" rel="alternate"></link><link href="http://blog.jameskyle.org/feeds/tags/presets.atom.xml" rel="self"></link><id>http://blog.jameskyle.org/</id><updated>2009-02-18T18:38:00-08:00</updated><entry><title>HandBrakeCLI Presets</title><link href="http://blog.jameskyle.org/2009/02/handbrakecli-presets" rel="alternate"></link><updated>2009-02-18T18:38:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2009-02-18:2009/02/handbrakecli-presets</id><summary type="html">&lt;p&gt;Found this over at snipplr, thought I'd duplicate here for my own
 reference: AppleTV&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 &lt;span class="se"&gt;\&lt;/span&gt;
-  -B 160 -R 48 -E AAC -e x264 -f MP4 &lt;span class="se"&gt;\&lt;/span&gt;
-  -m -p -b 2500 &lt;span class="se"&gt;\&lt;/span&gt;
+  -B &lt;span class="m"&gt;160&lt;/span&gt; -R &lt;span class="m"&gt;48&lt;/span&gt; -E AAC -e x264 -f MP4 &lt;span class="se"&gt;\&lt;/span&gt;
+  -m -p -b &lt;span class="m"&gt;2500&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
   -x &lt;span class="nv"&gt;bframes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;3:ref&lt;span class="o"&gt;=&lt;/span&gt;1:subme&lt;span class="o"&gt;=&lt;/span&gt;5:me&lt;span class="o"&gt;=&lt;/span&gt;umh:no-fast-pskip&lt;span class="o"&gt;=&lt;/span&gt;1:no-dct-decimate&lt;span class="o"&gt;=&lt;/span&gt;1:trellis&lt;span class="o"&gt;=&lt;/span&gt;2
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;iPod&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 -B 160 -R 48 -E AAC &lt;span class="se"&gt;\&lt;/span&gt;
-  -e x264b30 -f MP4 -m -b 1500 &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 -B &lt;span class="m"&gt;160&lt;/span&gt; -R &lt;span class="m"&gt;48&lt;/span&gt; -E AAC &lt;span class="se"&gt;\&lt;/span&gt;
+  -e x264b30 -f MP4 -m -b &lt;span class="m"&gt;1500&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
   -x &lt;span class="nv"&gt;frameref&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1:bframes&lt;span class="o"&gt;=&lt;/span&gt;0:nofast_pskip:subq&lt;span class="o"&gt;=&lt;/span&gt;6:partitions&lt;span class="o"&gt;=&lt;/span&gt;p8x8,p8x4,p4x8,i4x4:qcomp&lt;span class="o"&gt;=&lt;/span&gt;0:me&lt;span class="o"&gt;=&lt;/span&gt;umh:nodct_decimate
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;PS3&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 -B 160 -R 48 -E AAC -e x264 -f MP4 -m -p -b 2500 -x &lt;span class="nv"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;41
+&lt;div class="highlight"&gt;&lt;pre&gt;./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 -B &lt;span class="m"&gt;160&lt;/span&gt; -R &lt;span class="m"&gt;48&lt;/span&gt; -E AAC -e x264 -f MP4 -m -p -b &lt;span class="m"&gt;2500&lt;/span&gt; -x &lt;span class="nv"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;41
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;PSP&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 -B 128 -R 48 -E AAC -e FFmpeg -f MP4 -m -b 1024
+&lt;div class="highlight"&gt;&lt;pre&gt;./HandBrakeCLI -i DVD -o ~/Movies/movie.mp4 -B &lt;span class="m"&gt;128&lt;/span&gt; -R &lt;span class="m"&gt;48&lt;/span&gt; -E AAC -e FFmpeg -f MP4 -m -b 1024
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;original link &lt;a class="reference external" href="http://snipplr.com/view/3056/handbrake-cli-presets/"&gt;snipplr.com&lt;/a&gt;&lt;/p&gt;
 </summary><category term="handbrake"></category><category term="multimedia"></category><category term="presets"></category></entry></feed>

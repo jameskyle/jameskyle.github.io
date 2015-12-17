@@ -309,14 +309,14 @@ itself.&lt;/p&gt;
 bring them up. I typically do this with ipmitool. A script to do so might look
 something like&lt;/p&gt;
 &lt;pre class="code bash literal-block"&gt;
-&lt;span class="k"&gt;for &lt;/span&gt;i in 11 12 13 14;do
+&lt;span class="k"&gt;for&lt;/span&gt; i in &lt;span class="m"&gt;11&lt;/span&gt; &lt;span class="m"&gt;12&lt;/span&gt; &lt;span class="m"&gt;13&lt;/span&gt; 14&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;
     ipmitool -I lanplus &lt;span class="se"&gt;\
 &lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
-&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
 &lt;/span&gt;             -U root chassis bootdev pxe
     ipmitool -I lanplus &lt;span class="se"&gt;\
 &lt;/span&gt;             -f ~/.racpasswd &lt;span class="se"&gt;\
-&lt;/span&gt;             -H 192.168.19.&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
+&lt;/span&gt;             -H 192.168.19.&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\
 &lt;/span&gt;             -U root chassis power cycle
 &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/pre&gt;
@@ -418,33 +418,4 @@ support selinux&lt;/td&gt;&lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;/div&gt;
-</summary><category term="administration"></category><category term="devops"></category><category term="ansible"></category><category term="kubernetes"></category></entry><entry><title>Title</title><link href="http://blog.jameskyle.org/2013/08/charybdis-with-puppet" rel="alternate"></link><updated>2013-08-17T12:04:49-07:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2013-08-17:2013/08/charybdis-with-puppet</id><summary type="html">&lt;div class="section" id="introduction"&gt;
-&lt;h2&gt;Introduction&lt;/h2&gt;
-&lt;p&gt;We're going to use puppet to deploy a charybdis server with atheme services.
-I'm using ppa packages I built. You're free to use them or &lt;a class="reference external" href="http://developer.ubuntu.com/packaging/html/traditional-packaging.html"&gt;build your own&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="section" id="retrieving-source"&gt;
-&lt;h2&gt;Retrieving source&lt;/h2&gt;
-&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
-when an unknown printer took a galley of type and scrambled it to make a type
-specimen book.&lt;/p&gt;
-&lt;div class="section" id="subsection"&gt;
-&lt;h3&gt;Subsection&lt;/h3&gt;
-&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
-when an unknown printer took a galley of type and scrambled it to make a type
-specimen book.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="section" id="subsection-ii"&gt;
-&lt;h3&gt;SubSection II&lt;/h3&gt;
-&lt;p&gt;Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
-when an unknown printer took a galley of type and scrambled it to make a type
-specimen book.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="section" id="external-links"&gt;
-&lt;h2&gt;External Links&lt;/h2&gt;
-&lt;/div&gt;
-</summary><category term="charybdis puppet"></category></entry></feed>
+</summary><category term="administration"></category><category term="devops"></category><category term="ansible"></category><category term="kubernetes"></category></entry></feed>

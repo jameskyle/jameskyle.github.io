@@ -652,7 +652,7 @@ retrieve the status of all auto configured connections, you execute&lt;/p&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;When debugging, I find it very useful to poll the output of this command
 in one second intervales. For example,&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;% &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;((&lt;/span&gt; ;; &lt;span class="o"&gt;))&lt;/span&gt;;&lt;span class="k"&gt;do &lt;/span&gt;ipsec auto --status; sleep 1; &lt;span class="k"&gt;done&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;% &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;((&lt;/span&gt; &lt;span class="p"&gt;;;&lt;/span&gt; &lt;span class="o"&gt;))&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt; ipsec auto --status&lt;span class="p"&gt;;&lt;/span&gt; sleep 1&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The astute may notice the 'watch' command was made for this. I
 experienced glitches on some systems with ipsec status and the watch

@@ -9,7 +9,7 @@ E172: Only one file name allowed
 &lt;/pre&gt;
 &lt;p&gt;With occurrances on several lines in the runtime/syntax/vim.vim file.
 Opening the file, I found syntax like the following&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:perlpath
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.s:perlpath
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;You may notice the perpath variable is where the problem lies. the space
 gives the appearance of two arguments instead of a single path. We can
@@ -17,24 +17,24 @@ prevent this by using fnameescape For me, these errors occurred on lines
 585, 607, and 628.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;p class="first"&gt;Line 585&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:perlpath
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.s:perlpath
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;becomes&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:perlpath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPerlScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;s:perlpath&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;p class="first"&gt;Line 607&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:rubypath
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.s:rubypath
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;becomes&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:rubypath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimRubyScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;s:rubypath&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;p class="first"&gt;Line 628&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.&lt;span class="k"&gt;s&lt;/span&gt;:pythonpath
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.s:pythonpath
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;becomes&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;s&lt;/span&gt;:pythonpath&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;exe &lt;span class="s2"&gt;&amp;quot;syn include @vimPythonScript &amp;quot;&lt;/span&gt;.fnameescape&lt;span class="p"&gt;(&lt;/span&gt;s:pythonpath&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/li&gt;
 &lt;/ul&gt;

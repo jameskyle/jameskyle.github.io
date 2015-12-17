@@ -222,12 +222,12 @@ easily enough.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
 &lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0.10.8
-&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/gems/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/gems/chef-&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CHEF_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
 update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
-   --install /usr/bin/chef-client chef &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-client 500 &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/chef-solo chef-solo &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/knife knife &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/shef shef  &lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;/bin/shef
+   --install /usr/bin/chef-client chef &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/chef-client &lt;span class="m"&gt;500&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/chef-solo chef-solo &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/chef-solo &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/knife knife &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/knife &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/shef shef  &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GEM_ROOT&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/bin/shef
 &lt;/pre&gt;&lt;/div&gt;
 </summary><category term="administration"></category><category term="debian"></category><category term="linux"></category><category term="ubuntu"></category></entry><entry><title>Ruby Alternatives for Debian/Ubuntu</title><link href="http://blog.jameskyle.org/2012/02/ruby-alternatives-for-debianubuntu" rel="alternate"></link><updated>2012-02-05T10:14:00-08:00</updated><author><name>James A. Kyle</name></author><id>tag:blog.jameskyle.org,2012-02-05:2012/02/ruby-alternatives-for-debianubuntu</id><summary type="html">&lt;p&gt;A quick update-alternatives script for ruby versions on debian based
 systems. It only includes the ruby binaries, man pages, etc. included in
@@ -240,47 +240,47 @@ mode.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.9.1
 update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
-   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; 500 &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/rake rake /usr/bin/rake&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/gem gem /usr/bin/gem&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="m"&gt;500&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/rake rake /usr/bin/rake&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/gem gem /usr/bin/gem&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/rdoc.1.gz rdoc.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/testrb.1.gz testrb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/rake.1.gz rake.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/rake&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/rake&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/irb.1.gz irb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/erb.1.gz erb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/gem.1.gz gem.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/gem&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/gem&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-           /usr/share/man/man1/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/share/menu/ruby ruby_menu /usr/share/menu/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+           /usr/share/man/man1/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/share/menu/ruby ruby_menu /usr/share/menu/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
 
    &lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1.8
    update-alternatives &lt;span class="se"&gt;\&lt;/span&gt;
-   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; 400 &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
-   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --install /usr/bin/ruby ruby /usr/bin/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="m"&gt;400&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/erb erb /usr/bin/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/irb irb /usr/bin/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/rdoc rdoc /usr/bin/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
+   --slave /usr/bin/testrb testrb /usr/bin/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/rdoc.1.gz rdoc.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/rdoc&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/rdoc&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/testrb.1.gz testrb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/testrb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/testrb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/irb.1.gz irb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/irb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/irb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/erb.1.gz erb.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/erb&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/erb&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/man/man1/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
+       /usr/share/man/man1/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.1.gz &lt;span class="se"&gt;\&lt;/span&gt;
    --slave /usr/share/menu/ruby ruby_menu &lt;span class="se"&gt;\&lt;/span&gt;
-       /usr/share/menu/ruby&lt;span class="k"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="k"&gt;}&lt;/span&gt;
+       /usr/share/menu/ruby&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;RUBY_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 </summary><category term="administration"></category><category term="debian"></category><category term="linux"></category></entry></feed>
